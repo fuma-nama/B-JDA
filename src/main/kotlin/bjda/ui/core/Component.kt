@@ -36,8 +36,10 @@ abstract class Component<P, S : Any?>(val props: P, initialState: S, val key: An
         if (shouldUpdate()) {
             child?.forEach { it.onUnmount() }
 
-            child = render()?.also {
-                this.manager!!.mountChildren(this.asset!!, it)
+            child = render()
+
+            if (child != null) {
+                this.manager!!.mountChildren(this.asset!!, child)
             }
         }
 

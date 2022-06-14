@@ -56,7 +56,6 @@ class MainController {
     class MyComponent : Component<Nothing?, State>(null, State("Default")) {
         override fun render(): Children {
             val (content) = state
-            println(state)
 
             return child(
                 ChildComponent("Hi"),
