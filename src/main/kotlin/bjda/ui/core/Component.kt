@@ -4,65 +4,61 @@ import bjda.ui.ComponentManager
 import bjda.ui.exceptions.MissingManagerException
 
 typealias FComponent = Component<*, *>
-typealias Children = Array<FComponent>
+typealias Children = Array<out FComponent?>
+typealias Key = Any
 
-abstract class Component<P, S : Any?>(val props: P, initialState: S, val key: Any? = null) {
+abstract class Component<P, S>(var props: P, initialState: S, val key: Key? = null) {
     private var manager: ComponentManager? = null
-    private var asset: AssetLevel? = null
-    private var children: Array<FComponent>? = null
+    private var children: Children? = null
     var state: S = initialState
-        set(value) {
-            this.asset?.state = value
-            field = value
-        }
+
+    fun update(prop: Any?) {
+        val prev = this.props
+        this.props = prop as P
+
+        onUpdate(prev, this.props)
+    }
 
     protected abstract fun render(): Children?
 
-    protected open fun onBuild(data: RenderData) {
-    }
-
-    open fun shouldUpdate(): Boolean {
+    open fun shouldRenderChildren(): Boolean {
         return true
     }
 
     fun build(data: RenderData) {
-        if (this.manager == null)
-            throw MissingManagerException()
+        val manager = this.manager ?: throw MissingManagerException()
 
         onBuild(data)
 
         var child = children
 
-        if (shouldUpdate()) {
-            child?.forEach { it.onUnmount() }
+        if (shouldRenderChildren()) {
+            val snapshot = child
 
-            child = render()
-
-            if (child != null) {
-                this.manager!!.mountChildren(this.asset!!, child)
-            }
+            child = manager.scanner.scan(snapshot, render())
         }
 
         if (child != null) {
             for (component in child) {
-                component.build(data)
+                component?.build(data)
             }
         }
 
         children = child
     }
 
-    open fun mount(manager: ComponentManager, asset: AssetLevel) {
-        this.manager = manager
-        this.asset = asset
+    protected open fun onUpdate(prev: P, props: P) {
+        this.props = props
+    }
 
-        asset.state?.let {
-            this.state = it as S
-        }
+    open fun onMount(manager: ComponentManager) {
+        this.manager = manager
+    }
+
+    protected open fun onBuild(data: RenderData) {
     }
 
     open fun onUnmount() {
-
     }
 
     fun updateState(state: S) {
@@ -76,7 +72,11 @@ abstract class Component<P, S : Any?>(val props: P, initialState: S, val key: An
 
     companion object {
         fun child(vararg children: FComponent?): Children {
-            return children.filterNotNull().toTypedArray()
+            return children
+        }
+
+        fun child(children: List<FComponent?>): Children {
+            return children.toTypedArray()
         }
     }
 }

@@ -1,12 +1,13 @@
 package bjda.ui
 
-import bjda.ui.core.AssetLevel
 import bjda.ui.core.FComponent
 import bjda.ui.core.RenderData
+import bjda.ui.core.TreeScanner
 import net.dv8tion.jda.api.entities.Message
 import java.util.*
 
-class ComponentManager(private vararg val child: FComponent) {
+class ComponentManager(private val child: FComponent) {
+    val scanner = TreeScanner(this)
     private val listeners = Stack<DataListener>()
     /**
      State has two types:
@@ -15,29 +16,13 @@ class ComponentManager(private vararg val child: FComponent) {
      Global State is stored in manager itself which can be shared to multi components.
      Private state used to store single component data which is only shared to the component and its children.
      **/
-    private val asset = AssetLevel()
-
     init {
-        mountChildren(asset, child)
-    }
-
-    fun mountChildren(asset: AssetLevel, child: Array<out FComponent>) {
-        child.forEachIndexed {i, component ->
-            val key = (component.key ?: i).hashCode()
-
-            component.mount(this,
-                asset.getOrCreate(key).also {
-                    it.state = component.state
-                }
-            )
-        }
+        child.onMount(this)
     }
 
     fun build(): Message {
         val data = RenderData()
-        for (component in child) {
-            component.build(data)
-        }
+        child.build(data)
         return data.build()
     }
 
