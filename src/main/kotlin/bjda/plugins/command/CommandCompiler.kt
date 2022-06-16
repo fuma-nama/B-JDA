@@ -1,6 +1,6 @@
 package bjda.plugins.command
 
-import bjda.command.UnexpectedTypeException
+import bjda.ui.exceptions.UnexpectedTypeException
 import bjda.plugins.command.listener.CommandHandler
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.requests.restaction.CommandCreateAction

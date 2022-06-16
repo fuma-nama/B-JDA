@@ -1,4 +1,4 @@
-package bjda.command
+package bjda.ui.exceptions
 
 import kotlin.reflect.KClass
 import kotlin.reflect.KType

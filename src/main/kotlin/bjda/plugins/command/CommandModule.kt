@@ -1,7 +1,7 @@
 package bjda.plugins.command
 
 import bjda.IModule
-import bjda.command.UnexpectedTypeException
+import bjda.ui.exceptions.UnexpectedTypeException
 import bjda.plugins.command.annotations.Command
 import bjda.plugins.command.annotations.CommandGroup
 import bjda.plugins.command.annotations.Param
@@ -16,7 +16,6 @@ import net.dv8tion.jda.api.interactions.commands.build.SubcommandData
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData
 import java.lang.IllegalArgumentException
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter

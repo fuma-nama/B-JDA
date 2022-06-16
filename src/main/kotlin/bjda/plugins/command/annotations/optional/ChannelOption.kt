@@ -1,6 +1,6 @@
 package bjda.plugins.command.annotations.optional
 
-import bjda.command.UnexpectedTypeException
+import bjda.ui.exceptions.UnexpectedTypeException
 import bjda.utils.Compare
 import net.dv8tion.jda.api.entities.*
 import kotlin.reflect.KClass

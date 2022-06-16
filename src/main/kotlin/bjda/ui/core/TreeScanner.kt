@@ -5,22 +5,21 @@ import bjda.ui.ComponentManager
 class TreeScanner(private val manager: ComponentManager) {
     private fun unmounted(comp: FComponent) {
         comp.onUnmount()
-
-        println("unmounted $comp")
     }
 
     private fun mounted(comp: FComponent) {
         comp.onMount(manager)
-
-        println("mounted $comp")
     }
 
     private fun reused(comp: Component<*, *>, props: Any?) {
-        comp.update(props)
-
-        println("reused $comp")
+        comp.receiveProps(props)
     }
 
+    /**
+     * Compare the snapshot and rendered components
+     *
+     * and notify updates to children
+     */
     fun scan(old: Children?, new: Children?): Children? {
         if (new == null) {
             old?.forEach {
