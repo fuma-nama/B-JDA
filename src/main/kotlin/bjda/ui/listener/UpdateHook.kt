@@ -2,7 +2,7 @@ package bjda.ui.listener
 
 import net.dv8tion.jda.api.entities.Message
 
-interface DataListener {
+interface UpdateHook {
     fun onUpdate(message: Message)
     fun onDestroy()
 }

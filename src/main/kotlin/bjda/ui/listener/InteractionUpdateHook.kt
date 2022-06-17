@@ -3,7 +3,7 @@ package bjda.ui.listener
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.interactions.InteractionHook
 
-class HookListener(val hook: InteractionHook): DataListener {
+class InteractionUpdateHook(val hook: InteractionHook): UpdateHook {
     override fun onUpdate(message: Message) {
         hook.editOriginal(message).queue()
     }

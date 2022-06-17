@@ -1,19 +1,11 @@
 package bjda.ui.core
 
-import bjda.ui.ComponentManager
+abstract class ComponentTreeScanner {
+    protected abstract fun unmounted(comp: FComponent)
 
-class TreeScanner(private val manager: ComponentManager) {
-    private fun unmounted(comp: FComponent) {
-        comp.onUnmount()
-    }
+    protected abstract fun mounted(comp: FComponent)
 
-    private fun mounted(comp: FComponent) {
-        comp.onMount(manager)
-    }
-
-    private fun reused(comp: Component<*, *>, props: Any?) {
-        comp.receiveProps(props)
-    }
+    protected abstract fun reused(comp: Component<*, *>, props: Any?)
 
     /**
      * Compare the snapshot and rendered components

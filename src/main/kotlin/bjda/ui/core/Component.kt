@@ -1,24 +1,24 @@
 package bjda.ui.core
 
-import bjda.ui.exceptions.UnexpectedTypeException
-import bjda.ui.ComponentManager
-import bjda.ui.exceptions.MissingManagerException
+import bjda.utils.LambdaCreator
 
 typealias FComponent = Component<*, *>
-typealias Children = Array<out FComponent?>
+typealias Children =  Array<FComponent?>
+typealias LambdaChildren = LambdaCreator<FComponent?>
 typealias Key = Any
 
-/**
- * Base Component class,
- * it can also be a node of the component tree
- */
-abstract class Component<P, S>(var props: P, initialState: S, val key: Key? = null) {
-    private var manager: ComponentManager? = null
-    var children: Children? = null
-    var state: S = initialState
+abstract class BasicComponent<P>(props: P, key: Key? = null) : Component<P, Unit>(props, key)
 
-    fun receiveProps(props: Any?) {
-        onReceiveProps(this.props, props as P)
+abstract class Component<P, S : Any>(var props: P, val key: Key? = null) {
+    lateinit var manager: ComponentManager
+    var children: Children? = null
+    lateinit var state: S
+
+    fun receiveProps(next: Any?) {
+        val prev = this.props
+
+        this.props = next as P
+        onReceiveProps(prev, next)
     }
 
     /**
@@ -26,7 +26,9 @@ abstract class Component<P, S>(var props: P, initialState: S, val key: Key? = nu
      * should be called between update() and build()
      * Always invoked from its parent
      */
-    abstract fun render(): Children?
+    open fun render(): LambdaChildren? {
+        return null
+    }
 
     /**
      * Build data to message
@@ -39,50 +41,28 @@ abstract class Component<P, S>(var props: P, initialState: S, val key: Key? = nu
         }
     }
 
-    protected open fun onReceiveProps(prev: P, props: P) {
-        this.props = props
+    open fun onReceiveProps(prev: P, next: P) {
     }
 
     open fun onMount(manager: ComponentManager) {
-        this.manager = manager
     }
 
-    protected open fun onBuild(data: RenderData) {
+    open fun onBuild(data: RenderData) {
     }
 
     open fun onUnmount() {
     }
 
     fun forceUpdate() {
+        manager.updateComponent(this)
+    }
+
+    fun updateState(updater: S.() -> Unit) {
+        updater(this.state)
         updateState(this.state)
     }
 
     fun updateState(state: S) {
-        val manager = this.manager?: throw MissingManagerException()
-
         manager.updateComponent(this, state)
     }
-
-    companion object {
-        @Deprecated("Please use Component.children() instead", ReplaceWith("children"))
-        fun child(vararg children: FComponent?): Children {
-            return children
-        }
-
-        fun children(vararg children: Any?): Children {
-            val components = ArrayList<FComponent?>()
-            children.forEach {
-                if (it == null) components.add(null)
-
-                else when (it) {
-                    is FComponent -> components += it
-                    is Collection<*> -> components += it as Collection<FComponent?>
-                    is Array<*> -> components += it as Array<FComponent?>
-                    else -> throw UnexpectedTypeException(it::class)
-                }
-            }
-            return components.toTypedArray()
-        }
-    }
 }
-

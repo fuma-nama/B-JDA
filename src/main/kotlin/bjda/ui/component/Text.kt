@@ -1,10 +1,9 @@
-package bjda.ui.component.message
+package bjda.ui.component
 
-import bjda.ui.core.Children
-import bjda.ui.core.Component
+import bjda.ui.core.BasicComponent
 import bjda.ui.core.RenderData
 
-class Text(props: Props) : Component<Text.Props, Nothing?>(props, null) {
+class Text(props: Props) : BasicComponent<Text.Props>(props) {
     data class Props(val content: String, val type: TextType = TextType.NORMAL, val language: String = "")
 
     override fun onBuild(data: RenderData) {
@@ -16,10 +15,6 @@ class Text(props: Props) : Component<Text.Props, Nothing?>(props, null) {
             TextType.CODE_LINE -> data.appendCodeLine(content)
             TextType.CODE_BLOCK -> data.appendCodeBlock(content, language)
         }
-    }
-
-    override fun render(): Children? {
-        return null
     }
 }
 
