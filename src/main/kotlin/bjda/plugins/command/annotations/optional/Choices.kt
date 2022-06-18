@@ -9,13 +9,13 @@ import kotlin.reflect.KType
 @Retention(AnnotationRetention.RUNTIME)
 annotation class Choices(vararg val value: Choice) {
     annotation class Choice(val name: String, val value: String)
+
     companion object {
         fun map(choices: Choices, type: KType): List<Command.Choice> {
 
             return choices.value.map {
-                val value = read(it.value, type)
 
-                when (value) {
+                when (val value = read(it.value, type)) {
                     is Long -> Command.Choice(it.name, value)
                     is Double -> Command.Choice(it.name, value)
                     is String -> Command.Choice(it.name, value)

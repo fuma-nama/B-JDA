@@ -1,10 +1,13 @@
 package bjda.ui.component
 
-import bjda.ui.core.BasicComponent
+import bjda.ui.core.Component
+import bjda.ui.core.FProps
 import bjda.ui.core.RenderData
 
-class Content(content: String) : BasicComponent<String>(content) {
+class Content(props: Props) : Component.NoState<Content.Props>(props) {
+    data class Props(val content: String): FProps()
+
     override fun onBuild(data: RenderData) {
-        data.setContent(props)
+        data.setContent(props.content)
     }
 }

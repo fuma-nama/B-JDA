@@ -1,24 +1,43 @@
 package bjda.ui.core
 
-import bjda.utils.LambdaCreator
+import bjda.ui.types.Elements
+import bjda.ui.types.Key
+import bjda.ui.types.Init
+import bjda.ui.types.RenderContext
+import bjda.utils.LambdaBuilder
+import bjda.utils.LambdaList
 
-typealias FComponent = Component<*, *>
-typealias Children =  Array<FComponent?>
-typealias LambdaChildren = LambdaCreator<FComponent?>
-typealias Key = Any
+open class FProps {
+    var key: Key? = null
 
-abstract class BasicComponent<P>(props: P, key: Key? = null) : Component<P, Unit>(props, key)
+    fun <C> init(l: LambdaList<C>): List<C> {
+        return LambdaBuilder.build(l)
+    }
+}
 
-abstract class Component<P, S : Any>(var props: P, val key: Key? = null) {
+fun <T: FProps> T.init(init: Init<T>): T {
+    init(this)
+
+    return this
+}
+
+abstract class Component<P : FProps, S : Any>(var props: P) {
+    val key: Key? = props.key
     lateinit var manager: ComponentManager
-    var children: Children? = null
     lateinit var state: S
+    var context: RenderContext? = null
 
-    fun receiveProps(next: Any?) {
-        val prev = this.props
+    constructor(props: P, init: Init<P>) : this(props.init(init))
 
-        this.props = next as P
-        onReceiveProps(prev, next)
+    abstract class NoState<P : FProps> : Component<P, Unit> {
+        constructor(props: P) : super(props)
+        constructor(props: P, init: Init<P>) : super(props, init)
+    }
+
+    fun receiveProps(next: P) {
+        onReceiveProps(this.props, next)
+
+        this.props = next
     }
 
     /**
@@ -26,7 +45,7 @@ abstract class Component<P, S : Any>(var props: P, val key: Key? = null) {
      * should be called between update() and build()
      * Always invoked from its parent
      */
-    open fun render(): LambdaChildren? {
+    open fun render(): Elements? {
         return null
     }
 
@@ -36,22 +55,15 @@ abstract class Component<P, S : Any>(var props: P, val key: Key? = null) {
     fun build(data: RenderData) {
         onBuild(data)
 
-        children?.forEach {component ->
+        context?.forEach { component ->
             component?.build(data)
         }
     }
 
-    open fun onReceiveProps(prev: P, next: P) {
-    }
-
-    open fun onMount(manager: ComponentManager) {
-    }
-
-    open fun onBuild(data: RenderData) {
-    }
-
-    open fun onUnmount() {
-    }
+    open fun onReceiveProps(prev: P, next: P) = Unit
+    open fun onMount(manager: ComponentManager) = Unit
+    open fun onBuild(data: RenderData) = Unit
+    open fun onUnmount() = Unit
 
     fun forceUpdate() {
         manager.updateComponent(this)

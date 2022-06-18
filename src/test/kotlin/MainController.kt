@@ -1,11 +1,14 @@
 import bjda.plugins.command.annotations.Command
 import bjda.plugins.command.annotations.CommandGroup
 import bjda.plugins.command.annotations.Event
-import bjda.ui.component.Embed
 import bjda.ui.component.Text
 import bjda.ui.component.TextType
-import bjda.ui.core.*
+import bjda.ui.core.Component
+import bjda.ui.core.ComponentManager
+import bjda.ui.core.FProps
+import bjda.ui.types.Elements
 import bjda.ui.listener.InteractionUpdateHook
+import bjda.ui.types.Init
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import kotlin.collections.ArrayList
 
@@ -18,20 +21,27 @@ class MainController {
             @Event event: SlashCommandInteractionEvent
         ) {
 
+            val start = System.currentTimeMillis()
+
             val manager = ComponentManager(
-                BadComponent()
+                BadComponent {}
             )
 
             event.reply(manager.build()).queue { hook ->
                 manager.listen(InteractionUpdateHook(hook))
             }
+
+            val end = System.currentTimeMillis()
+            println("Took: ${end - start} ms")
+
         }
     }
 
     /**
      * Used to test performance, it is worse
      */
-    class BadComponent : Component<Unit, BadComponent.State>(Unit) {
+    class BadComponent(props: Init<FProps>) : Component<FProps, BadComponent.State>(FProps(), props) {
+
         data class State(var content: List<String> = ArrayList())
 
         override fun onMount(manager: ComponentManager) {
@@ -50,27 +60,36 @@ class MainController {
             }
         }
 
-        override fun render(): LambdaChildren {
-            val (content) = state
-
+        override fun render(): Elements {
             return {
-                + BadChildren("Hi")
-                + content.map {
-                    BadChildren(it)
+                + BadChildren {
+                    content = "fdsa"
+                }
+                + state.content.map {
+                    BadChildren { content = it }
                 }
             }
         }
 
-        private class BadChildren(content: String) : BasicComponent<String>(content) {
+        private class BadChildren(props: Init<Props>) : Component.NoState<BadChildren.Props>(Props(), props) {
+            class Props : FProps() {
+                lateinit var content: String
+            }
+
             override fun onMount(manager: ComponentManager) {
                 super.onMount(manager)
 
                 println("New $props")
             }
 
-            override fun render(): LambdaChildren {
+            override fun render(): Elements {
+                val text = props.content
+
                 return {
-                    + Text(Text.Props(props, TextType.LINE))
+                    + Text {
+                        content = text
+                        type = TextType.LINE
+                    }
                 }
             }
         }

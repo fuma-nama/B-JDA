@@ -1,4 +1,4 @@
-package bjda
+package bjda.plugins
 
 import net.dv8tion.jda.api.JDA
 

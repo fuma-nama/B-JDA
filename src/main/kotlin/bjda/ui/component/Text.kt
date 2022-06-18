@@ -1,20 +1,28 @@
 package bjda.ui.component
 
-import bjda.ui.core.BasicComponent
+import bjda.ui.core.Component
+import bjda.ui.core.FProps
 import bjda.ui.core.RenderData
+import bjda.ui.types.Init
 
-class Text(props: Props) : BasicComponent<Text.Props>(props) {
-    data class Props(val content: String, val type: TextType = TextType.NORMAL, val language: String = "")
+class Text(props: Init<Props>) : Component.NoState<Text.Props>(Props(), props) {
+    class Props : FProps() {
+        lateinit var content: String
+        lateinit var language: String
+        var type: TextType = TextType.NORMAL
+    }
 
     override fun onBuild(data: RenderData) {
-        val (content, type, language) = props
+        with (props) {
 
-        when (type) {
-            TextType.NORMAL -> data.append(content)
-            TextType.LINE -> data.appendLine(content)
-            TextType.CODE_LINE -> data.appendCodeLine(content)
-            TextType.CODE_BLOCK -> data.appendCodeBlock(content, language)
+            when (type) {
+                TextType.NORMAL -> data.append(content)
+                TextType.LINE -> data.appendLine(content)
+                TextType.CODE_LINE -> data.appendCodeLine(content)
+                TextType.CODE_BLOCK -> data.appendCodeBlock(content, language)
+            }
         }
+
     }
 }
 
