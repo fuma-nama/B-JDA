@@ -1,18 +1,21 @@
 package bjda.ui.core
 
+import bjda.ui.types.FComponent
+import bjda.ui.types.RenderContext
+
 abstract class ComponentTreeScanner {
     protected abstract fun unmounted(comp: FComponent)
 
     protected abstract fun mounted(comp: FComponent)
 
-    protected abstract fun reused(comp: Component<*, *>, props: Any?)
+    protected abstract fun<P : FProps> reused(comp: Component<P, *>, props: P)
 
     /**
      * Compare the snapshot and rendered components
      *
      * and notify updates to children
      */
-    fun scan(old: Children?, new: Children?): Children? {
+    fun scan(old: RenderContext?, new: RenderContext?): RenderContext? {
         if (new == null) {
             old?.forEach {
                 if (it != null)
@@ -46,7 +49,7 @@ abstract class ComponentTreeScanner {
                 null
             } else {
                 if (original != null && isSameComponent(rendered, original)) {
-                    reused(original, rendered.props)
+                    reused(original as Component<FProps, *>, rendered.props)
 
                     original
                 } else {

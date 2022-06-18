@@ -1,9 +1,16 @@
 package bjda.utils
 
-typealias LambdaCreator<C> = LambdaBuilder<C>.() -> Unit
+typealias LambdaList<C> = LambdaBuilder<C>.() -> Unit
+
+fun <C>(LambdaBuilder<C>.() -> Unit).build(): List<C> {
+    val builder = LambdaBuilder<C>()
+    this(builder)
+
+    return builder.build()
+}
 
 open class LambdaBuilder<C> {
-    val elements = ArrayList<C>()
+    private val elements = ArrayList<C>()
 
     operator fun Collection<C>.unaryPlus() {
         elements += this
@@ -19,13 +26,5 @@ open class LambdaBuilder<C> {
 
     fun build(): List<C> {
         return elements
-    }
-
-    companion object {
-        fun <C> build(child: LambdaCreator<C>): List<C> {
-            val builder = LambdaBuilder<C>()
-            child(builder)
-            return builder.build()
-        }
     }
 }

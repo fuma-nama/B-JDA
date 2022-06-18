@@ -1,6 +1,7 @@
 package bjda.ui.core
 
 import bjda.ui.listener.UpdateHook
+import bjda.ui.types.FComponent
 import net.dv8tion.jda.api.entities.Message
 import java.util.*
 
@@ -71,7 +72,7 @@ class ComponentManager(private val root: FComponent) {
             comp.onMount(manager)
         }
 
-        override fun reused(comp: Component<*, *>, props: Any?) {
+        override fun<P : FProps> reused(comp: Component<P, *>, props: P) {
             comp.receiveProps(props)
         }
     }

@@ -1,6 +1,8 @@
 package bjda.ui.core
 
+import bjda.ui.types.FComponent
 import bjda.utils.LambdaBuilder
+import bjda.utils.build
 import java.util.*
 
 typealias UpdateTask = () -> FComponent
@@ -19,8 +21,8 @@ abstract class Renderer(private val scanner: ComponentTreeScanner) {
      * It will also be rendered here
      */
     fun<S : Any> renderComponent(comp: Component<*, S>) {
-        val snapshot = comp.children
-        val rendered = comp.render()?.let { LambdaBuilder.build(it).toTypedArray() }
+        val snapshot = comp.context
+        val rendered = comp.render()?.build()?.toTypedArray()
 
         val scanned = scanner.scan(snapshot, rendered)
 
@@ -29,7 +31,7 @@ abstract class Renderer(private val scanner: ComponentTreeScanner) {
                 renderComponent(child)
         }
 
-        comp.children = scanned
+        comp.context = scanned
     }
 
     private fun executeUpdateQueue() {
