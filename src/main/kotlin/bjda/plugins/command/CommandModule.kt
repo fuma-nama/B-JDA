@@ -1,6 +1,6 @@
 package bjda.plugins.command
 
-import bjda.IModule
+import bjda.plugins.IModule
 import bjda.ui.exceptions.UnexpectedTypeException
 import bjda.plugins.command.annotations.Command
 import bjda.plugins.command.annotations.CommandGroup

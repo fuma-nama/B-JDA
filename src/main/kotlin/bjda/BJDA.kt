@@ -1,5 +1,6 @@
 package bjda
 
+import bjda.plugins.IModule
 import net.dv8tion.jda.api.JDA
 import java.util.*
 
