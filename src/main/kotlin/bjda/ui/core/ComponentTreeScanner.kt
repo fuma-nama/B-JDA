@@ -5,7 +5,7 @@ import bjda.ui.types.AnyElement
 import bjda.ui.types.ComponentTree
 import bjda.ui.types.ElementTree
 
-abstract class ComponentTreeScanner {
+abstract class ComponentTreeScanner(val parent: AnyElement) {
     protected abstract fun unmounted(comp: AnyElement)
 
     protected abstract fun mounted(comp: AnyComponent): AnyElement
@@ -17,22 +17,15 @@ abstract class ComponentTreeScanner {
      *
      * and notify updates to children
      */
-    fun scan(snapshot: ElementTree?, rendered: ComponentTree?): ElementTree? {
-        if (rendered == null) {
-            snapshot?.forEach {
-                if (it != null)
-                    unmounted(it)
-            }
-
-            return snapshot
-        }
+    fun scan(snapshot: ElementTree?, rendered: ComponentTree): ElementTree {
         if (snapshot == null) {
-            return rendered.map {
-                if (it != null)
-                    mounted(it)
-                else null
+            return rendered.map {comp ->
+                comp?.let {mounted(it)}
             }.toTypedArray()
         }
+
+        if (snapshot.isEmpty() && rendered.isEmpty())
+            return emptyArray()
 
         val keyMap = snapshot
             .filter { it?.key != null }
@@ -52,7 +45,7 @@ abstract class ComponentTreeScanner {
 
                 null
             } else {
-                if (original != null && comp::class == original.getComponentType()) {
+                if (original != null && comp::class == original.getType()) {
                     reused(original, comp.props)
 
                     original

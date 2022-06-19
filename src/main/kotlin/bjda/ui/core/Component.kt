@@ -1,6 +1,6 @@
 package bjda.ui.core
 
-import bjda.ui.core.hooks.Context
+import bjda.ui.core.hooks.IHook
 import bjda.ui.types.*
 import bjda.utils.build
 import kotlin.reflect.KClass
@@ -33,7 +33,7 @@ operator fun<T: Component<P, S>, P : IProps, S : Any> T.rangeTo(v: Init<P>): T {
     return this
 }
 
-operator fun<T: Component<P, S>, P: CProps<C>, S : Any, C : Any> T.plus(v: C): T {
+operator fun<T: Component<P, S>, P: CProps<C>, S : Any, C : Any> T.minus(v: C): T {
     props.children = v
     return this
 }
@@ -44,8 +44,9 @@ operator fun<T: Component<P, S>, P: CProps<C>, S : Any, C : Any> T.div(v: P.() -
 }
 
 abstract class Component<P : IProps, S : Any>(var props: P) {
-    lateinit var context: HashMap<Context<*>, Any?>
+    lateinit var contexts : ContextMap
     lateinit var state: S
+    var element: Element? = null
 
     abstract class NoState<P : IProps>(props: P) : Component<P, Unit>(props)
 
@@ -54,7 +55,7 @@ abstract class Component<P : IProps, S : Any>(var props: P) {
      * should be called between update() and build()
      * Always invoked from its parent
      */
-    open fun render(): Children? = null
+    open fun render(): Children = {}
     open fun build(data: RenderData) = Unit
     open fun onUpdateState(prev: S, next: S) = Unit
     open fun onReceiveProps(prev: P, next: P) = Unit
@@ -66,7 +67,6 @@ abstract class Component<P : IProps, S : Any>(var props: P) {
     }
 
     lateinit var forceUpdate: () -> Unit
-
     lateinit var setState: (S) -> Unit
 
     fun updateState(updater: S.() -> Unit) {
@@ -74,9 +74,16 @@ abstract class Component<P : IProps, S : Any>(var props: P) {
         setState(this.state)
     }
 
+    /**
+     * Use a hook and return its value
+     *
+     * It should be used in render() function every time as it won't update its value after updating component
+     */
+    fun<V> use(hook: IHook<V>): V {
+        return hook.onCreate(this)
+    }
 
-
-    inner class Element(val manager: ComponentManager) {
+    inner class Element(private val manager: ComponentManager) {
         private val component = this@Component
 
         var props: P by component::props
@@ -100,32 +107,37 @@ abstract class Component<P : IProps, S : Any>(var props: P) {
             onUpdateState(prev, state)
         }
 
-        fun getComponentType(): KClass<out Component<P, S>> {
+        fun getType(): KClass<out Component<P, S>> {
             return component::class
         }
 
         fun receiveProps(next: Any?) {
-            onReceiveProps(props, next as P)
+            val prev = this.props
+            this.props = next as P
 
-            this.props = next
+            onReceiveProps(prev, next)
         }
 
-        fun mount() {
+        fun mount(parent: AnyElement?) {
+            contexts = parent?.component?.contexts ?: hashMapOf()
+
             onMount()
         }
 
         fun build(data: RenderData) {
             component.build(data)
 
-            elements?.forEach { component ->
+            val elements = this.elements?: throw IllegalStateException("Component should be rendered before build")
+
+            elements.forEach { component ->
                 component?.build(data)
             }
         }
 
-        fun render(): ComponentTree? {
+        fun render(): ComponentTree {
             return component.render()
-                ?.build()
-                ?.toTypedArray()
+                .build()
+                .toTypedArray()
         }
 
         fun unmount() {

@@ -12,7 +12,7 @@ class ComponentManager(root: AnyComponent) {
     private val hooks = Stack<UpdateHook>()
 
     init {
-        this.root.mount()
+        this.root.mount(null)
         renderer.renderElement(this.root)
     }
 
@@ -31,17 +31,17 @@ class ComponentManager(root: AnyComponent) {
         }
     }
 
-    fun updateComponent(component: AnyElement) {
+    fun updateComponent(element: AnyElement) {
         renderer.addUpdateTask {
-            component
+            element
         }
     }
 
-    fun<S: Any> updateComponent(component: Component<*, S>.Element, state: S) {
+    fun<S: Any> updateComponent(element: Component<*, S>.Element, state: S) {
         renderer.addUpdateTask {
-            component.updateState(state)
+            element.updateState(state)
 
-            component
+            element
         }
     }
 
@@ -53,22 +53,24 @@ class ComponentManager(root: AnyComponent) {
         hooks.forEach { it.onDestroy() }
     }
 
-    inner class DefaultRenderer : Renderer(
-        ComponentTreeScannerImpl()
-    ) {
+    inner class DefaultRenderer : Renderer() {
         override fun onUpdated() {
             updateMessage()
         }
+
+        override fun createScanner(element: AnyElement): ComponentTreeScanner {
+            return ComponentTreeScannerImpl(element)
+        }
     }
 
-    inner class ComponentTreeScannerImpl : ComponentTreeScanner() {
+    inner class ComponentTreeScannerImpl(parent: AnyElement) : ComponentTreeScanner(parent) {
         override fun unmounted(comp: AnyElement) {
             comp.unmount()
         }
 
         override fun mounted(comp: AnyComponent): AnyElement {
             val element = comp.attach(this@ComponentManager)
-            element.mount()
+            element.mount(parent)
 
             return element
         }

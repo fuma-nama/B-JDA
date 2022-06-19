@@ -6,12 +6,14 @@ import bjda.ui.component.Text
 import bjda.ui.component.TextType
 import bjda.ui.core.*
 import bjda.ui.core.Component
+import bjda.ui.core.hooks.Context
 import bjda.ui.types.Children
 import bjda.ui.listener.InteractionUpdateHook
-import bjda.ui.types.Init
 import bjda.utils.build
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import kotlin.collections.ArrayList
+
+val Data = Context.create<String>()
 
 @CommandGroup(name = "test", description = "Testing Commands")
 class MainController {
@@ -25,7 +27,7 @@ class MainController {
             val start = System.currentTimeMillis()
 
             val manager = ComponentManager(
-                MyContainer() + {
+                MyContainer()-{
                     + Text()..{
                         content = "Hello"
                         type = TextType.LINE
@@ -68,12 +70,10 @@ class MainController {
         }
 
         override fun render(): Children {
+            use(Data.Provider("Update State ${state.content.size}"))
+
             return {
                 + props.children.build()
-                + Embed()..{
-                    title = "Update State ${state.content.size}"
-                    description = "Hello"
-                }
                 + state.content.map {
                     MyComponent()..{ content = it }
                 }
@@ -92,11 +92,10 @@ class MainController {
         }
 
         override fun render(): Children {
-            val text = props.content
-
+            val data = use(Data)
             return {
                 + Text()..{
-                    content = text
+                    content = data
                     type = TextType.LINE
                 }
             }
