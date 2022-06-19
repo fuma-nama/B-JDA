@@ -1,18 +1,17 @@
 package bjda.ui.component
 
 import bjda.ui.core.Component
-import bjda.ui.core.FProps
+import bjda.ui.core.IProps
 import bjda.ui.core.RenderData
-import bjda.ui.types.Init
 
-class Text(props: Init<Props>) : Component.NoState<Text.Props>(Props(), props) {
-    class Props : FProps() {
+class Text : Component.NoState<Text.Props>(Props()) {
+    class Props : IProps() {
         lateinit var content: String
         lateinit var language: String
         var type: TextType = TextType.NORMAL
     }
 
-    override fun onBuild(data: RenderData) {
+    override fun build(data: RenderData) {
         with (props) {
 
             when (type) {
@@ -22,7 +21,6 @@ class Text(props: Init<Props>) : Component.NoState<Text.Props>(Props(), props) {
                 TextType.CODE_BLOCK -> data.appendCodeBlock(content, language)
             }
         }
-
     }
 }
 

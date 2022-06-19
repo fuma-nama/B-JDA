@@ -4,10 +4,9 @@ import bjda.plugins.command.annotations.Event
 import bjda.ui.component.Embed
 import bjda.ui.component.Text
 import bjda.ui.component.TextType
+import bjda.ui.core.*
 import bjda.ui.core.Component
-import bjda.ui.core.ComponentManager
-import bjda.ui.core.FProps
-import bjda.ui.types.Elements
+import bjda.ui.types.Children
 import bjda.ui.listener.InteractionUpdateHook
 import bjda.ui.types.Init
 import bjda.utils.build
@@ -26,8 +25,8 @@ class MainController {
             val start = System.currentTimeMillis()
 
             val manager = ComponentManager(
-                MyContainer {
-                    + Text {
+                MyContainer() + {
+                    + Text()..{
                         content = "Hello"
                         type = TextType.LINE
                     }
@@ -47,12 +46,12 @@ class MainController {
     /**
      * Used to test performance, it is worse
      */
-    class MyContainer(children: Elements) : Component<MyContainer.Props, MyContainer.State>(Props(children)) {
-        class Props(val children: Elements) : FProps()
+    class MyContainer : Component<MyContainer.Props, MyContainer.State>(Props()) {
+        class Props : CProps<Children>()
 
         data class State(var content: List<String> = ArrayList())
 
-        override fun onMount(manager: ComponentManager) {
+        override fun onMount() {
             this.state = State()
 
             repeat(4) {
@@ -60,7 +59,7 @@ class MainController {
             }
         }
 
-        fun addLmao() {
+        private fun addLmao() {
             println("Update State ${state.content.size}")
 
             updateState {
@@ -68,37 +67,35 @@ class MainController {
             }
         }
 
-        override fun render(): Elements {
+        override fun render(): Children {
             return {
                 + props.children.build()
-                + Embed {
+                + Embed()..{
                     title = "Update State ${state.content.size}"
                     description = "Hello"
                 }
                 + state.content.map {
-                    MyComponent { content = it }
+                    MyComponent()..{ content = it }
                 }
             }
         }
 
     }
 
-    private class MyComponent(props: Init<Props>) : Component.NoState<MyComponent.Props>(Props(), props) {
-        class Props : FProps() {
+    private class MyComponent : Component.NoState<MyComponent.Props>(Props()) {
+        class Props : IProps() {
             lateinit var content: String
         }
 
-        override fun onMount(manager: ComponentManager) {
-            super.onMount(manager)
-
+        override fun onMount() {
             println("New $props")
         }
 
-        override fun render(): Elements {
+        override fun render(): Children {
             val text = props.content
 
             return {
-                + Text {
+                + Text()..{
                     content = text
                     type = TextType.LINE
                 }

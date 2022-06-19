@@ -1,7 +1,7 @@
 package bjda.ui.component
 
 import bjda.ui.core.Component
-import bjda.ui.core.FProps
+import bjda.ui.core.IProps
 import bjda.ui.core.RenderData
 import bjda.ui.types.Init
 import net.dv8tion.jda.api.EmbedBuilder
@@ -10,8 +10,8 @@ import java.awt.Color
 import java.time.temporal.TemporalAccessor
 
 //TODO: impl fields builder
-class Embed(props: Init<Props>) : Component.NoState<Embed.Props>(Props(), props) {
-    class Props : FProps() {
+class Embed : Component.NoState<Embed.Props>(Props()) {
+    class Props : IProps() {
         var title: String? = null
         var titleUrl: String? = null
         var description: String? = null
@@ -27,7 +27,7 @@ class Embed(props: Init<Props>) : Component.NoState<Embed.Props>(Props(), props)
         var fields: List<MessageEmbed.Field>? = null
     }
 
-    override fun onBuild(data: RenderData) {
+    override fun build(data: RenderData) {
         with (props) {
             val builder = EmbedBuilder()
                 .setTitle(title, titleUrl)

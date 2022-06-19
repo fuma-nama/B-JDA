@@ -1,18 +1,19 @@
 package bjda.ui.core
 
 import bjda.ui.listener.UpdateHook
-import bjda.ui.types.FComponent
+import bjda.ui.types.AnyComponent
+import bjda.ui.types.AnyElement
 import net.dv8tion.jda.api.entities.Message
 import java.util.*
 
-class ComponentManager(private val root: FComponent) {
+class ComponentManager(root: AnyComponent) {
+    private val root: AnyElement = root.attach(this)
     private val renderer = DefaultRenderer()
     private val hooks = Stack<UpdateHook>()
 
     init {
-        root.manager = this
-        root.onMount(this)
-        renderer.renderComponent(root)
+        this.root.mount()
+        renderer.renderElement(this.root)
     }
 
     fun build(): Message {
@@ -30,15 +31,15 @@ class ComponentManager(private val root: FComponent) {
         }
     }
 
-    fun updateComponent(component: FComponent) {
+    fun updateComponent(component: AnyElement) {
         renderer.addUpdateTask {
             component
         }
     }
 
-    fun<S: Any> updateComponent(component: Component<*, S>, state: S) {
+    fun<S: Any> updateComponent(component: Component<*, S>.Element, state: S) {
         renderer.addUpdateTask {
-            component.state = state
+            component.updateState(state)
 
             component
         }
@@ -61,18 +62,18 @@ class ComponentManager(private val root: FComponent) {
     }
 
     inner class ComponentTreeScannerImpl : ComponentTreeScanner() {
-        override fun unmounted(comp: FComponent) {
-            comp.onUnmount()
+        override fun unmounted(comp: AnyElement) {
+            comp.unmount()
         }
 
-        override fun mounted(comp: FComponent) {
-            val manager = this@ComponentManager
-            comp.manager = manager
+        override fun mounted(comp: AnyComponent): AnyElement {
+            val element = comp.attach(this@ComponentManager)
+            element.mount()
 
-            comp.onMount(manager)
+            return element
         }
 
-        override fun<P : FProps> reused(comp: Component<P, *>, props: P) {
+        override fun<P : IProps> reused(comp: Component<out P, *>.Element, props: P) {
             comp.receiveProps(props)
         }
     }

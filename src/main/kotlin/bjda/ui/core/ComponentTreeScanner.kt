@@ -1,67 +1,65 @@
 package bjda.ui.core
 
-import bjda.ui.types.FComponent
-import bjda.ui.types.RenderContext
+import bjda.ui.types.AnyComponent
+import bjda.ui.types.AnyElement
+import bjda.ui.types.ComponentTree
+import bjda.ui.types.ElementTree
 
 abstract class ComponentTreeScanner {
-    protected abstract fun unmounted(comp: FComponent)
+    protected abstract fun unmounted(comp: AnyElement)
 
-    protected abstract fun mounted(comp: FComponent)
+    protected abstract fun mounted(comp: AnyComponent): AnyElement
 
-    protected abstract fun<P : FProps> reused(comp: Component<P, *>, props: P)
+    protected abstract fun<P : IProps> reused(comp: Component<out P, *>.Element, props: P)
 
     /**
      * Compare the snapshot and rendered components
      *
      * and notify updates to children
      */
-    fun scan(old: RenderContext?, new: RenderContext?): RenderContext? {
-        if (new == null) {
-            old?.forEach {
+    fun scan(snapshot: ElementTree?, rendered: ComponentTree?): ElementTree? {
+        if (rendered == null) {
+            snapshot?.forEach {
                 if (it != null)
                     unmounted(it)
             }
 
-            return old
+            return snapshot
         }
-        if (old == null) {
-            new.forEach {
+        if (snapshot == null) {
+            return rendered.map {
                 if (it != null)
                     mounted(it)
-            }
-            return new
+                else null
+            }.toTypedArray()
         }
 
-        val keyMap = old
+        val keyMap = snapshot
             .filter { it?.key != null }
             .associateBy { it?.key }
 
-        return new.mapIndexed{i, rendered ->
-            val original =
-                if (rendered?.key != null) keyMap[rendered.key]
-                else old.getOrNull(i)
+        return rendered.mapIndexed{ i, comp ->
+            val key = comp?.props?.key
 
-            if (rendered == null) {
+            val original =
+                if (key != null) keyMap[key]
+                else snapshot.getOrNull(i)
+
+            if (comp == null) {
                 if (original != null) {
                     unmounted(original)
                 }
 
                 null
             } else {
-                if (original != null && isSameComponent(rendered, original)) {
-                    reused(original as Component<FProps, *>, rendered.props)
+                if (original != null && comp::class == original.getComponentType()) {
+                    reused(original, comp.props)
 
                     original
                 } else {
-                    mounted(rendered)
-
-                    rendered
+                    mounted(comp)
                 }
             }
         }.toTypedArray()
-    }
-
-    private fun isSameComponent(first: FComponent, second: FComponent): Boolean {
-        return first::class == second::class
     }
 }

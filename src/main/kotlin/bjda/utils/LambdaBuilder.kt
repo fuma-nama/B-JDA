@@ -10,14 +10,15 @@ fun <C>(LambdaBuilder<C>.() -> Unit).build(): List<C> {
 }
 
 open class LambdaBuilder<C> {
-    private val elements = ArrayList<C>()
+    protected val elements = ArrayList<C>()
 
     operator fun Collection<C>.unaryPlus() {
         elements += this
     }
 
-    operator fun C.unaryPlus() {
-        elements += this
+    operator fun<T : C> T.unaryPlus(): T {
+        elements += this as C
+        return this
     }
 
     operator fun Array<C>.unaryPlus() {
