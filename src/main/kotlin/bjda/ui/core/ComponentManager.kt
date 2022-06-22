@@ -2,18 +2,27 @@ package bjda.ui.core
 
 import bjda.ui.listener.UpdateHook
 import bjda.ui.types.AnyComponent
-import bjda.ui.types.AnyElement
 import net.dv8tion.jda.api.entities.Message
+import net.dv8tion.jda.api.interactions.callbacks.IMessageEditCallback
+import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback
+import net.dv8tion.jda.api.interactions.components.Modal
 import java.util.*
 
-class ComponentManager(root: AnyComponent) {
-    private val root: AnyElement = root.attach(this)
+class ComponentManager(private val root: AnyComponent) {
     private val renderer = DefaultRenderer()
-    private val hooks = Stack<UpdateHook>()
+    private val hooks = HashMap<String, UpdateHook>()
 
     init {
-        this.root.mount(null)
-        renderer.renderElement(this.root)
+        this.root.mount(null, this)
+        renderer.renderComponent(this.root)
+    }
+
+    fun edit(callback: IMessageEditCallback) {
+        callback.editMessage(this.build()).queue()
+    }
+
+    fun reply(callback: IReplyCallback) {
+        callback.reply(this.build()).queue()
     }
 
     fun build(): Message {
@@ -23,34 +32,49 @@ class ComponentManager(root: AnyComponent) {
         return data.build()
     }
 
+    /**
+     * Build a Modal
+     *
+     * Some components will be ignored as message type is unsupported by it
+     *
+     * Note: the title is assigned to the content of built message if not specified
+     */
+    fun buildModal(id: String, title: String? = null): Modal {
+        val message = build()
+
+        return Modal.create(id, title?: message.contentRaw)
+            .addActionRows(message.actionRows)
+            .build()
+    }
+
     fun updateMessage() {
         val message = build()
 
-        for (listener in hooks) {
+        for (listener in hooks.values) {
             listener.onUpdate(message)
         }
     }
 
-    fun updateComponent(element: AnyElement) {
+    fun updateComponent(element: AnyComponent) {
         renderer.addUpdateTask {
             element
         }
     }
 
-    fun<S: Any> updateComponent(element: Component<*, S>.Element, state: S) {
+    fun<S: Any> updateComponent(element: Component<*, S>, state: S) {
         renderer.addUpdateTask {
-            element.updateState(state)
+            element.update(state)
 
             element
         }
     }
 
     fun listen(entity: UpdateHook) {
-        hooks.push(entity)
+        hooks[entity.id] = entity
     }
 
     fun destroy() {
-        hooks.forEach { it.onDestroy() }
+        hooks.values.forEach { it.onDestroy() }
     }
 
     inner class DefaultRenderer : Renderer() {
@@ -58,24 +82,21 @@ class ComponentManager(root: AnyComponent) {
             updateMessage()
         }
 
-        override fun createScanner(element: AnyElement): ComponentTreeScanner {
+        override fun createScanner(element: AnyComponent): ComponentTreeScanner {
             return ComponentTreeScannerImpl(element)
         }
     }
 
-    inner class ComponentTreeScannerImpl(parent: AnyElement) : ComponentTreeScanner(parent) {
-        override fun unmounted(comp: AnyElement) {
+    inner class ComponentTreeScannerImpl(val parent: AnyComponent) : ComponentTreeScanner() {
+        override fun unmounted(comp: AnyComponent) {
             comp.unmount()
         }
 
-        override fun mounted(comp: AnyComponent): AnyElement {
-            val element = comp.attach(this@ComponentManager)
-            element.mount(parent)
-
-            return element
+        override fun mounted(comp: AnyComponent) {
+            comp.mount(parent, this@ComponentManager)
         }
 
-        override fun<P : IProps> reused(comp: Component<out P, *>.Element, props: P) {
+        override fun<P : IProps> reused(comp: Component<out P, *>, props: P) {
             comp.receiveProps(props)
         }
     }

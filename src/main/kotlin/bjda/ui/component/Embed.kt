@@ -27,7 +27,7 @@ class Embed : Component.NoState<Embed.Props>(Props()) {
         var fields: List<MessageEmbed.Field>? = null
     }
 
-    override fun build(data: RenderData) {
+    override fun onBuild(data: RenderData) {
         with (props) {
             val builder = EmbedBuilder()
                 .setTitle(title, titleUrl)

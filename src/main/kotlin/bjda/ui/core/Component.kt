@@ -3,7 +3,6 @@ package bjda.ui.core
 import bjda.ui.core.hooks.IHook
 import bjda.ui.types.*
 import bjda.utils.build
-import kotlin.reflect.KClass
 
 open class IProps {
     var key: Key? = null
@@ -21,7 +20,7 @@ open class CProps<C : Any> : IProps() {
     }
 }
 
-fun <T: IProps> T.init(init: Init<T>): T {
+fun <T> T.init(init: Init<T>): T {
     init(this)
 
     return this
@@ -44,104 +43,92 @@ operator fun<T: Component<P, S>, P: CProps<C>, S : Any, C : Any> T.div(v: P.() -
 }
 
 abstract class Component<P : IProps, S : Any>(var props: P) {
-    lateinit var contexts : ContextMap
+    var snapshot: ComponentTree? = null
+    var parent: AnyComponent? = null
+    val key: Key? by props::key
     lateinit var state: S
-    var element: Element? = null
+    lateinit var contexts : ContextMap
+    lateinit var manager: ComponentManager
 
     abstract class NoState<P : IProps>(props: P) : Component<P, Unit>(props)
-
     /**
      * Render component children
+     *
      * should be called between update() and build()
+     *
      * Always invoked from its parent
      */
-    open fun render(): Children = {}
-    open fun build(data: RenderData) = Unit
+    open fun onRender(): Children = {}
+    open fun onBuild(data: RenderData) = Unit
     open fun onUpdateState(prev: S, next: S) = Unit
     open fun onReceiveProps(prev: P, next: P) = Unit
     open fun onMount() = Unit
     open fun onUnmount() = Unit
 
-    fun attach(manager: ComponentManager) : Element {
-        return Element(manager)
+    fun update(state: S) {
+        val prev = state
+        this.state = state
+
+        onUpdateState(prev, state)
     }
 
-    lateinit var forceUpdate: () -> Unit
-    lateinit var setState: (S) -> Unit
+    fun updateState(state: S) {
+        manager.updateComponent(this, state)
+    }
 
     fun updateState(updater: S.() -> Unit) {
         updater(this.state)
-        setState(this.state)
+        this.updateState(state)
+    }
+
+    fun mount(parent: AnyComponent?, manager: ComponentManager) {
+        this.parent = parent
+        this.manager = manager
+
+        onMount()
     }
 
     /**
      * Use a hook and return its value
      *
      * It should be used in render() function every time as it won't update its value after updating component
+     *
+     * The Hook can be reused
      */
     fun<V> use(hook: IHook<V>): V {
         return hook.onCreate(this)
     }
 
-    inner class Element(private val manager: ComponentManager) {
-        private val component = this@Component
+    fun forceUpdate() {
+        manager.updateComponent(this)
+    }
 
-        var props: P by component::props
-        val key: Key? by props::key
-        var elements: ElementTree? = null
+    fun receiveProps(next: Any?) {
+        val prev = this.props
+        this.props = next as P
 
-        init {
-            forceUpdate = {
-                manager.updateComponent(this)
-            }
+        onReceiveProps(prev, next)
+    }
 
-            setState = { state ->
-                manager.updateComponent(this, state)
-            }
+    fun build(data: RenderData) {
+        onBuild(data)
+
+        val elements = this.snapshot?: throw IllegalStateException("Component should be rendered before build")
+
+        elements.forEach { component ->
+            component?.build(data)
         }
+    }
 
-        fun updateState(state: S) {
-            val prev = component.state
-            component.state = state
+    fun render(): ComponentTree {
+        contexts = parent?.contexts ?: hashMapOf()
 
-            onUpdateState(prev, state)
-        }
+        return onRender()
+            .build()
+            .toTypedArray()
+    }
 
-        fun getType(): KClass<out Component<P, S>> {
-            return component::class
-        }
-
-        fun receiveProps(next: Any?) {
-            val prev = this.props
-            this.props = next as P
-
-            onReceiveProps(prev, next)
-        }
-
-        fun mount(parent: AnyElement?) {
-            contexts = parent?.component?.contexts ?: hashMapOf()
-
-            onMount()
-        }
-
-        fun build(data: RenderData) {
-            component.build(data)
-
-            val elements = this.elements?: throw IllegalStateException("Component should be rendered before build")
-
-            elements.forEach { component ->
-                component?.build(data)
-            }
-        }
-
-        fun render(): ComponentTree {
-            return component.render()
-                .build()
-                .toTypedArray()
-        }
-
-        fun unmount() {
-            onUnmount()
-        }
+    fun unmount() {
+        onUnmount()
     }
 }

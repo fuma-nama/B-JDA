@@ -1,104 +1,119 @@
 import bjda.plugins.command.annotations.Command
 import bjda.plugins.command.annotations.CommandGroup
 import bjda.plugins.command.annotations.Event
-import bjda.ui.component.Embed
+import bjda.plugins.ui.AutoReply
+import bjda.plugins.ui.hook.ButtonClick
+import bjda.plugins.ui.modal.Form
+import bjda.plugins.ui.modal.Input
+import bjda.ui.component.Row
 import bjda.ui.component.Text
 import bjda.ui.component.TextType
+import bjda.ui.component.action.Button
+import bjda.ui.component.action.TextField
 import bjda.ui.core.*
 import bjda.ui.core.Component
 import bjda.ui.core.hooks.Context
 import bjda.ui.types.Children
-import bjda.ui.listener.InteractionUpdateHook
 import bjda.utils.build
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
-import kotlin.collections.ArrayList
+
 
 val Data = Context.create<String>()
 
-@CommandGroup(name = "test", description = "Testing Commands")
+@CommandGroup(name = "todo", description = "TODO List")
 class MainController {
-    @CommandGroup(name = "say", description = "Say something")
-    class Say {
-        @Command(name = "hello", description = "Say Hello")
-        fun hello(
-            @Event event: SlashCommandInteractionEvent
-        ) {
+    @Command(name = "create", description = "Create TODO List")
+    fun create(
+        @Event event: SlashCommandInteractionEvent,
+    ) {
 
-            val start = System.currentTimeMillis()
+        val start = System.currentTimeMillis()
 
-            val manager = ComponentManager(
-                MyContainer()-{
-                    + Text()..{
-                        content = "Hello"
-                        type = TextType.LINE
-                    }
-                }
-            )
+        val manager = ComponentManager(
+            TodoApp()
+        )
 
-            event.reply(manager.build()).queue { hook ->
-                manager.listen(InteractionUpdateHook(hook))
-            }
+        event.reply(manager.build()).queue()
 
-            val end = System.currentTimeMillis()
-            println("Took: ${end - start} ms")
-
-        }
+        val end = System.currentTimeMillis()
+        println("Took: ${end - start} ms")
     }
 
-    /**
-     * Used to test performance, it is worse
-     */
-    class MyContainer : Component<MyContainer.Props, MyContainer.State>(Props()) {
-        class Props : CProps<Children>()
-
+    class TodoApp : Component<IProps, TodoApp.State>(IProps()) {
         data class State(var content: List<String> = ArrayList())
 
-        override fun onMount() {
+        init {
             this.state = State()
+        }
 
-            repeat(4) {
-                addLmao()
+        private val addToDoForm = Form {
+            title = "Add Todo"
+
+            onSubmit = {event ->
+                addToDo(event.getValue("todo")!!.asString)
+                manager.edit(event)
+            }
+
+            rows = {
+                + Input {
+                    + TextField("todo") {
+                        label = "TODO"
+                    }
+                }
             }
         }
 
-        private fun addLmao() {
-            println("Update State ${state.content.size}")
+        private val onClick = ButtonClick { event ->
+            event.replyModal(addToDoForm.create()).queue()
 
+            AutoReply.OFF
+        }
+
+        private fun addToDo(content: String = "Empty") {
             updateState {
-                content += "Lmao"
+                state.content += content
             }
         }
 
-        override fun render(): Children {
+        override fun onRender(): Children {
             use(Data.Provider("Update State ${state.content.size}"))
 
             return {
-                + props.children.build()
-                + state.content.map {
-                    MyComponent()..{ content = it }
-                }
-            }
-        }
-
-    }
-
-    private class MyComponent : Component.NoState<MyComponent.Props>(Props()) {
-        class Props : IProps() {
-            lateinit var content: String
-        }
-
-        override fun onMount() {
-            println("New $props")
-        }
-
-        override fun render(): Children {
-            val data = use(Data)
-            return {
                 + Text()..{
-                    content = data
+                    content = "**TODO List**"
                     type = TextType.LINE
                 }
+
+                + if (state.content.isEmpty()) Text()..{
+                    content = "Empty"
+                    type = TextType.CODE_BLOCK
+                } else null
+
+                + state.content.map {
+                    TodoItem()-it
+                }
+
+                + Row()-{
+                    + Button {
+                        id = use(onClick)
+                        label = "Add"
+                    }
+                }
             }
         }
+
+        private class TodoItem : NoState<TodoItem.Props>(Props()) {
+            class Props : CProps<String>()
+
+            override fun onRender(): Children {
+                return {
+                    + Text()..{
+                        content = props.children
+                        type = TextType.CODE_BLOCK
+                    }
+                }
+            }
+        }
+
     }
 }

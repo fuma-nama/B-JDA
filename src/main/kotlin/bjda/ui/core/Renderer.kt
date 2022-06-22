@@ -1,10 +1,10 @@
 package bjda.ui.core
 
-import bjda.ui.types.AnyElement
+import bjda.ui.types.AnyComponent
 import java.util.*
 
-typealias UpdateTask = () -> AnyElement
-abstract class Renderer() {
+typealias UpdateTask = () -> AnyComponent
+abstract class Renderer {
     private val updateQueue: Queue<UpdateTask> = LinkedList()
     private var rendering = false
 
@@ -14,24 +14,24 @@ abstract class Renderer() {
         return rendering
     }
 
-    abstract fun createScanner(element: AnyElement): ComponentTreeScanner
+    abstract fun createScanner(element: AnyComponent): ComponentTreeScanner
 
     /**
      * If any render task is added when rendering component
      * It will also be rendered here
      */
-    fun renderElement(element: AnyElement) {
-        val snapshot = element.elements
-        val scanned = createScanner(element)
-            .scan(snapshot, element.render())
+    fun renderComponent(comp: AnyComponent) {
+        val snapshot = comp.snapshot
+        val scanned = createScanner(comp)
+            .scan(snapshot, comp.render())
 
         scanned.forEach {child ->
             if (child != null) {
-                renderElement(child)
+                renderComponent(child)
             }
         }
 
-        element.elements = scanned
+        comp.snapshot = scanned
     }
 
     private fun executeUpdateQueue() {
@@ -39,7 +39,7 @@ abstract class Renderer() {
         while (updateQueue.isNotEmpty()) {
             val task = updateQueue.peek()
 
-            renderElement(task())
+            renderComponent(task())
             updateQueue.poll()
         }
         rendering = false

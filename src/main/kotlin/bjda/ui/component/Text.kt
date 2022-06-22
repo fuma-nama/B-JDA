@@ -6,12 +6,12 @@ import bjda.ui.core.RenderData
 
 class Text : Component.NoState<Text.Props>(Props()) {
     class Props : IProps() {
-        lateinit var content: String
-        lateinit var language: String
+        var content: String? = null
+        var language: String? = null
         var type: TextType = TextType.NORMAL
     }
 
-    override fun build(data: RenderData) {
+    override fun onBuild(data: RenderData) {
         with (props) {
 
             when (type) {

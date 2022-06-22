@@ -1,26 +1,28 @@
 package bjda.ui.core
 
 import bjda.ui.types.AnyComponent
-import bjda.ui.types.AnyElement
 import bjda.ui.types.ComponentTree
-import bjda.ui.types.ElementTree
 
-abstract class ComponentTreeScanner(val parent: AnyElement) {
-    protected abstract fun unmounted(comp: AnyElement)
+abstract class ComponentTreeScanner {
+    protected abstract fun unmounted(comp: AnyComponent)
 
-    protected abstract fun mounted(comp: AnyComponent): AnyElement
+    protected abstract fun mounted(comp: AnyComponent)
 
-    protected abstract fun<P : IProps> reused(comp: Component<out P, *>.Element, props: P)
+    protected abstract fun<P : IProps> reused(comp: Component<out P, *>, props: P)
 
     /**
      * Compare the snapshot and rendered components
      *
      * and notify updates to children
      */
-    fun scan(snapshot: ElementTree?, rendered: ComponentTree): ElementTree {
+    fun scan(snapshot: ComponentTree?, rendered: ComponentTree): ComponentTree {
         if (snapshot == null) {
             return rendered.map {comp ->
-                comp?.let {mounted(it)}
+                if (comp != null) {
+                    mounted(comp)
+                }
+
+                comp
             }.toTypedArray()
         }
 
@@ -45,12 +47,14 @@ abstract class ComponentTreeScanner(val parent: AnyElement) {
 
                 null
             } else {
-                if (original != null && comp::class == original.getType()) {
+                if (original != null && comp::class == original::class) {
                     reused(original, comp.props)
 
                     original
                 } else {
                     mounted(comp)
+
+                    comp
                 }
             }
         }.toTypedArray()
