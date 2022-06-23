@@ -1,16 +1,13 @@
-package bjda.plugins.command
+package bjda.plugins.slashcommand
 
-import bjda.plugins.command.annotations.Event
+import bjda.plugins.slashcommand.annotations.Event
 import gnu.trove.map.TLongObjectMap
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.OptionMapping
 import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.OptionData
-import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
-import kotlin.reflect.KType
 import kotlin.reflect.full.hasAnnotation
-import kotlin.reflect.full.isSubclassOf
 
 private val resolvedField = OptionMapping::class.java.getDeclaredField("resolved")
 

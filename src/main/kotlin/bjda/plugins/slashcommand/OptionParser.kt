@@ -1,10 +1,10 @@
-package bjda.plugins.command
+package bjda.plugins.slashcommand
 
-import bjda.plugins.command.annotations.Param
-import bjda.plugins.command.annotations.optional.AutoComplete
-import bjda.plugins.command.annotations.optional.ChannelOption
-import bjda.plugins.command.annotations.optional.Choices
-import bjda.plugins.command.annotations.optional.Range
+import bjda.plugins.slashcommand.annotations.Param
+import bjda.plugins.slashcommand.annotations.optional.AutoComplete
+import bjda.plugins.slashcommand.annotations.optional.ChannelOption
+import bjda.plugins.slashcommand.annotations.optional.Choices
+import bjda.plugins.slashcommand.annotations.optional.Range
 import bjda.utils.Compare
 import net.dv8tion.jda.api.entities.*
 import net.dv8tion.jda.api.interactions.commands.OptionType

@@ -1,4 +1,4 @@
-package bjda.plugins.command.annotations.optional
+package bjda.plugins.slashcommand.annotations.optional
 
 @Target(AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)

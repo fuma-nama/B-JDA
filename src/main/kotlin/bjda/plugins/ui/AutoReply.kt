@@ -1,6 +1,10 @@
 package bjda.plugins.ui
 
-import bjda.ui.core.ComponentManager
+import bjda.ui.core.UI
+import net.dv8tion.jda.api.interactions.ModalInteraction
+import net.dv8tion.jda.api.interactions.callbacks.IMessageEditCallback
+import net.dv8tion.jda.api.interactions.callbacks.IModalCallback
+import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback
 import net.dv8tion.jda.api.interactions.components.ComponentInteraction
 
 /**
@@ -11,11 +15,11 @@ import net.dv8tion.jda.api.interactions.components.ComponentInteraction
 enum class AutoReply {
     OFF, REPEAT, EDIT;
 
-    fun reply(manager: ComponentManager, event: ComponentInteraction) {
+    fun<T> reply(ui: UI, event: T) where T: IReplyCallback, T: IMessageEditCallback {
         when (this) {
             OFF -> return
-            EDIT -> manager.edit(event)
-            REPEAT -> manager.reply(event)
+            EDIT -> ui.edit(event)
+            REPEAT -> ui.reply(event)
         }
     }
 }

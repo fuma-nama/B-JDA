@@ -9,7 +9,7 @@ open class IProps {
 }
 
 open class CProps<C : Any> : IProps() {
-    lateinit var children: C
+    open lateinit var children: C
 
     operator fun C.not() {
         this@CProps.children = this@not
@@ -26,29 +26,13 @@ fun <T> T.init(init: Init<T>): T {
     return this
 }
 
-operator fun<T: Component<P, S>, P : IProps, S : Any> T.rangeTo(v: Init<P>): T {
-    props.init(v)
-
-    return this
-}
-
-operator fun<T: Component<P, S>, P: CProps<C>, S : Any, C : Any> T.minus(v: C): T {
-    props.children = v
-    return this
-}
-
-operator fun<T: Component<P, S>, P: CProps<C>, S : Any, C : Any> T.div(v: P.() -> C): T {
-    props.children = v(props)
-    return this
-}
-
 abstract class Component<P : IProps, S : Any>(var props: P) {
     var snapshot: ComponentTree? = null
     var parent: AnyComponent? = null
     val key: Key? by props::key
     lateinit var state: S
     lateinit var contexts : ContextMap
-    lateinit var manager: ComponentManager
+    lateinit var ui: UI
 
     abstract class NoState<P : IProps>(props: P) : Component<P, Unit>(props)
     /**
@@ -73,7 +57,7 @@ abstract class Component<P : IProps, S : Any>(var props: P) {
     }
 
     fun updateState(state: S) {
-        manager.updateComponent(this, state)
+        ui.updateComponent(this, state)
     }
 
     fun updateState(updater: S.() -> Unit) {
@@ -81,9 +65,9 @@ abstract class Component<P : IProps, S : Any>(var props: P) {
         this.updateState(state)
     }
 
-    fun mount(parent: AnyComponent?, manager: ComponentManager) {
+    fun mount(parent: AnyComponent?, manager: UI) {
         this.parent = parent
-        this.manager = manager
+        this.ui = manager
 
         onMount()
     }
@@ -93,14 +77,14 @@ abstract class Component<P : IProps, S : Any>(var props: P) {
      *
      * It should be used in render() function every time as it won't update its value after updating component
      *
-     * The Hook can be reused
+     * Note: The Hook itself can be reused
      */
     fun<V> use(hook: IHook<V>): V {
         return hook.onCreate(this)
     }
 
     fun forceUpdate() {
-        manager.updateComponent(this)
+        ui.updateComponent(this)
     }
 
     fun receiveProps(next: Any?) {
@@ -130,5 +114,23 @@ abstract class Component<P : IProps, S : Any>(var props: P) {
 
     fun unmount() {
         onUnmount()
+    }
+
+    companion object {
+        operator fun<T: Component<P, S>, P : IProps, S : Any> T.rangeTo(v: Init<P>): T {
+            props.init(v)
+
+            return this
+        }
+
+        operator fun<T: Component<P, S>, P: CProps<C>, S : Any, C : Any> T.minus(v: C): T {
+            props.children = v
+            return this
+        }
+
+        operator fun<T: Component<P, S>, P: CProps<C>, S : Any, C : Any> T.div(v: P.() -> C): T {
+            props.children = v(props)
+            return this
+        }
     }
 }

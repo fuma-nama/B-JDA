@@ -1,4 +1,4 @@
-package bjda.plugins.command.annotations
+package bjda.plugins.slashcommand.annotations
 
 import kotlin.annotation.Retention
 import kotlin.annotation.Target

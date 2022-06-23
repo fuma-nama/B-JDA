@@ -1,4 +1,4 @@
-package bjda.plugins.command.listener
+package bjda.plugins.slashcommand.listener
 
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 

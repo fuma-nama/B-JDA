@@ -8,7 +8,7 @@ import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback
 import net.dv8tion.jda.api.interactions.components.Modal
 import java.util.*
 
-class ComponentManager(private val root: AnyComponent) {
+class UI(private val root: AnyComponent) {
     private val renderer = DefaultRenderer()
     private val hooks = HashMap<String, UpdateHook>()
 
@@ -93,7 +93,7 @@ class ComponentManager(private val root: AnyComponent) {
         }
 
         override fun mounted(comp: AnyComponent) {
-            comp.mount(parent, this@ComponentManager)
+            comp.mount(parent, this@UI)
         }
 
         override fun<P : IProps> reused(comp: Component<out P, *>, props: P) {

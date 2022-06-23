@@ -1,4 +1,4 @@
-package bjda.plugins.command.annotations.optional
+package bjda.plugins.slashcommand.annotations.optional
 
 import bjda.ui.exceptions.UnexpectedTypeException
 import bjda.utils.Compare

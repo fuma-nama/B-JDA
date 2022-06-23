@@ -1,4 +1,4 @@
-package bjda.plugins.command.exceptions
+package bjda.plugins.slashcommand.exceptions
 
 import kotlin.reflect.KClass
 
