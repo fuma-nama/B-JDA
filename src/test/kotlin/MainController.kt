@@ -18,6 +18,7 @@ import bjda.ui.types.Children
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption
+import net.dv8tion.jda.api.interactions.components.text.TextInputStyle
 
 
 @CommandGroup(name = "todo", description = "TODO List")
@@ -122,9 +123,9 @@ class MainController {
                     todoItem(it)
                 }
 
-                + not (empty) {
-                    Row()-{
-                        + Select(use(onSelectItem)) {
+                + RowLayout()-{
+                    addIf (!empty) {
+                        Select(use(onSelectItem)) {
                             placeholder = "Select a Item"
 
                             options = state.todos.mapIndexed {i, todo ->
@@ -132,13 +133,12 @@ class MainController {
                             }
                         }
                     }
-                }
 
-                + Row()-{
                     + Button {
                         id = use(onAddItem)
                         label = "Add"
                     }
+
                     + where (state.selected != null) {
                         + Button {
                             id = use(onEditItem)
@@ -177,6 +177,7 @@ class MainController {
                 + Input {
                     + TextField("todo") {
                         label = "TODO"
+                        style = TextInputStyle.PARAGRAPH
                     }
                 }
             }
@@ -185,11 +186,13 @@ class MainController {
         private val editTodoForm = Form {
             title = "Modify Todo"
 
+            val selected = state.selected!!
+
             onSubmit = {event ->
                 val value = event.getValue("todo")!!.asString
 
                 updateState {
-                    todos[selected!!] = value
+                    todos[selected] = value
                 }
 
                 AutoReply.EDIT
@@ -199,6 +202,8 @@ class MainController {
                 + Input {
                     + TextField("todo") {
                         label = "New Content"
+                        value = state.todos[selected]
+                        style = TextInputStyle.PARAGRAPH
                     }
                 }
             }

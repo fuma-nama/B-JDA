@@ -26,5 +26,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="KotlinJavaRuntime" level="project" />
     <orderEntry type="library" name="net.dv8tion.JDA" level="project" />
+    <orderEntry type="library" name="github.ajalt.clikt.jvm" level="project" />
   </component>
 </module>
