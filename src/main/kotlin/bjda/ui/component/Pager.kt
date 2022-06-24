@@ -1,6 +1,5 @@
 package bjda.ui.component
 
-import bjda.plugins.ui.AutoReply
 import bjda.plugins.ui.hook.ButtonClick
 import bjda.ui.component.action.Button
 import bjda.ui.core.CProps
@@ -37,7 +36,7 @@ class Pager : Component<Pager.Props, Pager.State>(Props()) {
             page++
         }
 
-        AutoReply.EDIT
+        ui.edit(it)
     }
 
     private val onPrevPage = ButtonClick {
@@ -45,7 +44,7 @@ class Pager : Component<Pager.Props, Pager.State>(Props()) {
             page--
         }
 
-        AutoReply.EDIT
+        ui.edit(it)
     }
 
     override fun onRender(): Children {
@@ -54,14 +53,12 @@ class Pager : Component<Pager.Props, Pager.State>(Props()) {
             return {
                 + pages.getOrNull(state.page)
                 + Row()-{
-                    + Button {
-                        id = use(onNextPage)
+                    + Button(onNextPage) {
                         label = "->"
                         disabled = state.page >= props.pages.size - 1
                     }
 
-                    + Button {
-                        id = use(onPrevPage)
+                    + Button(onPrevPage) {
                         label = "<-"
                         disabled = state.page <= 0
                     }

@@ -1,6 +1,5 @@
 package bjda.plugins.ui.modal
 
-import bjda.plugins.ui.AutoReply
 import bjda.plugins.ui.UIEvent
 import bjda.plugins.ui.event.ModalListener
 import bjda.ui.component.action.Action
@@ -14,10 +13,8 @@ import bjda.utils.build
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.interactions.components.ActionRow
 import net.dv8tion.jda.api.interactions.components.ItemComponent
-import net.dv8tion.jda.api.interactions.components.Modal
 import net.dv8tion.jda.internal.interactions.component.ModalImpl
 
-typealias EventHandler = (ModalInteractionEvent) -> AutoReply
 /**
  * Same usage as Component API but specified for Modal
  *
@@ -29,13 +26,12 @@ typealias EventHandler = (ModalInteractionEvent) -> AutoReply
  */
 class Form(val id: String = UIEvent.createId(),
            props: Init<Props>
-): ModalListener, IHook<Modal> {
-    private var ui: UI? = null
-
+): ModalListener {
     class Props {
         lateinit var title: String
         lateinit var rows: LambdaList<Input>
-        lateinit var onSubmit: EventHandler
+
+        lateinit var onSubmit: (ModalInteractionEvent) -> Unit
     }
 
     init {
@@ -55,17 +51,7 @@ class Form(val id: String = UIEvent.createId(),
     }
 
     override fun onSubmit(event: ModalInteractionEvent) {
-        val then = props.onSubmit(event)
-
-        val ui = this.ui?: return
-
-        then.reply(ui, event)
-    }
-
-    override fun onCreate(component: AnyComponent): Modal {
-        this.ui = component.ui
-
-        return create()
+        props.onSubmit(event)
     }
 }
 

@@ -21,8 +21,14 @@ class UI(private val root: AnyComponent) {
         callback.editMessage(this.build()).queue()
     }
 
-    fun reply(callback: IReplyCallback) {
-        callback.reply(this.build()).queue()
+    fun reply(message: Message) {
+        message.reply(this.build()).queue()
+    }
+
+    fun reply(callback: IReplyCallback, ephemeral: Boolean = false) {
+        callback.reply(this.build())
+            .setEphemeral(ephemeral)
+            .queue()
     }
 
     fun build(): Message {

@@ -1,23 +1,28 @@
 package bjda.plugins.ui.hook
 
-import bjda.plugins.ui.AutoReply
 import bjda.plugins.ui.UIEvent
 import bjda.plugins.ui.event.ButtonListener
-import bjda.ui.types.AnyComponent
+import bjda.ui.component.action.Button
+import bjda.ui.types.Init
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 
 class ButtonClick(
     id: String = UIEvent.createId(),
-    private val handler: (ButtonInteractionEvent) -> AutoReply
+    private val handler: (ButtonInteractionEvent) -> Unit
 ) : EventHook(id), ButtonListener {
-
-    override fun onCreate(component: AnyComponent): String {
+    init {
         UIEvent.listen(id, this)
-
-        return super.onCreate(component)
     }
 
     override fun onClick(event: ButtonInteractionEvent) {
-        handler(event).reply(ui, event)
+        handler(event)
+    }
+
+    override fun destroy() {
+
+    }
+
+    fun button(props: Init<Button.Props>): Button {
+        return Button(id, props)
     }
 }
