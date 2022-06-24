@@ -15,7 +15,6 @@ class MainController {
     ) {
 
         val start = System.currentTimeMillis()
-
         UI(
             TodoApp()
         ).reply(event)
