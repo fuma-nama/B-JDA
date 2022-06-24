@@ -49,13 +49,6 @@ abstract class Component<P : IProps, S : Any>(var props: P) {
     open fun onMount() = Unit
     open fun onUnmount() = Unit
 
-    fun update(state: S) {
-        val prev = state
-        this.state = state
-
-        onUpdateState(prev, state)
-    }
-
     fun updateState(state: S) {
         ui.updateComponent(this, state)
     }
@@ -65,11 +58,8 @@ abstract class Component<P : IProps, S : Any>(var props: P) {
         this.updateState(state)
     }
 
-    fun mount(parent: AnyComponent?, manager: UI) {
-        this.parent = parent
-        this.ui = manager
-
-        onMount()
+    fun forceUpdate() {
+        ui.updateComponent(this)
     }
 
     /**
@@ -83,18 +73,28 @@ abstract class Component<P : IProps, S : Any>(var props: P) {
         return hook.onCreate(this)
     }
 
-    fun forceUpdate() {
-        ui.updateComponent(this)
+    internal fun update(state: S) {
+        val prev = state
+        this.state = state
+
+        onUpdateState(prev, state)
     }
 
-    fun receiveProps(next: Any?) {
+    internal fun mount(parent: AnyComponent?, manager: UI) {
+        this.parent = parent
+        this.ui = manager
+
+        onMount()
+    }
+
+    internal fun receiveProps(next: Any?) {
         val prev = this.props
         this.props = next as P
 
         onReceiveProps(prev, next)
     }
 
-    fun build(data: RenderData) {
+    internal fun build(data: RenderData) {
         onBuild(data)
 
         val elements = this.snapshot?: throw IllegalStateException("Component should be rendered before build")
@@ -104,7 +104,7 @@ abstract class Component<P : IProps, S : Any>(var props: P) {
         }
     }
 
-    fun render(): ComponentTree {
+    internal fun render(): ComponentTree {
         contexts = parent?.contexts ?: hashMapOf()
 
         return onRender()
@@ -112,7 +112,7 @@ abstract class Component<P : IProps, S : Any>(var props: P) {
             .toTypedArray()
     }
 
-    fun unmount() {
+    internal fun unmount() {
         onUnmount()
     }
 
