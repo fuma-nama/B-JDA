@@ -31,14 +31,16 @@ app.reply(event)
 ```
 Declare slash command 
 ```kotlin
-@CommandGroup(name = "todo", description = "TODO List")
-class MainController {
-    @Command(name = "create", description = "Create TODO List")
-    fun create(
-        @Event event: SlashCommandInteractionEvent,
-    ) {
-        event.reply("Hi").queue()
-    }
+class SuperHello : SuperCommand(group = "test", subgroup = "say", name = "hello", description = "Say Hello") {
+  private val size: String by option(OptionType.STRING, "size").choices(
+    "Small" to "2xl",
+    "Medium" to "4xl",
+    "Large" to "6xl"
+  ).required(true)
+
+  override fun run() {
+    event.reply("size: $size").queue()
+  }
 }
 ```
 The coolest thing is you can even create a normal command with Clikt
