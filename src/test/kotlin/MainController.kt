@@ -1,19 +1,11 @@
-import bjda.plugins.slashcommand.annotations.Command
-import bjda.plugins.slashcommand.annotations.CommandGroup
-import bjda.plugins.slashcommand.annotations.Event
+import bjda.plugins.supercommand.SuperCommand
 import bjda.ui.component.*
 import bjda.ui.core.*
 import bjda.ui.core.Component.Companion.minus
 import bjda.ui.core.Component.Companion.rangeTo
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 
-@CommandGroup(name = "todo", description = "TODO List")
-class MainController {
-    @Command(name = "create", description = "Create TODO List")
-    fun create(
-        @Event event: SlashCommandInteractionEvent,
-    ) {
-
+class CreateTodo: SuperCommand(group = "todo", name = "create", description = "Create a Todo List") {
+    override fun run() {
         val start = System.currentTimeMillis()
         UI(
             TodoApp()
@@ -22,17 +14,18 @@ class MainController {
         val end = System.currentTimeMillis()
         println("Took: ${end - start} ms")
     }
+}
 
-    @Command(name = "settings", description = "Manage User Settings")
-    fun settings(@Event event: SlashCommandInteractionEvent) {
+class TodoSettings: SuperCommand(group = "todo", name = "settings", description = "Manager Settings") {
+    override fun run() {
         val app = UI(
             Pager()-{
                 + TodoApp()
                 + Text()..{
-                    content = "Hello"
+                    content = "Todo Settings"
                 }
                 + Embed()..{
-                    title = "Hello World"
+                    title = "User Settings"
                 }
             }
         )

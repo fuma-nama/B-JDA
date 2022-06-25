@@ -21,6 +21,8 @@ import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.*
 
+
+@Deprecated("This module is deprecated, and replaced by SuperCommand", ReplaceWith("bjda.plugins.supercommand.SuperCommand"))
 class SlashCommandModule(private vararg val controllers: KClass<*>) : IModule {
     override fun init(jda: JDA) {
         val groups = Stack<IGroup>()
