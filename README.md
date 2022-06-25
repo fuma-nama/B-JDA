@@ -120,6 +120,8 @@ Normally it should be synchronous but in some cases it is async.
     event.replyModal(
       addTodoForm.create()
     ).queue()
+    //or
+    ui.edit(event)
   }
   ```
 
