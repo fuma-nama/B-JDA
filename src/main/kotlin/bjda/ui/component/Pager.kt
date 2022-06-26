@@ -53,12 +53,13 @@ class Pager : Component<Pager.Props, Pager.State>(Props()) {
             return {
                 + pages.getOrNull(state.page)
                 + Row()-{
-                    + Button(onNextPage) {
+                    + Button(id = use(onNextPage)) {
                         label = "->"
                         disabled = state.page >= props.pages.size - 1
                     }
 
-                    + Button(onPrevPage) {
+                    + Button(id = use(onPrevPage)) {
+                        id = use(onPrevPage)
                         label = "<-"
                         disabled = state.page <= 0
                     }

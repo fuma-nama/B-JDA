@@ -29,7 +29,7 @@ fun <T> T.init(init: Init<T>): T {
 abstract class Component<P : IProps, S : Any>(var props: P) {
     var snapshot: ComponentTree? = null
     var parent: AnyComponent? = null
-    val key: Key? by props::key
+    val hooks = ArrayList<IHook<*>>()
     lateinit var state: S
     lateinit var contexts : ContextMap
     lateinit var ui: UI
@@ -70,7 +70,12 @@ abstract class Component<P : IProps, S : Any>(var props: P) {
      * Note: The Hook itself can be reused
      */
     fun<V> use(hook: IHook<V>): V {
-        return hook.onCreate(this)
+        if (!hooks.contains(hook)) {
+            hook.onCreate(this)
+            hooks.add(hook)
+        }
+
+        return hook.getValue()
     }
 
     internal fun update(state: S) {
@@ -114,6 +119,14 @@ abstract class Component<P : IProps, S : Any>(var props: P) {
 
     internal fun unmount() {
         onUnmount()
+
+        snapshot?.forEach {child ->
+            child?.unmount()
+        }
+
+        for (hook in hooks) {
+            hook.onDestroy()
+        }
     }
 
     companion object {

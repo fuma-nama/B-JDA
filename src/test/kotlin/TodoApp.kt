@@ -1,6 +1,7 @@
 import bjda.plugins.ui.hook.ButtonClick
 import bjda.plugins.ui.hook.MenuSelect
 import bjda.plugins.ui.modal.Form
+import bjda.plugins.ui.modal.Form.Companion.form
 import bjda.plugins.ui.modal.Input
 import bjda.ui.component.RowLayout
 import bjda.ui.component.Text
@@ -26,15 +27,11 @@ class TodoApp : Component<IProps, TodoApp.State>(IProps()) {
     }
 
     private val onAddItem = ButtonClick { event ->
-        event.replyModal(
-            addTodoForm.create()
-        ).queue()
+        event.replyModal(addTodoForm).queue()
     }
 
     private val onEditItem = ButtonClick { event ->
-        event.replyModal(
-            editTodoForm.create()
-        ).queue()
+        event.replyModal(editTodoForm).queue()
     }
 
     private val onDeleteItem = ButtonClick {
@@ -79,7 +76,8 @@ class TodoApp : Component<IProps, TodoApp.State>(IProps()) {
 
             + RowLayout() -{
                 addIf (!empty) {
-                    Menu(onSelectItem) {
+                    Menu {
+                        id = use(onSelectItem)
                         placeholder = "Select a Item"
 
                         options = state.todos.mapIndexed {i, todo ->
@@ -88,16 +86,19 @@ class TodoApp : Component<IProps, TodoApp.State>(IProps()) {
                     }
                 }
 
-                + Button(onAddItem) {
+                + Button {
+                    id = use(onAddItem)
                     label = "Add"
                 }
 
                 + where (state.selected != null) {
-                    + Button(onEditItem) {
+                    + Button {
+                        id = use(onEditItem)
                         label = "Edit"
                         style = ButtonStyle.PRIMARY
                     }
-                    + onDeleteItem.button {
+                    + Button {
+                        id = use(onDeleteItem)
                         label = "Delete"
                         style = ButtonStyle.DANGER
                     }
@@ -113,7 +114,7 @@ class TodoApp : Component<IProps, TodoApp.State>(IProps()) {
         }
     }
 
-    private val addTodoForm = Form {
+    private val addTodoForm by form {
         title = "Add Todo"
 
         onSubmit = {event ->
@@ -134,7 +135,7 @@ class TodoApp : Component<IProps, TodoApp.State>(IProps()) {
         }
     }
 
-    private val editTodoForm = Form {
+    private val editTodoForm by form {
         title = "Modify Todo"
 
         with (state) {
@@ -159,6 +160,5 @@ class TodoApp : Component<IProps, TodoApp.State>(IProps()) {
                 }
             }
         }
-
     }
 }

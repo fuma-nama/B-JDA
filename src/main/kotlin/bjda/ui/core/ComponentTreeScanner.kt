@@ -3,6 +3,11 @@ package bjda.ui.core
 import bjda.ui.types.AnyComponent
 import bjda.ui.types.ComponentTree
 
+private val Component<*, *>.key: Any?
+    get() {
+        return props.key
+    }
+
 abstract class ComponentTreeScanner {
     protected abstract fun unmounted(comp: AnyComponent)
 
@@ -34,7 +39,7 @@ abstract class ComponentTreeScanner {
             .associateBy { it?.key }
 
         return rendered.mapIndexed{ i, comp ->
-            val key = comp?.props?.key
+            val key = comp?.key
 
             val original =
                 if (key != null) keyMap[key]

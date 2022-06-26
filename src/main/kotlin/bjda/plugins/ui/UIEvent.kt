@@ -1,8 +1,8 @@
 package bjda.plugins.ui
 
-import bjda.plugins.ui.event.ButtonListener
-import bjda.plugins.ui.event.ModalListener
-import bjda.plugins.ui.event.SelectListener
+import bjda.plugins.ui.hook.event.ButtonListener
+import bjda.plugins.ui.hook.event.ModalListener
+import bjda.plugins.ui.hook.event.SelectListener
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
@@ -23,14 +23,14 @@ class UIEvent : ListenerAdapter() {
     }
 
     override fun onSelectMenuInteraction(event: SelectMenuInteractionEvent) {
-        val listener = selects[event.componentId]
+        val listener = menus[event.componentId]
 
          listener?.onSelect(event)
     }
 
     companion object {
         val buttons = hashMapOf<String, ButtonListener>()
-        val selects = hashMapOf<String, SelectListener>()
+        val menus = hashMapOf<String, SelectListener>()
         val modals = hashMapOf<String, ModalListener>()
 
         fun createId(): String {
@@ -47,7 +47,7 @@ class UIEvent : ListenerAdapter() {
         }
 
         fun listen(id: String, listener: SelectListener) {
-            selects[id] = listener
+            menus[id] = listener
         }
     }
 }

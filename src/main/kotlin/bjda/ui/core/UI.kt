@@ -8,7 +8,7 @@ import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback
 import net.dv8tion.jda.api.interactions.components.Modal
 import java.util.*
 
-class UI(private val root: AnyComponent) {
+class UI(private var root: AnyComponent) {
     private val renderer = DefaultRenderer()
     private val hooks = HashMap<String, UpdateHook>()
 
@@ -80,6 +80,7 @@ class UI(private val root: AnyComponent) {
     }
 
     fun destroy() {
+        root.unmount()
         hooks.values.forEach { it.onDestroy() }
     }
 
