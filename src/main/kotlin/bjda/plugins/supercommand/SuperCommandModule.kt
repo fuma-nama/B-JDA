@@ -4,44 +4,57 @@ import bjda.plugins.IModule
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
+import net.dv8tion.jda.api.interactions.commands.build.CommandData
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
 
-class SuperCommandModule(vararg commands: SuperCommand) : IModule {
-    val commands: HashMap<String, CommandDataImpl>
+class CommandGroupBuilder(val name: String) {
+    val subgroups = ArrayList<SubcommandGroupData>()
+    val subcommands = ArrayList<SubcommandData>()
+}
+
+class SuperCommandModule(vararg val commands: SuperCommand) : IModule {
     val listeners = HashMap<Info, SuperCommand>()
 
     data class Info(val group: String?, val subgroup: String?, val name: String)
 
-    init {
-        val built = HashMap<String, CommandDataImpl>()
-
-        fun getSubgroup(data: CommandDataImpl, name: String): SubcommandGroupData? {
-            return data.subcommandGroups.find {it.name == name}
+    private fun getSubgroup(data: CommandGroupBuilder, name: String): SubcommandGroupData? {
+        return data.subgroups.find {
+            it.name == name
         }
+    }
 
-        fun group(cmd: SuperCommand): CommandDataImpl {
-            cmd.group!!
+    private fun group(parent: CommandGroupBuilder?, cmd: SuperCommand): CommandGroupBuilder {
+        cmd.group!!
 
-            val group = built[cmd.group]?: CommandDataImpl(cmd.group, "No Description")
+        val group = parent?: CommandGroupBuilder(cmd.group)
 
-            if (cmd.subgroup != null) {
-                val subgroup = getSubgroup(group, cmd.subgroup)?: SubcommandGroupData(cmd.subgroup, "No Description").also {
-                    group.addSubcommandGroups(it)
-                }
+        if (cmd.subgroup != null) {
+            var subgroup = getSubgroup(group, cmd.subgroup) //cloned subgroup
 
-                subgroup.addSubcommands(cmd.buildSub())
-            } else {
-                group.addSubcommands(cmd.buildSub())
+            if (subgroup == null) {
+                subgroup = SubcommandGroupData(cmd.subgroup, "No Description")
+
+                group.subgroups.add(subgroup)
             }
 
-            return group
+            subgroup.addSubcommands(cmd.buildSub())
+        } else {
+            group.subcommands.add(cmd.buildSub())
         }
+
+        return group
+    }
+
+    private fun parse(): HashMap<String, CommandData> {
+        val built = HashMap<String, CommandData>()
+        val groups = HashMap<String, CommandGroupBuilder>()
 
         for (cmd in commands) {
 
             if (cmd.group != null) {
-                built[cmd.group] = group(cmd)
+                groups[cmd.group] = group(groups[cmd.group], cmd)
             } else {
                 built[cmd.name] = cmd.build()
             }
@@ -49,13 +62,18 @@ class SuperCommandModule(vararg commands: SuperCommand) : IModule {
             listeners[Info(cmd.group, cmd.subgroup, cmd.name)] = cmd
         }
 
-        this.commands = built
+        for (group in groups.values) {
+            built[group.name] = CommandDataImpl(group.name, "Null")
+                .addSubcommandGroups(group.subgroups)
+                .addSubcommands(group.subcommands)
+        }
+        return built
     }
 
     override fun init(jda: JDA) {
-        for (data in commands.values) {
-            jda.upsertCommand(data).queue()
-        }
+        val commands = parse()
+
+        jda.updateCommands().addCommands(commands.values).queue()
 
         jda.addEventListener(EventListener())
     }

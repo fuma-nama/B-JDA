@@ -1,5 +1,6 @@
 package bjda.plugins.supercommand
 
+import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.entities.ChannelType
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.Command.Choice
@@ -7,6 +8,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.OptionData
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
+import java.awt.Color
 
 abstract class SuperCommand(
     val group: String? = null,
@@ -29,7 +31,21 @@ abstract class SuperCommand(
         for (option in options) {
             option.update(event)
         }
-        run()
+
+        try {
+            run()
+        } catch (e: Throwable) {
+            error(e.message)
+        }
+    }
+
+    fun error(message: String?) {
+        event.replyEmbeds(
+            EmbedBuilder()
+                .setTitle(message?: "ERROR")
+                .setColor(Color.RED)
+                .build()
+        ).queue()
     }
 
     abstract fun run()

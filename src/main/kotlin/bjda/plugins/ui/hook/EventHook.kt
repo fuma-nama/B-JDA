@@ -15,7 +15,6 @@ abstract class EventHook(private val id: String): IHook<String> {
 
     override fun onDestroy() {
         destroy(id)
-        println("destroy $id")
     }
 
     abstract fun listen(id: String)

@@ -32,7 +32,7 @@ abstract class Component<P : IProps, S : Any>(var props: P) {
     val hooks = ArrayList<IHook<*>>()
     lateinit var state: S
     lateinit var contexts : ContextMap
-    lateinit var ui: UI
+    lateinit var ui: UI<*>
 
     abstract class NoState<P : IProps>(props: P) : Component<P, Unit>(props)
     /**
@@ -85,7 +85,7 @@ abstract class Component<P : IProps, S : Any>(var props: P) {
         onUpdateState(prev, state)
     }
 
-    internal fun mount(parent: AnyComponent?, manager: UI) {
+    internal fun mount(parent: AnyComponent?, manager: UI<*>) {
         this.parent = parent
         this.ui = manager
 

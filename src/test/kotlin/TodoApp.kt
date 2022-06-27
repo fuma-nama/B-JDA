@@ -1,6 +1,5 @@
 import bjda.plugins.ui.hook.ButtonClick
 import bjda.plugins.ui.hook.MenuSelect
-import bjda.plugins.ui.modal.Form
 import bjda.plugins.ui.modal.Form.Companion.form
 import bjda.plugins.ui.modal.Input
 import bjda.ui.component.RowLayout
@@ -86,19 +85,16 @@ class TodoApp : Component<IProps, TodoApp.State>(IProps()) {
                     }
                 }
 
-                + Button {
-                    id = use(onAddItem)
+                + Button(id = use(onAddItem)) {
                     label = "Add"
                 }
 
                 + where (state.selected != null) {
-                    + Button {
-                        id = use(onEditItem)
+                    + Button(id = use(onEditItem)) {
                         label = "Edit"
                         style = ButtonStyle.PRIMARY
                     }
-                    + Button {
-                        id = use(onDeleteItem)
+                    + Button(id = use(onDeleteItem)) {
                         label = "Delete"
                         style = ButtonStyle.DANGER
                     }

@@ -1,14 +1,16 @@
 package bjda.ui.core
 
+import bjda.ui.listener.InteractionUpdateHook
 import bjda.ui.listener.UpdateHook
 import bjda.ui.types.AnyComponent
 import net.dv8tion.jda.api.entities.Message
+import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.interactions.callbacks.IMessageEditCallback
 import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback
 import net.dv8tion.jda.api.interactions.components.Modal
 import java.util.*
 
-class UI(private var root: AnyComponent) {
+class UI<T: AnyComponent>(val root: T) {
     private val renderer = DefaultRenderer()
     private val hooks = HashMap<String, UpdateHook>()
 
@@ -73,6 +75,10 @@ class UI(private var root: AnyComponent) {
 
             element
         }
+    }
+
+    fun listen(hook: InteractionHook) {
+        listen(InteractionUpdateHook(hook))
     }
 
     fun listen(entity: UpdateHook) {
