@@ -1,7 +1,6 @@
 import bjda.plugins.ui.hook.ButtonClick
 import bjda.plugins.ui.hook.MenuSelect
 import bjda.plugins.ui.modal.Form.Companion.form
-import bjda.plugins.ui.modal.Input
 import bjda.ui.component.RowLayout
 import bjda.ui.component.Text
 import bjda.ui.component.TextType
@@ -122,7 +121,7 @@ class TodoApp : Component<IProps, TodoApp.State>(IProps()) {
         }
 
         rows = {
-            + Input {
+            + row {
                 + TextField("todo") {
                     label = "TODO"
                     style = TextInputStyle.PARAGRAPH
@@ -147,7 +146,7 @@ class TodoApp : Component<IProps, TodoApp.State>(IProps()) {
             }
 
             rows = {
-                + Input {
+                + row {
                     + TextField("todo") {
                         label = "New Content"
                         value = todos[selected!!]

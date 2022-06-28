@@ -2,7 +2,9 @@ package bjda.plugins.ui.modal
 
 import bjda.plugins.ui.UIEvent
 import bjda.plugins.ui.hook.event.ModalListener
+import bjda.ui.component.Row
 import bjda.ui.component.action.Action
+import bjda.ui.core.Component.Companion.minus
 import bjda.ui.core.UI
 import bjda.ui.core.hooks.IHook
 import bjda.ui.core.init
@@ -31,9 +33,33 @@ class Form(val id: String = UIEvent.createId(),
 
     class Props {
         lateinit var title: String
-        lateinit var rows: LambdaList<Input>
+        lateinit var rows: LambdaList<ModalRow>
 
         lateinit var onSubmit: (ModalInteractionEvent) -> Unit
+
+        fun row(items: LambdaList<Action>): ModalRow {
+            return ModalRow(items.build())
+        }
+
+        fun row(item: Action): ModalRow {
+            return ModalRow(listOf(item))
+        }
+
+        fun ModalInteractionEvent.value(id: String): String {
+            return getValue(id)!!.asString
+        }
+
+        fun ModalInteractionEvent.value(item: Action): String {
+            return value(item.id)
+        }
+
+        class ModalRow(val items: List<Action>) {
+            fun build(): List<ItemComponent> {
+                return items.map {
+                    it.build()
+                }
+            }
+        }
     }
 
     val props = Props().init(props)
@@ -79,14 +105,6 @@ class Form(val id: String = UIEvent.createId(),
             override fun onDestroy() {
                 form.destroy()
             }
-        }
-    }
-}
-
-data class Input(val items: LambdaList<Action>) {
-    fun build(): List<ItemComponent> {
-        return items.build().map {
-            it.build()
         }
     }
 }

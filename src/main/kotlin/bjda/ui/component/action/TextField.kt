@@ -6,7 +6,7 @@ import net.dv8tion.jda.api.interactions.components.ItemComponent
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle
 import net.dv8tion.jda.internal.interactions.component.TextInputImpl
 
-class TextField(val id: String, props: Init<Props>) : Action {
+class TextField(override val id: String, props: Init<Props>) : Action {
     class Props {
         var style: TextInputStyle = TextInputStyle.SHORT
         lateinit var label: String

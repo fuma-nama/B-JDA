@@ -8,11 +8,12 @@ import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle
 import net.dv8tion.jda.internal.interactions.component.ButtonImpl
 
 class Button(props: Init<Props>) : Action {
+    private val props = Props().init(props)
+    override val id by this.props::id
+
     constructor(id: String, props: Init<Props>) : this(props) {
         this.props.id = id
     }
-
-    private val props = Props().init(props)
 
     class Props {
         lateinit var id: String

@@ -30,9 +30,9 @@ abstract class Component<P : IProps, S : Any>(var props: P) {
     var snapshot: ComponentTree? = null
     var parent: AnyComponent? = null
     val hooks = ArrayList<IHook<*>>()
-    lateinit var state: S
+    open lateinit var state: S
     lateinit var contexts : ContextMap
-    lateinit var ui: UI<*>
+    lateinit var ui: UI
 
     abstract class NoState<P : IProps>(props: P) : Component<P, Unit>(props)
     /**
@@ -78,6 +78,17 @@ abstract class Component<P : IProps, S : Any>(var props: P) {
         return hook.getValue()
     }
 
+    /**
+     * Create a hook at global level
+     *
+     * You may use it anywhere, avoid to access its value outside the render function
+     */
+    fun<V> useLazy(hook: IHook<V>): Lazy<V> {
+        return lazy {
+            use(hook)
+        }
+    }
+
     internal fun update(state: S) {
         val prev = state
         this.state = state
@@ -85,7 +96,7 @@ abstract class Component<P : IProps, S : Any>(var props: P) {
         onUpdateState(prev, state)
     }
 
-    internal fun mount(parent: AnyComponent?, manager: UI<*>) {
+    internal fun mount(parent: AnyComponent?, manager: UI) {
         this.parent = parent
         this.ui = manager
 

@@ -7,11 +7,12 @@ import net.dv8tion.jda.api.interactions.components.selections.SelectOption
 import net.dv8tion.jda.internal.interactions.component.SelectMenuImpl
 
 class Menu(props: Init<Props>) : Action {
+    private val props = Props().init(props)
+    override val id by this.props::id
+
     constructor(id: String, props: Init<Props>) : this(props) {
         this.props.id = id
     }
-
-    private val props = Props().init(props)
 
     class Props {
         lateinit var id: String

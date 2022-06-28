@@ -9,33 +9,61 @@ import net.dv8tion.jda.api.interactions.callbacks.IMessageEditCallback
 import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback
 import net.dv8tion.jda.api.interactions.components.Modal
 import java.util.*
+import java.util.function.Consumer
 
-class UI<T: AnyComponent>(val root: T) {
+class UI(private val option: Option = Option()) {
+    data class Option(
+        /**
+         * If enabled, Hooks will be updated after updating components
+         */
+        var updateHooks: Boolean = true
+    )
+
+    var root: AnyComponent? = null
+        private set(value) {
+            if (value != null) {
+                value.mount(null, this)
+                renderer.renderComponent(value)
+            }
+
+            field = value
+        }
+
     private val renderer = DefaultRenderer()
     private val hooks = HashMap<String, UpdateHook>()
 
-    init {
-        this.root.mount(null, this)
-        renderer.renderComponent(this.root)
+    constructor(root: AnyComponent) : this() {
+        this.root = root
     }
 
-    fun edit(callback: IMessageEditCallback) {
-        callback.editMessage(this.build()).queue()
+    /**
+     * Switch current root to another one
+     * @param update If enabled, Hooks will be updated after changing the root
+     */
+    fun switchTo(root: AnyComponent, update: Boolean = true) {
+        this.root = root
+
+        if (update)
+            updateHooks()
     }
 
-    fun reply(message: Message) {
-        message.reply(this.build()).queue()
+    fun edit(callback: IMessageEditCallback, success: Consumer<InteractionHook>? = null) {
+        callback.editMessage(this.build()).queue(success)
     }
 
-    fun reply(callback: IReplyCallback, ephemeral: Boolean = false) {
+    fun reply(message: Message, success: Consumer<Message>? = null) {
+        message.reply(this.build()).queue(success)
+    }
+
+    fun reply(callback: IReplyCallback, ephemeral: Boolean = false, success: Consumer<InteractionHook>? = null) {
         callback.reply(this.build())
             .setEphemeral(ephemeral)
-            .queue()
+            .queue(success)
     }
 
     fun build(): Message {
         val data = RenderData()
-        root.build(data)
+        root!!.build(data)
 
         return data.build()
     }
@@ -55,7 +83,7 @@ class UI<T: AnyComponent>(val root: T) {
             .build()
     }
 
-    fun updateMessage() {
+    fun updateHooks() {
         val message = build()
 
         for (listener in hooks.values) {
@@ -63,7 +91,7 @@ class UI<T: AnyComponent>(val root: T) {
         }
     }
 
-    fun updateComponent(element: AnyComponent) {
+    fun updateComponent(element: AnyComponent = root!!) {
         renderer.addUpdateTask {
             element
         }
@@ -86,13 +114,14 @@ class UI<T: AnyComponent>(val root: T) {
     }
 
     fun destroy() {
-        root.unmount()
+        root!!.unmount()
         hooks.values.forEach { it.onDestroy() }
     }
 
     inner class DefaultRenderer : Renderer() {
         override fun onUpdated() {
-            updateMessage()
+            if (option.updateHooks)
+                updateHooks()
         }
 
         override fun createScanner(element: AnyComponent): ComponentTreeScanner {
