@@ -4,69 +4,73 @@ import bjda.plugins.IModule
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
+import net.dv8tion.jda.api.interactions.commands.Command.SubcommandGroup
 import net.dv8tion.jda.api.interactions.commands.build.CommandData
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
 
-class CommandGroupBuilder(val name: String) {
-    val subgroups = ArrayList<SubcommandGroupData>()
-    val subcommands = ArrayList<SubcommandData>()
-}
-
-class SuperCommandModule(vararg val commands: SuperCommand) : IModule {
+class SuperCommandModule(vararg val nodes: SuperNode) : IModule {
     val listeners = HashMap<Info, SuperCommand>()
 
     data class Info(val group: String?, val subgroup: String?, val name: String)
 
-    private fun getSubgroup(data: CommandGroupBuilder, name: String): SubcommandGroupData? {
-        return data.subgroups.find {
-            it.name == name
-        }
+    private fun nextSubNode(group: String, node: SuperCommandGroup): SubcommandGroupData {
+        val data = SubcommandGroupData(node.name, node.description)
+        val commands = node.commands()?: error("Sub command group cannot be empty or null")
+
+        data.addSubcommands(commands.map {cmd ->
+            listeners[Info(group, node.name, cmd.name)] = cmd
+
+            cmd.buildSub()
+        })
+
+        return data
     }
 
-    private fun group(parent: CommandGroupBuilder?, cmd: SuperCommand): CommandGroupBuilder {
-        cmd.group!!
-
-        val group = parent?: CommandGroupBuilder(cmd.group)
-
-        if (cmd.subgroup != null) {
-            var subgroup = getSubgroup(group, cmd.subgroup) //cloned subgroup
-
-            if (subgroup == null) {
-                subgroup = SubcommandGroupData(cmd.subgroup, "No Description")
-
-                group.subgroups.add(subgroup)
+    private fun nextNode(node: SuperNode): CommandData {
+        when (node) {
+            is SuperCommand -> {
+                return node.build()
             }
 
-            subgroup.addSubcommands(cmd.buildSub())
-        } else {
-            group.subcommands.add(cmd.buildSub())
-        }
+            is SuperCommandGroup -> {
+                val data = CommandDataImpl(node.name, node.description)
+                val commands = node.commands()
+                val groups = node.groups()
 
-        return group
+                if (groups != null) {
+                    data.addSubcommandGroups(
+                        groups.map {g ->
+                            nextSubNode(node.name, g)
+                        }
+                    )
+                } else if (commands != null) {
+                    data.addSubcommands(
+                        commands.map {cmd ->
+                            listeners[Info(node.name, null, cmd.name)] = cmd
+
+                            cmd.buildSub()
+                        }
+                    )
+                }
+
+                return data
+            }
+        }
     }
 
     private fun parse(): HashMap<String, CommandData> {
         val built = HashMap<String, CommandData>()
-        val groups = HashMap<String, CommandGroupBuilder>()
 
-        for (cmd in commands) {
-
-            if (cmd.group != null) {
-                groups[cmd.group] = group(groups[cmd.group], cmd)
-            } else {
-                built[cmd.name] = cmd.build()
+        for (node in nodes) {
+            if (built.containsKey(node.name)) {
+                error("Super Command cannot be duplicated: ${node.name}")
             }
 
-            listeners[Info(cmd.group, cmd.subgroup, cmd.name)] = cmd
+            built[node.name] = nextNode(node)
         }
 
-        for (group in groups.values) {
-            built[group.name] = CommandDataImpl(group.name, "Null")
-                .addSubcommandGroups(group.subgroups)
-                .addSubcommands(group.subcommands)
-        }
         return built
     }
 

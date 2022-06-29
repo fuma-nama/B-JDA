@@ -1,10 +1,15 @@
 import bjda.plugins.supercommand.SuperCommand
+import bjda.plugins.supercommand.SuperCommandGroup
 import bjda.ui.component.*
 import bjda.ui.core.*
 import bjda.ui.core.Component.Companion.minus
 import bjda.ui.core.Component.Companion.rangeTo
 
-class CreateTodo: SuperCommand(group = "todo", name = "create", description = "Create a Todo List") {
+val VoteCommands = SuperCommandGroup.create("todo", "Todo Commands",
+    CreateTodo(), TodoSettings()
+)
+
+private class CreateTodo: SuperCommand(name = "create", description = "Create a Todo List") {
     override fun run() {
         val start = System.currentTimeMillis()
         UI(
@@ -16,7 +21,7 @@ class CreateTodo: SuperCommand(group = "todo", name = "create", description = "C
     }
 }
 
-class TodoSettings: SuperCommand(group = "todo", name = "settings", description = "Manager Settings") {
+private class TodoSettings: SuperCommand(name = "settings", description = "Manager Settings") {
     override fun run() {
         val app = UI(
             Pager()-{

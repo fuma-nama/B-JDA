@@ -1,9 +1,11 @@
 package n1
 
 import bjda.plugins.supercommand.SuperCommand
+import bjda.plugins.supercommand.SuperCommandGroup
 import bjda.ui.component.*
 import bjda.ui.core.Component.Companion.rangeTo
 import bjda.ui.core.UI
+import bjda.ui.types.AnyComponent
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.entities.TextChannel
@@ -27,7 +29,13 @@ class Question(val title: String, answers: Pair<String, String>) {
     }
 }
 
-class StartCommand : SuperCommand(group = "vote", subgroup = "game", name = "start", description = "Start vote game") {
+val GameCommands = SuperCommandGroup.create("game", "Games",
+    SuperCommandGroup.create("votq", "Commands for Game 'votq'",
+        JoinCommand(), StartCommand()
+    )
+)
+
+class StartCommand : SuperCommand(name = "start", description = "Start vote game") {
     override fun run() {
         val game = VoteGame.create(event.textChannel, event.user)
             ?: return error("Already has existing game in this channel")
@@ -40,7 +48,7 @@ class StartCommand : SuperCommand(group = "vote", subgroup = "game", name = "sta
     }
 }
 
-class JoinCommand : SuperCommand(group = "vote", subgroup = "game", name = "join", description = "Join vote game") {
+class JoinCommand : SuperCommand(name = "join", description = "Join vote game") {
     override fun run() {
         val ui = VoteGame.join(event.textChannel.id, event.user)?.ui ?: return error("Has been joined the game")
 
@@ -128,6 +136,15 @@ class VoteGame(private val channel: TextChannel, val owner: User) {
                 .setColor(Color.GREEN)
                 .build()
         ).queue()
+
+        next()
+    }
+
+    fun sendMessage(message: String) {
+
+    }
+
+    fun skipCurrent() {
 
         next()
     }

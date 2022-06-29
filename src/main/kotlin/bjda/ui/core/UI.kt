@@ -11,7 +11,7 @@ import net.dv8tion.jda.api.interactions.components.Modal
 import java.util.*
 import java.util.function.Consumer
 
-class UI(private val option: Option = Option()) {
+open class UI(private val option: Option = Option()) {
     data class Option(
         /**
          * If enabled, Hooks will be updated after updating components

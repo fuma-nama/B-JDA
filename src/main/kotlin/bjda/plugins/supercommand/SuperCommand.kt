@@ -10,11 +10,9 @@ import net.dv8tion.jda.api.interactions.commands.build.SubcommandData
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
 import java.awt.Color
 
-abstract class SuperCommand(
-    val group: String? = null,
-    val subgroup: String? = null,
-    val name: String,
-    val description: String) {
+abstract class SuperCommand (
+    override val name: String,
+    override val description: String): SuperNode {
     lateinit var event: SlashCommandInteractionEvent
     private val options = ArrayList<OptionValue>()
 
