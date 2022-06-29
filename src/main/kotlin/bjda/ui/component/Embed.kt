@@ -25,6 +25,14 @@ class Embed : Component.NoState<Embed.Props>(Props()) {
         var timestamp: TemporalAccessor? = null
         var color: Color? = null
         var fields: List<MessageEmbed.Field>? = null
+
+        fun fields(vararg fields: MessageEmbed.Field): List<MessageEmbed.Field> {
+            return fields.toList()
+        }
+
+        fun field(text: Pair<String, String>, inline: Boolean = false): MessageEmbed.Field {
+            return MessageEmbed.Field(text.first, text.second, inline)
+        }
     }
 
     override fun onBuild(data: RenderData) {

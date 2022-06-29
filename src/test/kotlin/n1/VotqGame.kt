@@ -1,11 +1,11 @@
 package n1
 
-import bjda.plugins.supercommand.SuperCommand
-import bjda.plugins.supercommand.SuperCommandGroup
 import bjda.ui.component.*
 import bjda.ui.core.Component.Companion.rangeTo
 import bjda.ui.core.UI
-import bjda.ui.types.AnyComponent
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.entities.TextChannel
@@ -29,46 +29,18 @@ class Question(val title: String, answers: Pair<String, String>) {
     }
 }
 
-val GameCommands = SuperCommandGroup.create("game", "Games",
-    SuperCommandGroup.create("votq", "Commands for Game 'votq'",
-        JoinCommand(), StartCommand()
-    )
-)
-
-class StartCommand : SuperCommand(name = "start", description = "Start vote game") {
-    override fun run() {
-        val game = VoteGame.create(event.textChannel, event.user)
-            ?: return error("Already has existing game in this channel")
-
-        val ui = game.join(event.user)!!.ui
-
-        ui.reply(event, true) {
-            ui.listen(it)
-        }
-    }
-}
-
-class JoinCommand : SuperCommand(name = "join", description = "Join vote game") {
-    override fun run() {
-        val ui = VoteGame.join(event.textChannel.id, event.user)?.ui ?: return error("Has been joined the game")
-
-        ui.reply(event, true) {
-            ui.listen(it)
-        }
-    }
-}
-
-fun WaitingPlayersPanel(): Embed {
+fun WaitingPlayersPanel(message: String = "Waiting Other Players..."): Embed {
     return Embed()..{
-        title = "Waiting Other Players..."
+        title = message
         description = "Please wait :P"
     }
 }
 
-class VoteGame(private val channel: TextChannel, val owner: User) {
+class VoteGame(val id: String, private val owner: User) {
     val players = ArrayList<Player>()
     private var current = 0
     var started = false
+    val winScore = 10
 
     fun join(user: User): Player? {
         if (started || players.any { it.user.id == user.id }) return null
@@ -97,30 +69,6 @@ class VoteGame(private val channel: TextChannel, val owner: User) {
             .build()
     }
 
-    companion object {
-        private val games = hashMapOf<String, VoteGame>()
-
-        fun create(channel: TextChannel, owner: User): VoteGame? {
-
-            val exist = games.containsKey(channel.id)
-
-            if (!exist) {
-                val game = VoteGame(channel, owner)
-                games[channel.id] = game
-
-                return game
-            }
-
-            return null
-        }
-
-        fun join(id: String, user: User): Player? {
-            val game = games[id]?: return null
-
-            return game.join(user)
-        }
-    }
-
     private fun updateInfo() {
         for (player in players) {
             player.ui.updateComponent()
@@ -128,39 +76,84 @@ class VoteGame(private val channel: TextChannel, val owner: User) {
         }
     }
 
-    fun start() {
+    fun start() = runBlocking {
         started = true
-        channel.sendMessageEmbeds(
-            EmbedBuilder()
-                .setTitle("Game Started!")
-                .setColor(Color.GREEN)
-                .build()
-        ).queue()
+        displayMessage(
 
-        next()
+            "Game Started!",
+            "Wait for few seconds",
+            ::next
+        )
     }
 
-    fun sendMessage(message: String) {
+    private fun displayMessage(title: String, description: String, then: () -> Unit) = runBlocking {
+        for (player in players) {
+            player.ui.switchTo(
+                Embed()..{
+                    this.title = title
+                    this.description = description
+                    color = Color.GREEN
+                }
+            )
+        }
 
+        launch {
+            delay(5000L)
+            then()
+        }
     }
 
-    fun skipCurrent() {
+    private fun skipCurrent(current: Player) = runBlocking {
+        displayMessage(
+            "${current.user.name} skipped his round!",
+            "The question will be written by other player...",
+            ::next
+        )
+    }
 
-        next()
+    private fun canEnd(): Boolean {
+        return players.any { it.score >= winScore }
+    }
+
+    private fun end() {
+        val winners = players.filter {
+            it.score == winScore
+        }
+
+        for (player in players) {
+            player.ui.switchTo(
+                EndPanel {
+                    this.player = player
+                    this.winners = winners
+                    this.isWinner = player.score == winScore
+                }
+            )
+        }
+
+        games.remove(id)
     }
 
     fun next() {
+        if (canEnd()) {
+            return end()
+        }
+
+        if (current == players.size) {
+            current = 0
+        }
+
         val asker = players[current]
-        channel.sendMessage("${asker.user.name}'s turn!").queue()
-        updateInfo()
 
         for (player in players) {
             val ui = if (player == asker) {
                 AskPanel()..{
                     onAsk = ::ask
+                    onSkip = {
+                        skipCurrent(asker)
+                    }
                 }
             } else {
-                WaitingPlayersPanel()
+                WaitingPlayersPanel("Its ${asker.user.name}'s turn!")
             }
 
             player.ui.switchTo(ui)
@@ -201,7 +194,7 @@ class VoteGame(private val channel: TextChannel, val owner: User) {
     private fun ask(question: Question) {
         val answered = hashMapOf<Player, String>()
 
-        val onFinish = {
+        fun onFinish() {
             val best = question.answers
                 .toList()
                 .maxByOrNull { it.votes }!!
@@ -209,7 +202,7 @@ class VoteGame(private val channel: TextChannel, val owner: User) {
             confirmResult(best, answered)
         }
 
-        val onAnswer = {player: Player, chose: String ->
+        fun onAnswer(player: Player, chose: String) {
             question.getAnswer(chose)?.let {
                 it.votes++
             }
@@ -226,9 +219,31 @@ class VoteGame(private val channel: TextChannel, val owner: User) {
                 AnswerPanel {
                     this.question = question
                     this.player = player
-                    this.onAnswer = onAnswer
+                    this.onAnswer = ::onAnswer
                 }
             )
+        }
+    }
+
+    companion object {
+        private val games = hashMapOf<String, VoteGame>()
+
+        fun create(channel: TextChannel, owner: User): VoteGame? {
+
+            val exist = games.containsKey(channel.id)
+
+            if (!exist) {
+                val game = VoteGame(channel.id, owner)
+                games[channel.id] = game
+
+                return game
+            }
+
+            return null
+        }
+
+        fun getGame(id: String): VoteGame? {
+            return games[id]
         }
     }
 }

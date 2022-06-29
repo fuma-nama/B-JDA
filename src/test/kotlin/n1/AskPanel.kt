@@ -14,6 +14,7 @@ import java.awt.Color
 class AskPanel : Component<AskPanel.Props, AskPanel.State>(Props()) {
     class Props : IProps() {
         lateinit var onAsk: (Question) -> Unit
+        lateinit var onSkip: () -> Unit
     }
 
     class State {
@@ -27,7 +28,8 @@ class AskPanel : Component<AskPanel.Props, AskPanel.State>(Props()) {
     }
 
     private val onSkip = ButtonClick {event ->
-
+        event.deferEdit().queue()
+        props.onSkip()
     }
 
     private val questionForm by form {

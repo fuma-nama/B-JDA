@@ -29,8 +29,8 @@ open class UI(private val option: Option = Option()) {
             field = value
         }
 
-    private val renderer = DefaultRenderer()
-    private val hooks = HashMap<String, UpdateHook>()
+    internal val renderer = DefaultRenderer()
+    val hooks = HashMap<String, UpdateHook>()
 
     constructor(root: AnyComponent) : this() {
         this.root = root

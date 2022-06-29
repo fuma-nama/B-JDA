@@ -16,7 +16,7 @@ class FComponent<P: IProps, S: Any>(
     companion object {
         fun<P: IProps, S: Any> create(props: () -> P, component: FComponentBody<P, S>): FComponentConstructor<P, S> {
             return {init ->
-                FComponent(props(), component)..init
+                FComponent(props().init(init), component)
             }
         }
 

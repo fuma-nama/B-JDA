@@ -51,6 +51,7 @@ class WaitingPanel : Component.NoState<WaitingPanel.Props>(Props()) {
 
             + if (props.player.isOwner) {
                 ControlUI()..{
+                    id = game.id
                     onStart = root.onStart
                     players = game.players
                 }
@@ -85,6 +86,7 @@ val MemberUI = FComponent.noState(::MemberUIProps) {
 
 class ControlUI : Component<ControlUI.Props, Unit>(Props()) {
     class Props: IProps() {
+        lateinit var id: String
         lateinit var onStart: ButtonClick
         lateinit var players: List<Player>
     }
@@ -92,8 +94,8 @@ class ControlUI : Component<ControlUI.Props, Unit>(Props()) {
     override fun onRender(): Children {
         return with (props) {{
             + Embed()..{
-                title = "Waiting Players"
-                description = "${players.size} Players joined"
+                title = "Waiting Players..."
+                description = "${players.size} Players joined (Channel Id: `$id`)"
                 fields = players.map {player ->
                     MessageEmbed.Field(player.user.name, "", false)
                 }

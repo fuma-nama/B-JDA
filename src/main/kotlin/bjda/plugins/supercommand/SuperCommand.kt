@@ -43,7 +43,7 @@ abstract class SuperCommand (
                 .setTitle(message?: "ERROR")
                 .setColor(Color.RED)
                 .build()
-        ).queue()
+        ).setEphemeral(true).queue()
     }
 
     abstract fun run()
@@ -73,12 +73,18 @@ abstract class SuperCommand (
         type: OptionType,
         description: String) {
 
+        private var default: () -> Any? = { null }
         private var value: Any? = null
         internal var data = OptionData(type, name, description)
 
         fun required(value: Boolean): OptionValue {
             data = data.setRequired(value)
 
+            return this
+        }
+
+        fun default(value: () -> Any?): OptionValue {
+            this.default = value
             return this
         }
 
@@ -122,7 +128,7 @@ abstract class SuperCommand (
             val mapping = event.getOption(data.name)
 
             value = if (mapping == null) {
-                null
+                this.default()
             } else {
                 when (mapping.type) {
                     OptionType.INTEGER -> mapping.asLong
