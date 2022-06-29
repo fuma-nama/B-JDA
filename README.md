@@ -31,7 +31,7 @@ app.reply(event)
 ```
 Declare slash command 
 ```kotlin
-class SuperHello : SuperCommand(group = "test", subgroup = "say", name = "hello", description = "Say Hello") {
+class SuperHello : SuperCommand(name = "hello", description = "Say Hello") {
   private val size: String by option(OptionType.STRING, "size").choices(
     "Small" to "2xl",
     "Medium" to "4xl",
@@ -58,40 +58,38 @@ See the full Demo and TODO APP implementation in [here](./src/test/kotlin)
 
 ### Creating a select app
 ```kotlin
-class App : Component<IProps, App.State>(IProps()) {
-    class State {
-        var selected: String? = null
+class ResultPanelProps : IProps() {
+  lateinit var answer: Answer
+  lateinit var onConfirm: () -> Unit
+  var score: Int = 0
+  var isCorrect = false
+}
+val ResultPanel = FComponent.noState(::ResultPanelProps) {
+  val onConfirm = ButtonClick {event ->
+    ui.switchTo(WaitingPlayersPanel(), false)
+
+    ui.edit(event) {
+      props.onConfirm()
+    }
+  };
+
+  {
+    + Embed()..{
+      with (props) {
+        title = "The Answer is ${answer.name} with ${answer.votes} Votes"
+        description = "Now you have ${props.score} Scores"
+
+        color = if (isCorrect) Color.GREEN else Color.RED
+      }
     }
 
-    init {
-        this.state = State()
+    + Row() -{
+      + Button(id = use(onConfirm)) {
+        label = "Confirm"
+        style = ButtonStyle.SUCCESS
+      }
     }
-
-    private val onSelect = MenuSelect { event ->
-        updateState {
-            selected = event.selectedOptions.getOrNull(0)?.value
-        }
-
-        println(state.selected)
-        ui.edit(event)
-    }
-
-    override fun onRender(): Children {
-        return {
-            +Content("My App")
-
-            +RowLayout() - {
-                +Menu(onSelect) {
-                    placeholder = "Select a Item"
-
-                    options = createOptions(
-                        state.selected,
-                        "Hello World" to "hello"
-                    )
-                }
-            }
-        }
-    }
+  }
 }
 ```
 Invoke `updateState` to update state and render the component again
@@ -99,9 +97,11 @@ Invoke `updateState` to update state and render the component again
 Normally it should be synchronous but in some cases it is async.
 
 ### Update Message after update
+It is painful to real-time update messages in multiplayer game
 
+Now you can write it clearly with hooks or manually update
 #### You have two ways:
-- ##### Auto update (For updating multi messages realtime)
+- #### Auto update (For updating multi messages realtime)
 
   it will update listened hooks when ui is updated
   <br>
@@ -109,9 +109,22 @@ Normally it should be synchronous but in some cases it is async.
   <br>
   which is listened as it won't detect if the message is updated manually
   ```kotlin
-  event.reply(ui.build()).queue { hook ->
-      ui.listen(InteractionUpdateHook(hook))
+  ui.reply(event) {
+    ui.listen(it)
   }
+  ```
+- #### Half-Auto update:
+  You may disable the `updateHooks` option to avoid updating hooks after components updated
+  
+  which includes calling the `updateState` from components. 
+  
+  You must call `ui.updateHooks` manually to update hooks
+
+  ```kotlin
+  updateState {
+      player.score++
+  }
+  ui.updateHooks()
   ```
 - #### Manually Update (For event handlers)
   Calling `ui.edit` or `ui.reply` from component
