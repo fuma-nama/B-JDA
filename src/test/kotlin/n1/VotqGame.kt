@@ -38,11 +38,10 @@ fun WaitingPlayersPanel(message: String = "Waiting Other Players..."): Embed {
     }
 }
 
-class VoteGame(val id: String, private val owner: User) {
+class VoteGame(val id: String, val owner: User, private val winScore: Int) {
     val players = ArrayList<Player>()
     private var current = 0
     var started = false
-    private val winScore = 10
 
     fun join(user: User): Player? {
         if (started || players.any { it.user.id == user.id }) return null
@@ -117,7 +116,7 @@ class VoteGame(val id: String, private val owner: User) {
         return players.any { it.score >= winScore }
     }
 
-    private fun end() {
+    fun end() {
         val winners = players.filter {
             it.score == winScore
         }
@@ -240,12 +239,12 @@ class VoteGame(val id: String, private val owner: User) {
     companion object {
         private val games = hashMapOf<String, VoteGame>()
 
-        fun create(channel: TextChannel, owner: User): VoteGame? {
+        fun create(channel: TextChannel, owner: User, winScore: Int): VoteGame? {
 
             val exist = games.containsKey(channel.id)
 
             if (!exist) {
-                val game = VoteGame(channel.id, owner)
+                val game = VoteGame(channel.id, owner, winScore)
                 games[channel.id] = game
 
                 return game

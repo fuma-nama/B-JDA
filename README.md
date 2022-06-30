@@ -43,6 +43,14 @@ class SuperHello : SuperCommand(name = "hello", description = "Say Hello") {
   }
 }
 ```
+Application Command is also supported
+```kotlin
+class UserHelloCommand : SuperContext(name = "hello", type = Command.Type.USER) {
+    override fun run(event: UserContextInteractionEvent) {
+        event.reply("Hello").queue()
+    }
+}
+```
 The coolest thing is you can even create a normal command with Clikt
 ```kotlin
 class Hello : BJDACommand(name = "apps") { //BJDACommand is based on Clikt
