@@ -1,6 +1,6 @@
 package bjda.plugins.supercommand
 
-abstract class SuperCommandGroup(override val name: String, override val description: String): SuperNode {
+abstract class SuperCommandGroup(override val name: String, val description: String): SuperNode {
     open fun groups(): Array<out SuperCommandGroup>? = null
     open fun commands(): Array<out SuperCommand>? = null
 

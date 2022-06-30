@@ -12,7 +12,9 @@ class EndPanelProps : IProps() {
     lateinit var winners: List<Player>
 }
 val EndPanel = FComponent.noState(::EndPanelProps) {
-    val winnersText = props.winners.map { it.user.name + ", " };
+    val winnersText = props.winners.joinToString {
+        it.user.name
+    };
 
     {
         with (props) {

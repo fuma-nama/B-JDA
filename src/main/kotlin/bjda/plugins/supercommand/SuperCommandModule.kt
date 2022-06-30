@@ -2,18 +2,21 @@ package bjda.plugins.supercommand
 
 import bjda.plugins.IModule
 import net.dv8tion.jda.api.JDA
+import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
+import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
-import net.dv8tion.jda.api.interactions.commands.Command.SubcommandGroup
+import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.interactions.commands.build.CommandData
-import net.dv8tion.jda.api.interactions.commands.build.SubcommandData
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
 
 class SuperCommandModule(vararg val nodes: SuperNode) : IModule {
     val listeners = HashMap<Info, SuperCommand>()
+    val contexts = HashMap<ContextInfo, SuperContext>()
 
-    data class Info(val group: String?, val subgroup: String?, val name: String)
+    data class Info(val group: String? = null, val subgroup: String? = null, val name: String)
+    data class ContextInfo(val name: String, val type: Command.Type)
 
     private fun nextSubNode(group: String, node: SuperCommandGroup): SubcommandGroupData {
         val data = SubcommandGroupData(node.name, node.description)
@@ -31,7 +34,15 @@ class SuperCommandModule(vararg val nodes: SuperNode) : IModule {
     private fun nextNode(node: SuperNode): CommandData {
         when (node) {
             is SuperCommand -> {
-                return node.build()
+                return node.build().also {
+                    listeners[Info(name = node.name)] = node
+                }
+            }
+
+            is SuperContext -> {
+                return node.build().also {
+                    contexts[ContextInfo(node.name, node.type)] = node
+                }
             }
 
             is SuperCommandGroup -> {
@@ -60,15 +71,11 @@ class SuperCommandModule(vararg val nodes: SuperNode) : IModule {
         }
     }
 
-    private fun parse(): HashMap<String, CommandData> {
-        val built = HashMap<String, CommandData>()
+    private fun parse(): List<CommandData> {
+        val built = ArrayList<CommandData>()
 
         for (node in nodes) {
-            if (built.containsKey(node.name)) {
-                error("Super Command cannot be duplicated: ${node.name}")
-            }
-
-            built[node.name] = nextNode(node)
+            built += nextNode(node)
         }
 
         return built
@@ -77,12 +84,24 @@ class SuperCommandModule(vararg val nodes: SuperNode) : IModule {
     override fun init(jda: JDA) {
         val commands = parse()
 
-        jda.updateCommands().addCommands(commands.values).queue()
+        jda.updateCommands().addCommands(commands).queue()
 
         jda.addEventListener(EventListener())
     }
 
     inner class EventListener : ListenerAdapter() {
+        override fun onMessageContextInteraction(event: MessageContextInteractionEvent) {
+            val info = ContextInfo(event.name, event.commandType)
+
+            contexts[info]?.run(event)
+        }
+
+        override fun onUserContextInteraction(event: UserContextInteractionEvent) {
+            val info = ContextInfo(event.name, event.commandType)
+
+            contexts[info]?.run(event)
+        }
+
         override fun onSlashCommandInteraction(event: SlashCommandInteractionEvent) {
             val info = if (event.subcommandName != null) {
                 Info(event.name, event.subcommandGroup, event.subcommandName!!)

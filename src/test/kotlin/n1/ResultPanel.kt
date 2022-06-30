@@ -12,7 +12,7 @@ import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle
 import java.awt.Color
 
 class ResultPanelProps : IProps() {
-    lateinit var answer: Answer
+    var answers: List<Answer>? = null
     lateinit var onConfirm: () -> Unit
     var score: Int = 0
     var isCorrect = false
@@ -26,13 +26,38 @@ val ResultPanel = FComponent.noState(::ResultPanelProps) {
         }
     };
 
+    val answers = props.answers
+
+    val text = answers?.joinToString(" and ") {answer ->
+        "\"${answer.name}\""
+    };
+
     {
         + Embed()..{
+
             with (props) {
-                title = "The Answer is ${answer.name} with ${answer.votes} Votes"
+                title = if (answers != null) {
+                    val are = if (answers.size == 1)
+                        "is"
+                    else
+                        "are"
+
+                    val votes = answers[0].votes
+
+                    "The Answer $are $text with $votes Votes"
+                } else {
+                    "All answers has the same votes, No one is correct"
+                }
+
                 description = "Now you have ${props.score} Scores"
 
-                color = if (isCorrect) Color.GREEN else Color.RED
+                if (isCorrect) {
+                    color = Color.GREEN
+                    footer = "Correct!"
+                } else {
+                    color = Color.RED
+                    footer = "Wrong!"
+                }
             }
         }
 

@@ -21,8 +21,10 @@ data class Player(val user: User, val isOwner: Boolean) {
 
 data class Answer(val name: String, var votes: Int = 0)
 
-class Question(val title: String, answers: Pair<String, String>) {
-    val answers: Pair<Answer, Answer> = Answer(answers.first) to Answer(answers.second)
+class Question(val title: String, answers: List<String>) {
+    val answers: List<Answer> = answers.map {
+        Answer(it)
+    }
 
     fun getAnswer(name: String): Answer? {
         return answers.toList().find {it.name == name}
@@ -40,7 +42,7 @@ class VoteGame(val id: String, private val owner: User) {
     val players = ArrayList<Player>()
     private var current = 0
     var started = false
-    val winScore = 10
+    private val winScore = 10
 
     fun join(user: User): Player? {
         if (started || players.any { it.user.id == user.id }) return null
@@ -76,7 +78,7 @@ class VoteGame(val id: String, private val owner: User) {
         }
     }
 
-    fun start() = runBlocking {
+    fun start() {
         started = true
         displayMessage(
 
@@ -98,12 +100,12 @@ class VoteGame(val id: String, private val owner: User) {
         }
 
         launch {
-            delay(5000L)
+            delay(3000L)
             then()
         }
     }
 
-    private fun skipCurrent(current: Player) = runBlocking {
+    private fun skipCurrent(current: Player) {
         displayMessage(
             "${current.user.name} skipped his round!",
             "The question will be written by other player...",
@@ -162,7 +164,7 @@ class VoteGame(val id: String, private val owner: User) {
         current++
     }
 
-    private fun confirmResult(best: Answer, answered: Map<Player, String>) {
+    private fun confirmResult(best: List<Answer>?, answered: Map<Player, String>) {
         var confirmed = 0
 
         val onConfirm: () -> Unit = {
@@ -174,7 +176,9 @@ class VoteGame(val id: String, private val owner: User) {
         }
 
         for ((player, chose) in answered) {
-            val correct = chose == best.name
+            val correct = best != null && best.any {
+                it.name == chose
+            }
 
             if (correct) {
                 player.score++
@@ -182,7 +186,7 @@ class VoteGame(val id: String, private val owner: User) {
 
             player.ui.switchTo(
                 ResultPanel {
-                    this.answer = best
+                    this.answers = best
                     this.isCorrect = correct
                     this.score = player.score
                     this.onConfirm = onConfirm
@@ -197,9 +201,17 @@ class VoteGame(val id: String, private val owner: User) {
         fun onFinish() {
             val best = question.answers
                 .toList()
-                .maxByOrNull { it.votes }!!
+                .groupBy { it.votes }
+                .maxByOrNull { it.key }!!.value
 
-            confirmResult(best, answered)
+            confirmResult(
+                if (best.size == question.answers.size) {
+                    null
+                } else {
+                    best
+                },
+                answered
+            )
         }
 
         fun onAnswer(player: Player, chose: String) {

@@ -1,10 +1,13 @@
 package n1
 
 import bjda.plugins.ui.hook.ButtonClick
+import bjda.plugins.ui.hook.MenuSelect
 import bjda.plugins.ui.modal.Form.Companion.form
 import bjda.ui.component.Embed
 import bjda.ui.component.Row
 import bjda.ui.component.action.Button
+import bjda.ui.component.action.Menu
+import bjda.ui.component.action.Menu.Companion.createOptions
 import bjda.ui.component.action.TextField
 import bjda.ui.core.Component
 import bjda.ui.core.IProps
@@ -19,6 +22,7 @@ class AskPanel : Component<AskPanel.Props, AskPanel.State>(Props()) {
 
     class State {
         var error: String? = null
+        var optionCount: Int = 2
     }
 
     override var state = State()
@@ -32,23 +36,33 @@ class AskPanel : Component<AskPanel.Props, AskPanel.State>(Props()) {
         props.onSkip()
     }
 
+    private val onSelectOptionsCount = MenuSelect {event->
+        updateState {
+            optionCount = event.selectedOptions[0].value.toInt()
+        }
+
+        ui.edit(event)
+    }
+
     private val questionForm by form {
         title = "Write Question"
 
         val title = TextField("question") {
             label = "Question"
         }
-        val option1 = TextField("option_1") {
-            label = "Choice 1"
-        }
-        val option2 = TextField("option_2") {
-            label = "Choice 2"
+
+        val options = (1..state.optionCount).map {i ->
+            TextField("$i") {
+                label = "Choice $i"
+            }
         }
 
         onSubmit = {event ->
-            val answers = event.value(option1) to event.value(option2)
+            val choices = options.map {
+                event.value(it.id)
+            }
 
-            if (answers.first == answers.second) {
+            if (choices.distinct().size != choices.size) {
                 updateState {
                     error = "Choices cannot be duplicated"
                 }
@@ -57,7 +71,7 @@ class AskPanel : Component<AskPanel.Props, AskPanel.State>(Props()) {
             } else {
                 event.deferEdit().queue()
 
-                val question = Question(event.value(title), answers)
+                val question = Question(event.value(title), choices)
 
                 props.onAsk(question)
             }
@@ -65,8 +79,10 @@ class AskPanel : Component<AskPanel.Props, AskPanel.State>(Props()) {
 
         rows = {
             + row(title)
-            + row(option1)
-            + row(option2)
+
+            + options.map {
+                row(it)
+            }
         }
     }
 
@@ -82,8 +98,25 @@ class AskPanel : Component<AskPanel.Props, AskPanel.State>(Props()) {
 
             + Embed()..{
                 title = "Write your Question"
-                description = "You may skip your turn"
+                description = "You may skip your turn."
+
                 color = Color.LIGHT_GRAY
+            }
+
+            + Embed()..{
+                description = "Specify options amount as you wanted with the below select menu!"
+            }
+
+            + Row() -{
+                + Menu(id = use(onSelectOptionsCount)) {
+                    placeholder = "Select Options Count"
+
+                    options = createOptions(
+                        state.optionCount.toString(),
+                        "2" to "2",
+                        "4" to "4"
+                    )
+                }
             }
 
             + Row() -{
