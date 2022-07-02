@@ -13,9 +13,12 @@ class BJDA private constructor(private val jda: JDA) {
         }
     }
 
-    fun install(module: IModule): BJDA {
-        modules.add(module)
-        module.init(jda)
+    fun install(vararg modules: IModule): BJDA {
+        for (module in modules) {
+
+            this.modules.add(module)
+            module.init(jda)
+        }
 
         return this
     }

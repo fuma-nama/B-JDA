@@ -69,7 +69,7 @@ abstract class Component<P : IProps, S : Any>(var props: P) {
      *
      * Note: The Hook itself can be reused
      */
-    fun<V> use(hook: IHook<V>): V {
+    infix fun<V> use(hook: IHook<V>): V {
         if (!hooks.contains(hook)) {
             hook.onCreate(this)
             hooks.add(hook)

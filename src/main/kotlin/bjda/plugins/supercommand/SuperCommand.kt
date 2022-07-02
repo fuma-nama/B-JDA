@@ -1,10 +1,11 @@
 package bjda.plugins.supercommand
 
+import bjda.plugins.supercommand.entries.PermissionEntry
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.entities.ChannelType
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.Command.Choice
-import net.dv8tion.jda.api.interactions.commands.Command.Type
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions
 import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.OptionData
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData
@@ -13,7 +14,10 @@ import java.awt.Color
 
 abstract class SuperCommand (
     override val name: String,
-    val description: String = "No Description"): SuperNode {
+    val description: String = "No Description",
+    override val guildOnly: Boolean? = null,
+    override val permissions: DefaultMemberPermissions? = null
+): SuperNode, PermissionEntry {
     lateinit var event: SlashCommandInteractionEvent
     private val options = ArrayList<OptionValue>()
 
@@ -49,22 +53,26 @@ abstract class SuperCommand (
 
     abstract fun run()
 
-    internal fun build(): CommandDataImpl {
-        val data = CommandDataImpl(name, description)
+    override fun build(listeners: Listeners): CommandDataImpl {
+        val data = CommandDataImpl(name, description).setPermissions()
 
         data.addOptions(options.map {
             it.data
         })
 
+        listeners[Info(name = name)] = this
+
         return data
     }
 
-    internal fun buildSub(): SubcommandData {
+    internal fun buildSub(group: String, subgroup: String? = null, listeners: Listeners): SubcommandData {
         val data = SubcommandData(name, description)
 
         data.addOptions(options.map {
             it.data
         })
+
+        listeners[Info(group, subgroup, name)] = this
 
         return data
     }

@@ -64,34 +64,20 @@ class Hello : BJDACommand(name = "apps") { //BJDACommand is based on Clikt
 ### Demo
 See the full Demo and TODO APP implementation in [here](./src/test/kotlin)
 
-### Creating a select app
+### Creating an App
 ```kotlin
-class ResultPanelProps : IProps() {
-  lateinit var answer: Answer
-  lateinit var onConfirm: () -> Unit
-  var score: Int = 0
-  var isCorrect = false
-}
-val ResultPanel = FComponent.noState(::ResultPanelProps) {
+val Panel = FComponent.noState(::IProps) {
   val onConfirm = ButtonClick {event ->
-    ui.switchTo(WaitingPlayersPanel(), false)
-
-    ui.edit(event) {
-      props.onConfirm()
-    }
+    println("Confirmed")
+    ui.edit(event)
   };
 
   {
     + Embed()..{
-      with (props) {
-        title = "The Answer is ${answer.name} with ${answer.votes} Votes"
-        description = "Now you have ${props.score} Scores"
-
-        color = if (isCorrect) Color.GREEN else Color.RED
-      }
+      title = "Hello World"
     }
 
-    + Row() -{
+    + Row()-{
       + Button(id = use(onConfirm)) {
         label = "Confirm"
         style = ButtonStyle.SUCCESS
@@ -104,11 +90,21 @@ Invoke `updateState` to update state and render the component again
 <br>
 Normally it should be synchronous but in some cases it is async.
 
-### Update Message after update
+### Creating the Command
+```kotlin
+class MessageHelloCommand : SuperCommand(name = "hello", description = "Hello World") {
+    override fun run() {
+        UI()
+        event.reply("Hello").queue()
+    }
+}
+```
+
+## Update Message after update
 It is painful to real-time update messages in multiplayer game
 
 Now you can write it clearly with hooks or manually update
-#### You have two ways:
+### You have two ways:
 - #### Auto update (For updating multi messages realtime)
 
   it will update listened hooks when ui is updated
@@ -159,7 +155,32 @@ To create a list of components, use the `key` prop to help the Scanner knows whi
 <br>
 It can improve the performance of the Tree Scanner
 
+## What's New
+Reactions Component are supported in 2.0
+```kotlin
+Reactions()/{
+  onAdd = {event ->
+    event.channel
+      .sendMessage("You chosen ${event.reaction.emoji}")
+      .queue()
+  }
+
+  onRemove = {event ->
+    event.channel
+      .sendMessage("You removed ${event.reaction.emoji}")
+      .queue()
+  }
+
+  reactions(
+    Emoji.fromUnicode("U+1F601"),
+    Emoji.fromUnicode("U+1F602")
+  )
+}
+```
+The design pattern of UIHooks is also updated,
+<br>
+You can create a provider and receiver UIHook to access the message after sending
 
 ## Coming soon
 
-We will move to Kcord soon which is a better discord api written in kotlin
+We will move to Kord soon which is a better discord api written in kotlin

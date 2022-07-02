@@ -10,7 +10,9 @@ abstract class SuperContext(override val name: String, val type: Type) : SuperNo
     open fun run(event: MessageContextInteractionEvent) = Unit
     open fun run(event: UserContextInteractionEvent) = Unit
 
-    fun build(): CommandData {
+    override fun build(listeners: Listeners): CommandData {
+        listeners[ContextInfo(name, type)] = this
+
         return CommandDataImpl(type, name)
     }
 }

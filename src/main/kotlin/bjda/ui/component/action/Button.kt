@@ -2,7 +2,7 @@ package bjda.ui.component.action
 
 import bjda.ui.core.init
 import bjda.ui.types.Init
-import net.dv8tion.jda.api.entities.Emoji
+import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.interactions.components.ItemComponent
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle
 import net.dv8tion.jda.internal.interactions.component.ButtonImpl

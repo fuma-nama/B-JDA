@@ -1,9 +1,10 @@
 package bjda.ui.listener
 
+import bjda.ui.core.UI
 import net.dv8tion.jda.api.entities.Message
 
-interface UpdateHook {
-    val id: String
+interface UIHook {
+    fun onEnable(ui: UI) = Unit
     fun onUpdate(message: Message)
     fun onDestroy()
 }

@@ -1,15 +1,16 @@
 package bjda.ui.core
 
 import bjda.ui.listener.InteractionUpdateHook
-import bjda.ui.listener.UpdateHook
+import bjda.ui.listener.MessageUpdateHook
+import bjda.ui.listener.UIHook
 import bjda.ui.types.AnyComponent
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.interactions.callbacks.IMessageEditCallback
 import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback
 import net.dv8tion.jda.api.interactions.components.Modal
-import java.util.*
 import java.util.function.Consumer
+import kotlin.collections.ArrayList
 
 open class UI(private val option: Option = Option()) {
     data class Option(
@@ -30,7 +31,7 @@ open class UI(private val option: Option = Option()) {
         }
 
     internal val renderer = DefaultRenderer()
-    val hooks = HashMap<String, UpdateHook>()
+    val hooks = ArrayList<UIHook>()
 
     constructor(root: AnyComponent) : this() {
         this.root = root
@@ -86,7 +87,7 @@ open class UI(private val option: Option = Option()) {
     fun updateHooks() {
         val message = build()
 
-        for (listener in hooks.values) {
+        for (listener in hooks) {
             listener.onUpdate(message)
         }
     }
@@ -109,13 +110,26 @@ open class UI(private val option: Option = Option()) {
         listen(InteractionUpdateHook(hook))
     }
 
-    fun listen(entity: UpdateHook) {
-        hooks[entity.id] = entity
+    fun listen(message: Message) {
+        listen(MessageUpdateHook(message))
+    }
+
+    fun listen(hook: UIHook) {
+        hook.onEnable(this)
+        hooks += hook
     }
 
     fun destroy() {
         root!!.unmount()
-        hooks.values.forEach { it.onDestroy() }
+
+        for (hook in hooks) {
+            hook.onDestroy()
+        }
+    }
+
+    fun destroyHook(hook: UIHook) {
+        hook.onDestroy()
+        hooks.remove(hook)
     }
 
     inner class DefaultRenderer : Renderer() {

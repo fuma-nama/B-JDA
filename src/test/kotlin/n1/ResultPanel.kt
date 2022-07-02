@@ -49,7 +49,7 @@ val ResultPanel = FComponent.noState(::ResultPanelProps) {
                     "All answers has the same votes, No one is correct"
                 }
 
-                description = "Now you have ${props.score} Scores"
+                description = "Now you have $score Scores"
 
                 if (isCorrect) {
                     color = Color.GREEN

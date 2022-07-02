@@ -11,13 +11,9 @@ val VoteCommands = SuperCommandGroup.create("todo", "Todo Commands",
 
 private class CreateTodo: SuperCommand(name = "create", description = "Create a Todo List") {
     override fun run() {
-        val start = System.currentTimeMillis()
         UI(
             TodoApp()
         ).reply(event)
-
-        val end = System.currentTimeMillis()
-        println("Took: ${end - start} ms")
     }
 }
 
