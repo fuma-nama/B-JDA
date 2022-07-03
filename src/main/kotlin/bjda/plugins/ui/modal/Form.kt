@@ -2,10 +2,7 @@ package bjda.plugins.ui.modal
 
 import bjda.plugins.ui.UIEvent
 import bjda.plugins.ui.hook.event.ModalListener
-import bjda.ui.component.Row
 import bjda.ui.component.action.Action
-import bjda.ui.core.Component.Companion.minus
-import bjda.ui.core.UI
 import bjda.ui.core.hooks.IHook
 import bjda.ui.core.init
 import bjda.ui.types.AnyComponent
@@ -33,7 +30,7 @@ class Form(val id: String = UIEvent.createId(),
 
     class Props {
         lateinit var title: String
-        lateinit var rows: LambdaList<ModalRow>
+        lateinit var render: LambdaList<ModalRow>
 
         lateinit var onSubmit: (ModalInteractionEvent) -> Unit
 
@@ -65,10 +62,11 @@ class Form(val id: String = UIEvent.createId(),
     val props = Props().init(props)
 
     fun create(): ModalImpl {
+
         UIEvent.listen(id, this)
 
         with (props) {
-            val rows = rows.build().map {
+            val rows = render.build().map {
                 ActionRow.of(it.build())
             }
 

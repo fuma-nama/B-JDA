@@ -3,31 +3,24 @@ package bjda.ui.core
 import bjda.ui.types.Children
 import bjda.ui.types.Init
 
-typealias FComponentBody<P, S> = FComponent<P, S>.() -> Children
-typealias FComponentConstructor<P, S> = (Init<P>) -> FComponent<P, S>
-typealias FComponentFunBody<P, S> = (P, S) -> Children
+typealias FComponentBody<P> = FComponent<P>.() -> Children
+typealias FComponentConstructor<P> = (props: Init<P>) -> FComponent<P>
 
-class FComponent<P: IProps, S: Any>(
+class FComponent<P: IProps>(
     props: P,
-    component: FComponentBody<P, S>
-) : Component<P, S>(props) {
-    val children = component(this)
+    private val component: FComponentBody<P>
+) : Component<P>(props) {
+    lateinit var children: Children
+
+    override fun onMount() {
+        children = component(this)
+    }
 
     companion object {
-        fun<P: IProps, S: Any> create(props: () -> P, component: FComponentBody<P, S>): FComponentConstructor<P, S> {
+        fun<P: IProps> create(props: () -> P, component: FComponentBody<P>): FComponentConstructor<P> {
             return {init ->
                 FComponent(props().init(init), component)
             }
-        }
-
-        fun<P: IProps, S: Any> full(props: () -> P, component: FComponentFunBody<P, S>): FComponentConstructor<P, S> {
-            return create(props) {
-                component(this.props, this.state)
-            }
-        }
-
-        fun<P: IProps> noState(defaultProps: () -> P, component: FComponentBody<P, Unit>): FComponentConstructor<P, Unit> {
-            return create(defaultProps, component)
         }
     }
 

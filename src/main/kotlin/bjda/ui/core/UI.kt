@@ -92,15 +92,9 @@ open class UI(private val option: Option = Option()) {
         }
     }
 
-    fun updateComponent(element: AnyComponent = root!!) {
+    fun updateComponent(element: AnyComponent = root!!, update: (() -> Unit)? = null) {
         renderer.addUpdateTask {
-            element
-        }
-    }
-
-    fun<S: Any> updateComponent(element: Component<*, S>, state: S) {
-        renderer.addUpdateTask {
-            element.update(state)
+            update?.invoke()
 
             element
         }
@@ -152,7 +146,7 @@ open class UI(private val option: Option = Option()) {
             comp.mount(parent, this@UI)
         }
 
-        override fun<P : IProps> reused(comp: Component<out P, *>, props: P) {
+        override fun<P : IProps> reused(comp: Component<out P>, props: P) {
             comp.receiveProps(props)
         }
     }

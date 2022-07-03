@@ -14,15 +14,13 @@ import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle
 
-class TodoApp : Component<IProps, TodoApp.State>(IProps()) {
-    class State {
-        var todos: ArrayList<String> = ArrayList()
-        var selected: Int? = null
-    }
+class TodoApp : Component<IProps>(IProps()) {
+    private val state = useCombinedState(State())
 
-    init {
-        this.state = State()
-    }
+    data class State(
+        val todos: ArrayList<String> = ArrayList(),
+        var selected: Int? = null
+    )
 
     private val onAddItem = ButtonClick { event ->
         event.replyModal(addTodoForm).queue()
@@ -33,7 +31,7 @@ class TodoApp : Component<IProps, TodoApp.State>(IProps()) {
     }
 
     private val onDeleteItem = ButtonClick {
-        updateState {
+        state update {
             todos.removeAt(selected!!)
 
             selected = null
@@ -43,7 +41,7 @@ class TodoApp : Component<IProps, TodoApp.State>(IProps()) {
     }
 
     private val onSelectItem = MenuSelect { event ->
-        updateState {
+        state update {
             selected = todos.indexOf(
                 event.selectedOptions[0].value
             )
@@ -53,7 +51,7 @@ class TodoApp : Component<IProps, TodoApp.State>(IProps()) {
     }
 
     override fun onRender(): Children {
-        val empty = state.todos.isEmpty()
+        val (todos, selected) = state.get()
 
         return {
             + Text()..{
@@ -61,25 +59,24 @@ class TodoApp : Component<IProps, TodoApp.State>(IProps()) {
                 type = TextType.LINE
             }
 
-            + on (empty) {
+            + on (todos.isEmpty()) {
                 Text()..{
                     content = "No Todos"
                     type = TextType.CODE_BLOCK
                 }
             }
 
-            + state.todos.map {
+            + todos.map {
                 todoItem(it)
             }
 
             + RowLayout() -{
-                addIf (!empty) {
-                    Menu {
-                        id = use(onSelectItem)
+                addIf (todos.isNotEmpty()) {
+                    Menu(id = use(onSelectItem)) {
                         placeholder = "Select a Item"
 
-                        options = state.todos.mapIndexed {i, todo ->
-                            SelectOption.of(todo, todo).withDefault(i == state.selected)
+                        options = todos.mapIndexed {i, todo ->
+                            SelectOption.of(todo, todo).withDefault(i == selected)
                         }
                     }
                 }
@@ -88,7 +85,7 @@ class TodoApp : Component<IProps, TodoApp.State>(IProps()) {
                     label = "Add"
                 }
 
-                + where (state.selected != null) {
+                + where (selected != null) {
                     + Button(id = use(onEditItem)) {
                         label = "Edit"
                         style = ButtonStyle.PRIMARY
@@ -113,14 +110,14 @@ class TodoApp : Component<IProps, TodoApp.State>(IProps()) {
         title = "Add Todo"
 
         onSubmit = {event ->
-            updateState {
+            state update {
                 todos += event.getValue("todo")!!.asString
             }
 
             ui.edit(event)
         }
 
-        rows = {
+        render = {
             + row {
                 + TextField("todo") {
                     label = "TODO"
@@ -133,25 +130,24 @@ class TodoApp : Component<IProps, TodoApp.State>(IProps()) {
     private val editTodoForm by form {
         title = "Modify Todo"
 
-        with (state) {
+        onSubmit = {event ->
+            val value = event.getValue("todo")!!.asString
 
-            onSubmit = {event ->
-                val value = event.getValue("todo")!!.asString
-
-                updateState {
-                    todos[selected!!] = value
-                }
-
-                ui.edit(event)
+            state update {
+                todos[selected!!] = value
             }
 
-            rows = {
-                + row {
-                    + TextField("todo") {
-                        label = "New Content"
-                        value = todos[selected!!]
-                        style = TextInputStyle.PARAGRAPH
-                    }
+            ui.edit(event)
+        }
+
+        render = {
+            val (todos, selected) = state.get()
+
+            + row {
+                + TextField("todo") {
+                    label = "New Content"
+                    value = todos[selected!!]
+                    style = TextInputStyle.PARAGRAPH
                 }
             }
         }

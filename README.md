@@ -66,7 +66,7 @@ See the full Demo and TODO APP implementation in [here](./src/test/kotlin)
 
 ### Creating an App
 ```kotlin
-val Panel = FComponent.noState(::IProps) {
+val Panel = FComponent.create(::IProps) {
   val onConfirm = ButtonClick {event ->
     println("Confirmed")
     ui.edit(event)
@@ -125,8 +125,8 @@ Now you can write it clearly with hooks or manually update
   You must call `ui.updateHooks` manually to update hooks
 
   ```kotlin
-  updateState {
-      player.score++
+  player update {
+      score++
   }
   ui.updateHooks()
   ```
@@ -180,6 +180,24 @@ Reactions()/{
 The design pattern of UIHooks is also updated,
 <br>
 You can create a provider and receiver UIHook to access the message after sending
+
+The `useState` and `useCombinedState` hook is also implemented since 2.0
+<br>
+you can use it by declaring it on the component level with `var score by useState(0)`
+<br>
+To updating multi states at same time, use `useCombinedState` like:
+```kotlin
+val player = useCominedState(Player())
+
+//get
+val (score, win) = player.get()
+
+//update
+player update {
+  win = true
+  score++
+}
+```
 
 ## Coming soon
 

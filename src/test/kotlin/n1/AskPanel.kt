@@ -14,18 +14,14 @@ import bjda.ui.core.IProps
 import bjda.ui.types.Children
 import java.awt.Color
 
-class AskPanel : Component<AskPanel.Props, AskPanel.State>(Props()) {
+class AskPanel : Component<AskPanel.Props>(Props()) {
     class Props : IProps() {
         lateinit var onAsk: (Question) -> Unit
         lateinit var onSkip: () -> Unit
     }
 
-    class State {
-        var error: String? = null
-        var optionCount: Int = 2
-    }
-
-    override var state = State()
+    private var error: String? by useState(null)
+    var optionCount: Int by useState(2)
 
     private val onWrite = ButtonClick {event ->
         event.replyModal(questionForm).queue()
@@ -37,9 +33,7 @@ class AskPanel : Component<AskPanel.Props, AskPanel.State>(Props()) {
     }
 
     private val onSelectOptionsCount = MenuSelect {event->
-        updateState {
-            optionCount = event.selectedOptions[0].value.toInt()
-        }
+        optionCount = event.selectedOptions[0].value.toInt()
 
         ui.edit(event)
     }
@@ -51,7 +45,7 @@ class AskPanel : Component<AskPanel.Props, AskPanel.State>(Props()) {
             label = "Question"
         }
 
-        val options = (1..state.optionCount).map {i ->
+        val options = (1..optionCount).map {i ->
             TextField("$i") {
                 label = "Choice $i"
             }
@@ -63,9 +57,7 @@ class AskPanel : Component<AskPanel.Props, AskPanel.State>(Props()) {
             }
 
             if (choices.distinct().size != choices.size) {
-                updateState {
-                    error = "Choices cannot be duplicated"
-                }
+                error = "Choices cannot be duplicated"
 
                 ui.edit(event)
             } else {
@@ -77,7 +69,7 @@ class AskPanel : Component<AskPanel.Props, AskPanel.State>(Props()) {
             }
         }
 
-        rows = {
+        render = {
             + row(title)
 
             + options.map {
@@ -88,10 +80,10 @@ class AskPanel : Component<AskPanel.Props, AskPanel.State>(Props()) {
 
     override fun onRender(): Children {
         return {
-            + on(state.error != null) {
+            + on(error != null) {
                 Embed()..{
                     title = "Error"
-                    description = state.error
+                    description = error
                     color = Color.RED
                 }
             }
@@ -112,7 +104,7 @@ class AskPanel : Component<AskPanel.Props, AskPanel.State>(Props()) {
                     placeholder = "Select Options Count"
 
                     options = createOptions(
-                        state.optionCount.toString(),
+                        optionCount.toString(),
                         "2" to "2",
                         "4" to "4"
                     )

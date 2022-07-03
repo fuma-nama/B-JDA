@@ -10,10 +10,8 @@ import bjda.ui.core.Component.Companion.rangeTo
 import bjda.ui.core.FComponent
 import bjda.ui.core.IProps
 import bjda.ui.types.Children
-import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle
-import java.awt.Color
 
 fun LoadingPanel(): Embed {
     return Embed()..{
@@ -21,7 +19,8 @@ fun LoadingPanel(): Embed {
         thumbnail = "https://upload.wikimedia.org/wikipedia/commons/a/ad/YouTube_loading_symbol_3_%28transparent%29.gif"
     }
 }
-class WaitingPanel : Component.NoState<WaitingPanel.Props>(Props()) {
+
+class WaitingPanel : Component<WaitingPanel.Props>(Props()) {
     class Props : IProps() {
         lateinit var game: VoteGame
         lateinit var player: Player
@@ -67,7 +66,7 @@ class WaitingPanel : Component.NoState<WaitingPanel.Props>(Props()) {
 class MemberUIProps : IProps() {
     lateinit var onLeave: ButtonClick
 }
-val MemberUI = FComponent.noState(::MemberUIProps) {
+val MemberUI = FComponent.create(::MemberUIProps) {
     {
         + Embed()..{
             title = "Joined the Game"
@@ -84,7 +83,7 @@ val MemberUI = FComponent.noState(::MemberUIProps) {
     }
 }
 
-class ControlUI : Component<ControlUI.Props, Unit>(Props()) {
+class ControlUI : Component<ControlUI.Props>(::Props) {
     class Props: IProps() {
         lateinit var id: String
         lateinit var onStart: ButtonClick

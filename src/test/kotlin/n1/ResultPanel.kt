@@ -17,22 +17,22 @@ class ResultPanelProps : IProps() {
     var score: Int = 0
     var isCorrect = false
 }
-val ResultPanel = FComponent.noState(::ResultPanelProps) {
+val ResultPanel = FComponent.create(::ResultPanelProps) {
     val onConfirm = ButtonClick {event ->
         ui.switchTo(WaitingPlayersPanel(), false)
 
         ui.edit(event) {
             props.onConfirm()
         }
-    };
+    }
 
     val answers = props.answers
 
     val text = answers?.joinToString(" and ") {answer ->
         "\"${answer.name}\""
-    };
+    }
 
-    {
+    return@create {
         + Embed()..{
 
             with (props) {

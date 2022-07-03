@@ -16,7 +16,7 @@ class AnswerPanelProps : IProps() {
     lateinit var onAnswer: (player: Player, chose: String) -> Unit
 }
 
-val AnswerPanel = FComponent.noState(::AnswerPanelProps) {
+val AnswerPanel = FComponent.create(::AnswerPanelProps) {
     val onSelect = MenuSelect {event ->
         ui.switchTo(WaitingPlayersPanel(), false)
 

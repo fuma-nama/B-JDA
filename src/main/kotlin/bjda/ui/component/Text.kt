@@ -4,7 +4,7 @@ import bjda.ui.core.Component
 import bjda.ui.core.IProps
 import bjda.ui.core.RenderData
 
-open class Text : Component.NoState<Text.Props>(Props()) {
+open class Text : Component<Text.Props>(Props()) {
     class Props : IProps() {
         var content: String? = null
         var language: String? = null

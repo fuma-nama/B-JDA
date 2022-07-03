@@ -13,7 +13,7 @@ import java.util.Stack
 /**
  * Auto create a row when no space available
  */
-class RowLayout : Component<RowLayout.Props, Unit>(Props()) {
+class RowLayout : Component<RowLayout.Props>(Props()) {
     class Props : CProps<LambdaList<Action>>()
     private val rowSpace = 1.0
 

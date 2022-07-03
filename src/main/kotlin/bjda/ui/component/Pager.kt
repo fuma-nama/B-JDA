@@ -9,7 +9,9 @@ import bjda.ui.types.Children
 import bjda.utils.LambdaList
 import bjda.utils.build
 
-class Pager : Component<Pager.Props, Pager.State>(Props()) {
+class Pager : Component<Pager.Props>(Props()) {
+    var page: Int by useState(props::defaultPage)
+
     class Props: CProps<LambdaList<AnyComponent>>() {
         lateinit var pages: Array<AnyComponent>
 
@@ -23,26 +25,14 @@ class Pager : Component<Pager.Props, Pager.State>(Props()) {
             }
     }
 
-    class State(var page: Int)
-
-    override fun onMount() {
-        this.state = State(
-            props.defaultPage
-        )
-    }
-
     private val onNextPage = ButtonClick {
-        updateState {
-            page++
-        }
+        page++
 
         ui.edit(it)
     }
 
     private val onPrevPage = ButtonClick {
-        updateState {
-            page--
-        }
+        page--
 
         ui.edit(it)
     }
@@ -51,17 +41,17 @@ class Pager : Component<Pager.Props, Pager.State>(Props()) {
         with (props) {
 
             return {
-                + pages.getOrNull(state.page)
+                + pages.getOrNull(page)
                 + Row()-{
-                    + Button(id = use(onNextPage)) {
-                        label = "->"
-                        disabled = state.page >= props.pages.size - 1
-                    }
-
                     + Button(id = use(onPrevPage)) {
                         id = use(onPrevPage)
                         label = "<-"
-                        disabled = state.page <= 0
+                        disabled = page <= 0
+                    }
+
+                    + Button(id = use(onNextPage)) {
+                        label = "->"
+                        disabled = page >= props.pages.size - 1
                     }
                 }
             }

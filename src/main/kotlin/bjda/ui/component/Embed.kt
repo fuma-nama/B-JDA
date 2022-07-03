@@ -3,14 +3,13 @@ package bjda.ui.component
 import bjda.ui.core.Component
 import bjda.ui.core.IProps
 import bjda.ui.core.RenderData
-import bjda.ui.types.Init
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.entities.MessageEmbed
 import java.awt.Color
 import java.time.temporal.TemporalAccessor
 
 //TODO: impl fields builder
-class Embed : Component.NoState<Embed.Props>(Props()) {
+class Embed : Component<Embed.Props>(Props()) {
     class Props : IProps() {
         var title: String? = null
         var titleUrl: String? = null

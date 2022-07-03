@@ -4,13 +4,10 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.requireObject
 import com.github.ajalt.clikt.parameters.arguments.ProcessedArgument
 import com.github.ajalt.clikt.parameters.arguments.convert
-import com.github.ajalt.clikt.parameters.options.Option
 import com.github.ajalt.clikt.parameters.options.OptionWithValues
 import com.github.ajalt.clikt.parameters.options.convert
-import com.github.ajalt.clikt.parameters.options.option
 import net.dv8tion.jda.api.entities.IMentionable
 import net.dv8tion.jda.api.entities.Message
-import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 abstract class BJDACommand(

@@ -3,7 +3,7 @@ package bjda.ui.core
 import bjda.ui.types.AnyComponent
 import bjda.ui.types.ComponentTree
 
-private val Component<*, *>.key: Any?
+private val AnyComponent.key: Any?
     get() {
         return props.key
     }
@@ -13,7 +13,7 @@ abstract class ComponentTreeScanner {
 
     protected abstract fun mounted(comp: AnyComponent)
 
-    protected abstract fun<P : IProps> reused(comp: Component<out P, *>, props: P)
+    protected abstract fun<P : IProps> reused(comp: Component<out P>, props: P)
 
     /**
      * Compare the snapshot and rendered components

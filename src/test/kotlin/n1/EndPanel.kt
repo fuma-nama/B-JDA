@@ -11,8 +11,12 @@ class EndPanelProps : IProps() {
     var isWinner: Boolean = false
     lateinit var winners: List<Player>
 }
-val EndPanel = FComponent.noState(::EndPanelProps) {
-    val winnersText = props.winners.joinToString {
+val EndPanel = FComponent.create(::EndPanelProps) {
+    val winners = props.winners
+
+    val winnersText = if (winners.isEmpty())
+        "No Winner"
+    else winners.joinToString {
         it.user.name
     };
 

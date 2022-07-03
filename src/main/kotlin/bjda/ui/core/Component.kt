@@ -3,6 +3,8 @@ package bjda.ui.core
 import bjda.ui.core.hooks.IHook
 import bjda.ui.types.*
 import bjda.utils.build
+import kotlin.reflect.KMutableProperty0
+import kotlin.reflect.KProperty
 
 open class IProps {
     var key: Key? = null
@@ -26,15 +28,15 @@ fun <T> T.init(init: Init<T>): T {
     return this
 }
 
-abstract class Component<P : IProps, S : Any>(var props: P) {
+abstract class Component<P : IProps>(var props: P) {
+    constructor(props: ()-> P): this(props())
+
     var snapshot: ComponentTree? = null
     var parent: AnyComponent? = null
     val hooks = ArrayList<IHook<*>>()
-    open lateinit var state: S
     lateinit var contexts : ContextMap
     lateinit var ui: UI
 
-    abstract class NoState<P : IProps>(props: P) : Component<P, Unit>(props)
     /**
      * Render component children
      *
@@ -44,22 +46,24 @@ abstract class Component<P : IProps, S : Any>(var props: P) {
      */
     open fun onRender(): Children = {}
     open fun onBuild(data: RenderData) = Unit
-    open fun onUpdateState(prev: S, next: S) = Unit
     open fun onReceiveProps(prev: P, next: P) = Unit
     open fun onMount() = Unit
     open fun onUnmount() = Unit
 
-    fun updateState(state: S) {
-        ui.updateComponent(this, state)
-    }
-
-    fun updateState(updater: S.() -> Unit) {
-        updater(this.state)
-        this.updateState(state)
-    }
-
     fun forceUpdate() {
         ui.updateComponent(this)
+    }
+
+    fun<T> useState(initial: T): StateDelegate<T> {
+        return StateDelegate(initial)
+    }
+
+    fun<T> useState(initial: () -> T): LinkedStateDelegate<T> {
+        return LinkedStateDelegate(initial)
+    }
+
+    fun<T> useCombinedState(initial: T): StateWrapper<T> {
+        return StateWrapper(initial)
     }
 
     /**
@@ -87,13 +91,6 @@ abstract class Component<P : IProps, S : Any>(var props: P) {
         return lazy {
             use(hook)
         }
-    }
-
-    internal fun update(state: S) {
-        val prev = state
-        this.state = state
-
-        onUpdateState(prev, state)
     }
 
     internal fun mount(parent: AnyComponent?, manager: UI) {
@@ -141,20 +138,99 @@ abstract class Component<P : IProps, S : Any>(var props: P) {
     }
 
     companion object {
-        operator fun<T: Component<P, S>, P : IProps, S : Any> T.rangeTo(v: Init<P>): T {
+        operator fun<T: Component<P>, P : IProps> T.rangeTo(v: Init<P>): T {
             props.init(v)
 
             return this
         }
 
-        operator fun<T: Component<P, S>, P: CProps<C>, S : Any, C : Any> T.minus(v: C): T {
+        operator fun<T: Component<P>, P: CProps<C>, C : Any> T.minus(v: C): T {
             props.children = v
             return this
         }
 
-        operator fun<T: Component<P, S>, P: CProps<C>, S : Any, C : Any> T.div(v: P.() -> C): T {
+        operator fun<T: Component<P>, P: CProps<C>, C : Any> T.div(v: P.() -> C): T {
             props.children = v(props)
             return this
+        }
+    }
+
+    inner class LinkedStateDelegate<T>(val initial: () -> T): IStateDelegate<T>() {
+        private var wrapper: Wrapper? = null
+
+        override fun get(): T {
+            val wrapper = wrapper?: return initial()
+
+            return wrapper.value
+        }
+
+        override fun set(value: T) {
+            this.wrapper = Wrapper(value)
+        }
+
+        inner class Wrapper(var value: T)
+    }
+
+    inner class StateDelegate<T>(var value: T): IStateDelegate<T>() {
+        override fun set(value: T) {
+            this.value = value
+        }
+
+        override fun get(): T {
+            return value
+        }
+    }
+
+    inner class StateWrapper<T>(var value: T) {
+        fun get(): T {
+            return value
+        }
+
+        fun ref(): KMutableProperty0<T> {
+            return this::value
+        }
+
+        fun set(value: T) {
+            ui.updateComponent(this@Component) {
+                this.value = value
+            }
+        }
+
+        infix fun update(updater: T.() -> Unit) {
+            ui.updateComponent(this@Component) {
+                updater(value)
+            }
+        }
+
+        fun updater(): Pair<T, (T.() -> Unit) -> Unit> {
+            val state: T by ::value
+
+            return state to ::update
+        }
+    }
+
+    abstract inner class IStateDelegate<T> {
+        abstract fun get(): T
+        abstract fun set(value: T)
+
+        operator fun getValue(thisRef: Nothing?, property: KProperty<*>): T {
+            return get()
+        }
+
+        operator fun setValue(thisRef: Nothing?, property: KProperty<*>, value: T) {
+            ui.updateComponent(this@Component) {
+                set(value)
+            }
+        }
+
+        operator fun getValue(thisRef: Any?, property: KProperty<*>): T {
+            return get()
+        }
+
+        operator fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
+            ui.updateComponent(this@Component) {
+                set(value)
+            }
         }
     }
 }
