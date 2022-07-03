@@ -6,6 +6,16 @@ Added a flexible UI API which inspired by React.js
 <br>
 Used for my own bots only, might be out of maintenance
 
+## Installation
+### Maven:
+```xml
+<dependency>
+  <groupId>io.github.sonmoosans</groupId>
+  <artifactId>bjda</artifactId>
+  <version>2.0</version>
+</dependency>
+```
+
 ## Why BJDA
 
 ### Fully Modularized Design
