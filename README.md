@@ -156,7 +156,12 @@ To create a list of components, use the `key` prop to help the Scanner knows whi
 It can improve the performance of the Tree Scanner
 
 ## What's New
-Reactions Component are supported in 2.0
+### SlashCommand Module is removed
+You can use SuperCommand instead.
+It supports to create slash commands with the similar usage of BJDACommand 
+
+
+### Reactions Component are supported in 2.0
 ```kotlin
 Reactions()/{
   onAdd = {event ->
@@ -181,8 +186,7 @@ The design pattern of UIHooks is also updated,
 <br>
 You can create a provider and receiver UIHook to access the message after sending
 
-The `useState` and `useCombinedState` hook is also implemented since 2.0
-<br>
+### The `useState` and `useCombinedState` hooks
 you can use it by declaring it on the component level with `var score by useState(0)`
 <br>
 To updating multi states at same time, use `useCombinedState` like:
