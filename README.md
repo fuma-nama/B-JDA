@@ -230,6 +230,10 @@ player update {
 }
 ```
 
+## Known Issues
+
+If some messages are deleted, related hooks will be failed to updated 
+
 ## Coming soon
 
 We will move to Kord soon which is a better discord api written in kotlin
