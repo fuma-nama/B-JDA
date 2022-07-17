@@ -1,8 +1,14 @@
 package bjda.ui.core
 
+import bjda.ui.component.Fragment
 import bjda.ui.core.hooks.IHook
+import bjda.ui.listener.HookData
+import bjda.ui.listener.InteractionUpdateHook
 import bjda.ui.types.*
+import bjda.utils.LambdaBuilder
 import bjda.utils.build
+import net.dv8tion.jda.api.interactions.Interaction
+import net.dv8tion.jda.api.interactions.callbacks.IMessageEditCallback
 import kotlin.reflect.KMutableProperty0
 import kotlin.reflect.KProperty
 
@@ -26,6 +32,10 @@ fun <T> T.init(init: Init<T>): T {
     init(this)
 
     return this
+}
+
+operator fun Collection<AnyComponent?>.not(): Fragment {
+    return Fragment(this)
 }
 
 abstract class Component<P : IProps>(var props: P) {
@@ -196,18 +206,34 @@ abstract class Component<P : IProps>(var props: P) {
             }
         }
 
+        fun set(event: IMessageEditCallback, value: T) {
+            ui.updateComponent(this@Component, event) {
+                this.value = value
+            }
+        }
+
         infix fun update(updater: T.() -> Unit) {
             ui.updateComponent(this@Component) {
                 updater(value)
             }
         }
 
-        fun updater(): Pair<T, (T.() -> Unit) -> Unit> {
-            val state: T by ::value
+        fun update(event: IMessageEditCallback, updater: T.() -> Unit) {
+            ui.updateComponent(this@Component, event) {
+                updater(value)
+            }
+        }
 
-            return state to ::update
+        fun updater(): Updater<T> {
+            return Updater(value, ::update, ::update)
         }
     }
+
+    data class Updater<T>(
+        val value: T,
+        val updater: (T.() -> Unit) -> Unit,
+        val eventUpdater: (event: IMessageEditCallback, T.() -> Unit) -> Unit
+    )
 
     abstract inner class IStateDelegate<T> {
         abstract fun get(): T
