@@ -26,5 +26,9 @@ class ReactionProviderHook(private val message: Message, hook: UIHook) : UIHook 
                 ReactionProviderHook(it, hook)
             }
         }
+
+        fun<H: UIHook> H.supportReaction(message: Message): ReactionProviderHook {
+            return ReactionProviderHook(message)
+        }
     }
 }

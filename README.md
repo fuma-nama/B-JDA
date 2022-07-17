@@ -96,15 +96,16 @@ val Panel = FComponent.create(::IProps) {
   }
 }
 ```
-Invoke `updateState` to update state and render the component again
+Declare `val state = useCominedState()` variable
 <br>
+and Invoke `state.update` to update state and render the component again
+
 Normally it should be synchronous but in some cases it is async.
 
 ### Creating the Command
 ```kotlin
 class MessageHelloCommand : SuperCommand(name = "hello", description = "Hello World") {
     override fun run() {
-        UI()
         event.reply("Hello").queue()
     }
 }
@@ -119,37 +120,52 @@ Now you can write it clearly with hooks or manually update
 
   it will update listened hooks when ui is updated
   <br>
-  However, the message will update multi times when replying to an interaction event
   <br>
-  which is listened as it won't detect if the message is updated manually
+  If you are replying to an event
+  <br>
+  You should use `state.update(event)` so that hooks will reply to the event instead of updating the message 
+  <br>
+  Otherwise, the message will be edited twice times
   ```kotlin
+  //reply and listen
   ui.reply(event) {
     ui.listen(it)
   }
+  
+  //update state
+  state.update(event) {
+    name = "Hello World"
+  }
   ```
 - #### Half-Auto update:
-  You may disable the `updateHooks` option to avoid updating hooks after components updated
+  You can call `ui.updateHooks` or `ui.editAndUpdate` manually to update hooks
   
-  which includes calling the `updateState` from components. 
+  Make sure you are calling `ui.editAndUpdate(event)` when you are replaying to an event,
   
-  You must call `ui.updateHooks` manually to update hooks
-
+  it is equal to `state.update(event)`
   ```kotlin
+  //reply and listen
+  ui.reply(event) {
+    ui.listen(it)
+  }
+  
+  //update state
   player update {
       score++
   }
-  ui.updateHooks()
+  ui.editAndUpdate(event, Await())
+  //or updating hooks sync
+  ui.updateHooks(Await())
   ```
 - #### Manually Update (For event handlers)
-  Calling `ui.edit` or `ui.reply` from component
 
-  It is more flexible and won't cause multi-edit issue
+  When you wanted to update state without update hooks
+  
+  you can easily use `ui.edit` or `ui.reply` from the component
+
+  It is more flexible and allow you to write a state manager yourself
   ```kotlin
   private val onAddItem = ButtonClick { event ->
-    event.replyModal(
-      addTodoForm.create()
-    ).queue()
-    //or
     ui.edit(event)
   }
   ```
@@ -160,8 +176,10 @@ The UI API is similar to React.js, unless it is removed from view
 <br>
 Otherwise, components is always reused
 
-### For List
-To create a list of components, use the `key` prop to help the Scanner knows which component is new or removed
+### For Dynamic List
+To render a collection of components, convert it to a Fragment by using `Fragment(components)` or `!components`
+<br>
+Give component a `key` prop to help the Scanner knows which component is new or removed
 <br>
 It can improve the performance of the Tree Scanner
 
@@ -169,7 +187,6 @@ It can improve the performance of the Tree Scanner
 ### SlashCommand Module is removed
 You can use SuperCommand instead.
 It supports to create slash commands with the similar usage of BJDACommand 
-
 
 ### Reactions Component are supported in 2.0
 ```kotlin

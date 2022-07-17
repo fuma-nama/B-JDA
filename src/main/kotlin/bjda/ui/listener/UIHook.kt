@@ -5,6 +5,6 @@ import net.dv8tion.jda.api.entities.Message
 
 interface UIHook {
     fun onEnable(ui: UI) = Unit
-    fun onUpdate(message: Message)
+    fun onUpdate(message: Message, data: ParsedHookData)
     fun onDestroy()
 }

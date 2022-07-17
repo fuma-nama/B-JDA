@@ -1,5 +1,8 @@
 package bjda.utils
 
+import bjda.ui.component.Fragment
+import bjda.ui.types.AnyComponent
+
 typealias LambdaList<C> = LambdaBuilder<C>.() -> Unit
 
 fun <C>(LambdaBuilder<C>.() -> Unit).build(): List<C> {
@@ -10,7 +13,7 @@ fun <C>(LambdaBuilder<C>.() -> Unit).build(): List<C> {
 }
 
 open class LambdaBuilder<C> {
-    protected val elements = ArrayList<C>()
+    val elements = ArrayList<C>()
 
     operator fun Collection<C>.unaryPlus() {
         elements += this

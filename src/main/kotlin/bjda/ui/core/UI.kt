@@ -1,8 +1,6 @@
 package bjda.ui.core
 
-import bjda.ui.listener.InteractionUpdateHook
-import bjda.ui.listener.MessageUpdateHook
-import bjda.ui.listener.UIHook
+import bjda.ui.listener.*
 import bjda.ui.types.AnyComponent
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.interactions.InteractionHook
@@ -15,9 +13,9 @@ import kotlin.collections.ArrayList
 open class UI(private val option: Option = Option()) {
     data class Option(
         /**
-         * If enabled, Hooks will be updated after updating components
+         * Fired after updating components
          */
-        var updateHooks: Boolean = true
+        var afterUpdate: () -> Unit = {}
     )
 
     var root: AnyComponent? = null
@@ -37,6 +35,10 @@ open class UI(private val option: Option = Option()) {
         this.root = root
     }
 
+    constructor(root: AnyComponent, option: Option) : this(option) {
+        this.root = root
+    }
+
     /**
      * Switch current root to another one
      * @param update If enabled, Hooks will be updated after changing the root
@@ -50,6 +52,17 @@ open class UI(private val option: Option = Option()) {
 
     fun edit(callback: IMessageEditCallback, success: Consumer<InteractionHook>? = null) {
         callback.editMessage(this.build()).queue(success)
+    }
+
+    /**
+     * Edit event message then Update hooks which are not the same interaction
+     */
+    fun<T> editAndUpdate(event: T, success: Consumer<InteractionHook>? = null) where T: IMessageEditCallback {
+        edit(event, success)
+
+        event.hook.retrieveOriginal().queue {
+            updateHooks( *ignore(it.interaction!!) )
+        }
     }
 
     fun reply(message: Message, success: Consumer<Message>? = null) {
@@ -84,11 +97,12 @@ open class UI(private val option: Option = Option()) {
             .build()
     }
 
-    fun updateHooks() {
+    fun updateHooks(vararg data: HookData) {
         val message = build()
+        val parsedData = data.associateBy { it::class }
 
-        for (listener in hooks) {
-            listener.onUpdate(message)
+        for (hook in hooks) {
+            hook.onUpdate(message, ParsedHookData(parsedData))
         }
     }
 
@@ -96,7 +110,22 @@ open class UI(private val option: Option = Option()) {
         renderer.addUpdateTask {
             update?.invoke()
 
-            element
+            Payload(
+                comp = element
+            )
+        }
+    }
+
+    fun updateComponent(element: AnyComponent = root!!, event: IMessageEditCallback, update: (() -> Unit)? = null) {
+        renderer.addUpdateTask {
+            update?.invoke()
+
+            Payload(
+                comp = element,
+                afterUpdate = {
+                    editAndUpdate(event)
+                }
+            )
         }
     }
 
@@ -128,8 +157,7 @@ open class UI(private val option: Option = Option()) {
 
     inner class DefaultRenderer : Renderer() {
         override fun onUpdated() {
-            if (option.updateHooks)
-                updateHooks()
+            option.afterUpdate()
         }
 
         override fun createScanner(element: AnyComponent): ComponentTreeScanner {
