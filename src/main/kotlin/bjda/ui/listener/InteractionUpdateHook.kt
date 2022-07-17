@@ -13,7 +13,6 @@ class InteractionUpdateHook(private val hook: InteractionHook): UIHook {
             return
 
         hook.editOriginal(message).queue()
-        println("update interaction: ${hook.interaction.id}")
     }
 
     override fun onDestroy() {
