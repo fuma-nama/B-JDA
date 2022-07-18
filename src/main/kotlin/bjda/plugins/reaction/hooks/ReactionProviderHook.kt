@@ -1,9 +1,9 @@
 package bjda.plugins.reaction.hooks
 
 import bjda.ui.core.UI
-import bjda.ui.listener.InteractionUpdateHook
-import bjda.ui.listener.MessageUpdateHook
-import bjda.ui.listener.UIHook
+import bjda.ui.hook.InteractionUpdateHook
+import bjda.ui.hook.MessageUpdateHook
+import bjda.ui.hook.UIHook
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.requests.RestAction

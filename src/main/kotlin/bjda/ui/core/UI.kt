@@ -1,12 +1,13 @@
 package bjda.ui.core
 
-import bjda.ui.listener.*
+import bjda.ui.hook.*
 import bjda.ui.types.AnyComponent
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.interactions.callbacks.IMessageEditCallback
 import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback
 import net.dv8tion.jda.api.interactions.components.Modal
+import net.dv8tion.jda.api.requests.RestAction
 import java.util.function.Consumer
 import kotlin.collections.ArrayList
 
@@ -47,7 +48,7 @@ open class UI(private val option: Option = Option()) {
         this.root = root
 
         if (update)
-            updateHooks()
+            updateHooks(HookData())
     }
 
     fun edit(callback: IMessageEditCallback, success: Consumer<InteractionHook>? = null) {
@@ -57,11 +58,37 @@ open class UI(private val option: Option = Option()) {
     /**
      * Edit event message then Update hooks which are not the same interaction
      */
+    fun<T> editAndUpdate(events: Array<T>, success: Consumer<InteractionHook>? = null) where T: IMessageEditCallback {
+        for (event in events) {
+            edit(event, success)
+        }
+
+        var queue: RestAction<*>? = null
+        val originals = arrayListOf<Message>()
+
+        events.forEach {
+            val action = it.hook.retrieveOriginal().map {m -> originals += m }
+
+            queue = if (queue != null) {
+                queue!!.and(action)
+            } else {
+                action
+            }
+        }
+
+        queue?.queue {
+            updateHooks(ignore(originals))
+        }
+    }
+
+    /**
+     * Edit event message then Update hooks which are not the same interaction
+     */
     fun<T> editAndUpdate(event: T, success: Consumer<InteractionHook>? = null) where T: IMessageEditCallback {
         edit(event, success)
 
         event.hook.retrieveOriginal().queue {
-            updateHooks( *ignore(it.interaction!!) )
+            updateHooks(ignore(it))
         }
     }
 
@@ -97,12 +124,24 @@ open class UI(private val option: Option = Option()) {
             .build()
     }
 
-    fun updateHooks(vararg data: HookData) {
+    fun updateHooks(ignore: List<Ignore>, await: Boolean = false) {
+        return updateHooks(HookData(ignore, await))
+    }
+
+    fun updateHooks(data: HookData = HookData()) {
         val message = build()
-        val parsedData = data.associateBy { it::class }
 
         for (hook in hooks) {
-            hook.onUpdate(message, ParsedHookData(parsedData))
+            if (hook !is UpdateHook) continue
+            if (hook.isIgnored(data)) continue
+
+            val action = hook.onUpdate(message, data)
+
+            if (data.await) {
+                action.complete()
+            } else {
+                action.queue()
+            }
         }
     }
 
