@@ -140,7 +140,7 @@ Now you can write it clearly with hooks or manually update
 - #### Half-Auto update:
   You can call `ui.updateHooks` or `ui.editAndUpdate` manually to update hooks
   
-  Make sure you are calling `ui.editAndUpdate(event)` when you are replaying to an event,
+  Make sure you are calling `ui.editAndUpdate(event)` when you are replying to an event,
   
   it is equal to `state.update(event)`
   ```kotlin
@@ -153,9 +153,9 @@ Now you can write it clearly with hooks or manually update
   player update {
       score++
   }
-  ui.editAndUpdate(event, Await())
+  ui.editAndUpdate(event)
   //or updating hooks sync
-  ui.updateHooks(Await())
+  ui.updateHooks(HookData(await = true))
   ```
 - #### Manually Update (For event handlers)
 
