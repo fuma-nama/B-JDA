@@ -12,7 +12,7 @@ Used for my own bots only, might be out of maintenance
 <dependency>
   <groupId>io.github.sonmoosans</groupId>
   <artifactId>bjda</artifactId>
-  <version>3.0.0</version>
+  <version>3.1.0</version>
 </dependency>
 ```
 
@@ -229,11 +229,6 @@ player update {
   score++
 }
 ```
-
-## Known Issues
-
-If some messages are deleted, related hooks will be failed to updated 
-
 ## Coming soon
 
 We will move to Kord soon which is a better discord api written in kotlin
