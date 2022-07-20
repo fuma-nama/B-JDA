@@ -30,7 +30,7 @@ open class UI(private val option: Option = Option()) {
             field = value
         }
 
-    internal val renderer = DefaultRenderer()
+    private val renderer = DefaultRenderer()
     val hooks = ArrayList<UIHook>()
 
     constructor(root: AnyElement) : this() {
@@ -126,7 +126,7 @@ open class UI(private val option: Option = Option()) {
             .build()
     }
 
-    fun updateHooks(ignore: List<Ignore>, await: Boolean = false) {
+    fun updateHooks(ignore: List<Ignore> = emptyList(), await: Boolean = false) {
         return updateHooks(HookData(ignore, await))
     }
 

@@ -12,7 +12,7 @@ Used for my own bots only, might be out of maintenance
 <dependency>
   <groupId>io.github.sonmoosans</groupId>
   <artifactId>bjda</artifactId>
-  <version>3.0.0</version>
+  <version>4.0.0</version>
 </dependency>
 ```
 
@@ -72,12 +72,12 @@ class Hello : BJDACommand(name = "apps") { //BJDACommand is based on Clikt
 
 ## Getting Started
 ### Demo
-See the full Demo and TODO APP implementation in [here](./src/test/kotlin)
+Demo is currently Unavailable, might be provided soon
 
 ### Creating an App
 ```kotlin
 val Panel = FComponent.create(::IProps) {
-  val onConfirm = ButtonClick {event ->
+  val onConfirm by onClick {event ->
     println("Confirmed")
     ui.edit(event)
   };
@@ -88,7 +88,7 @@ val Panel = FComponent.create(::IProps) {
     }
 
     + Row()-{
-      + Button(id = use(onConfirm)) {
+      + Button(onConfirm) {
         label = "Confirm"
         style = ButtonStyle.SUCCESS
       }
@@ -96,7 +96,7 @@ val Panel = FComponent.create(::IProps) {
   }
 }
 ```
-Declare `val state = useCominedState()` variable
+Declare `val state = useState()` variable
 <br>
 and Invoke `state.update` to update state and render the component again
 
@@ -122,9 +122,9 @@ Now you can write it clearly with hooks or manually update
   <br>
   <br>
   If you are replying to an event
-  <br>
+
   You should use `state.update(event)` so that hooks will reply to the event instead of updating the message 
-  <br>
+
   Otherwise, the message will be edited twice times
   ```kotlin
   //reply and listen
@@ -137,10 +137,16 @@ Now you can write it clearly with hooks or manually update
     name = "Hello World"
   }
   ```
+  Notice that if you directly call `state.update` without the `event` parameter, ui will not be updated
+
+  You must reply to the ui manually, it is called **Half-Auto Update**
 - #### Half-Auto update:
-  You can call `ui.updateHooks` or `ui.editAndUpdate` manually to update hooks
+  To half-auto update state, use `state.update {..}` instead of `state.update(event) {..}`
   
-  Make sure you are calling `ui.editAndUpdate(event)` when you are replaying to an event,
+  You can call `ui.updateHooks` or `ui.editAndUpdate` manually to update hooks
+  <br>
+  <br>
+  Make sure you are calling `ui.editAndUpdate(event)` when you are replying to an event,
   
   it is equal to `state.update(event)`
   ```kotlin
@@ -153,19 +159,19 @@ Now you can write it clearly with hooks or manually update
   player update {
       score++
   }
-  ui.editAndUpdate(event, Await())
-  //or updating hooks sync
-  ui.updateHooks(Await())
+  
+  ui.editAndUpdate(event)
   ```
 - #### Manually Update (For event handlers)
 
-  When you wanted to update state without update hooks
+  When you wanted to update state only without updating hooks
   
   you can easily use `ui.edit` or `ui.reply` from the component
 
-  It is more flexible and allow you to write a state manager yourself
   ```kotlin
   private val onAddItem = ButtonClick { event ->
+    state update "Hello World" //don't pass the event parameter
+  
     ui.edit(event)
   }
   ```
@@ -176,63 +182,60 @@ The UI API is similar to React.js, unless it is removed from view
 <br>
 Otherwise, components is always reused
 
+**Important**:
+<br>
+You should dispose the UI by using `ui.destroy()` when it is never to be used again
+<br>
+Otherwise, it will cause memory leak
+
 ### For Dynamic List
-To render a collection of components, convert it to a Fragment by using `Fragment(components)` or `!components`
+To render a collection of components, convert it to a Fragment by using `Fragment(components)`
+
+Since 4.0.0, collections of components will automatically convert to a Fragment 
 <br>
 Give component a `key` prop to help the Scanner knows which component is new or removed
 <br>
 It can improve the performance of the Tree Scanner
 
-## What's New
-### SlashCommand Module is removed
-You can use SuperCommand instead.
-It supports to create slash commands with the similar usage of BJDACommand 
+## What's New Since 3.0.0
+### useCombinedState is removed
+You should use `useState` instead.
+<br>
+New method mixed the old one and `useCombinedState`, you can use it as a delegate or a StateWrapper  
 
-### Reactions Component are supported in 2.0
+### Group is replaced with Fragment
+
+### Supports Await updating
+To enable this, you must update hooks manually
 ```kotlin
-Reactions()/{
-  onAdd = {event ->
-    event.channel
-      .sendMessage("You chosen ${event.reaction.emoji}")
-      .queue()
-  }
+ui.updateHooks(await = true)
+```
 
-  onRemove = {event ->
-    event.channel
-      .sendMessage("You removed ${event.reaction.emoji}")
-      .queue()
-  }
+### Improves performance
+Component class now split into multi interfaces
 
-  reactions(
-    Emoji.fromUnicode("U+1F601"),
-    Emoji.fromUnicode("U+1F602")
-  )
-}
+The base of it is Element, it only stores props and contexts api which save a lot of memory
+
+### Component Listeners supports Delegate
+Now hooks can both supports those patterns:
+
+**Default Hook**
+```kotlin
+//declare
+val onCreate = ButtonClick {}
+//use
+Button(id = use(onCreate))
+```
+**Delegated invisible Hook**
+```kotlin
+//declare
+val onCreate by onClick {}
+//use
+Button(onCreate)
 ```
 The design pattern of UIHooks is also updated,
 <br>
 You can create a provider and receiver UIHook to access the message after sending
-
-### The `useState` and `useCombinedState` hooks
-you can use it by declaring it on the component level with `var score by useState(0)`
-<br>
-To updating multi states at same time, use `useCombinedState` like:
-```kotlin
-val player = useCominedState(Player())
-
-//get
-val (score, win) = player.get()
-
-//update
-player update {
-  win = true
-  score++
-}
-```
-
-## Known Issues
-
-If some messages are deleted, related hooks will be failed to updated 
 
 ## Coming soon
 
