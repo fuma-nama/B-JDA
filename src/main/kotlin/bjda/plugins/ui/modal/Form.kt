@@ -3,6 +3,7 @@ package bjda.plugins.ui.modal
 import bjda.plugins.ui.UIEvent
 import bjda.plugins.ui.hook.event.ModalListener
 import bjda.ui.component.action.Action
+import bjda.ui.core.hooks.Delegate
 import bjda.ui.core.hooks.IHook
 import bjda.ui.core.init
 import bjda.ui.types.AnyComponent
@@ -24,7 +25,7 @@ import net.dv8tion.jda.internal.interactions.component.ModalImpl
  *
  * Note: use it as Hook to enable AutoReply
  */
-class Form(val id: String = UIEvent.createId(),
+open class Form(val id: String = UIEvent.createId(),
            props: Init<Props>
 ): ModalListener {
 
@@ -61,9 +62,21 @@ class Form(val id: String = UIEvent.createId(),
 
     val props = Props().init(props)
 
-    fun create(): ModalImpl {
-
+    /**
+     * Listen submit events
+     */
+    fun listen() {
         UIEvent.listen(id, this)
+    }
+
+    /**
+     * Build a modal and set up its listeners
+     * @param listen If disabled, Submit events of this modal will not be listened
+     */
+    fun create(listen: Boolean = true): ModalImpl {
+        if (listen) {
+            this.listen()
+        }
 
         with (props) {
             val rows = render.build().map {
@@ -83,22 +96,21 @@ class Form(val id: String = UIEvent.createId(),
     }
 
     companion object {
-        fun AnyComponent.form(props: Init<Props>): ModalCreator {
+        fun AnyComponent.form(props: Init<Props>): Delegate<Modal> {
             val form = Form(props = props)
-            val hook = ModalCreator(form)
-            this.use(hook)
+            val hook = ModalHook(form)
 
-            return hook
+            return Delegate { this use hook }
         }
 
-        class ModalCreator(private val form: Form) : IHook<Unit> {
-            operator fun getValue(parent: Any, property: Any): Modal {
-                return form.create()
+        class ModalHook(private val form: Form) : IHook<Modal> {
+            override fun onCreate(component: AnyComponent, initial: Boolean): Modal {
+                if (initial) {
+                    form.listen()
+                }
+
+                return form.create(listen = false)
             }
-
-            override fun getValue() = Unit
-
-            override fun onCreate(component: AnyComponent) = Unit
 
             override fun onDestroy() {
                 form.destroy()

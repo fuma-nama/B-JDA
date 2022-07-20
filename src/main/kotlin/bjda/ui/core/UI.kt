@@ -2,6 +2,7 @@ package bjda.ui.core
 
 import bjda.ui.hook.*
 import bjda.ui.types.AnyComponent
+import bjda.ui.types.AnyElement
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.interactions.callbacks.IMessageEditCallback
@@ -19,11 +20,11 @@ open class UI(private val option: Option = Option()) {
         var afterUpdate: () -> Unit = {}
     )
 
-    var root: AnyComponent? = null
+    var root: AnyElement? = null
         private set(value) {
             if (value != null) {
                 value.mount(null, this)
-                renderer.renderComponent(value)
+                renderer.renderElement(value)
             }
 
             field = value
@@ -32,11 +33,11 @@ open class UI(private val option: Option = Option()) {
     internal val renderer = DefaultRenderer()
     val hooks = ArrayList<UIHook>()
 
-    constructor(root: AnyComponent) : this() {
+    constructor(root: AnyElement) : this() {
         this.root = root
     }
 
-    constructor(root: AnyComponent, option: Option) : this(option) {
+    constructor(root: AnyElement, option: Option) : this(option) {
         this.root = root
     }
 
@@ -44,7 +45,7 @@ open class UI(private val option: Option = Option()) {
      * Switch current root to another one
      * @param update If enabled, Hooks will be updated after changing the root
      */
-    fun switchTo(root: AnyComponent, update: Boolean = true) {
+    fun switchTo(root: AnyElement, update: Boolean = true) {
         this.root = root
 
         if (update)
@@ -104,7 +105,8 @@ open class UI(private val option: Option = Option()) {
 
     fun build(): Message {
         val data = RenderData()
-        root!!.build(data)
+
+        root!!.buildAll(data)
 
         return data.build()
     }
@@ -145,25 +147,13 @@ open class UI(private val option: Option = Option()) {
         }
     }
 
-    fun updateComponent(element: AnyComponent = root!!, update: (() -> Unit)? = null) {
-        renderer.addUpdateTask {
-            update?.invoke()
-
-            Payload(
-                comp = element
-            )
-        }
-    }
-
-    fun updateComponent(element: AnyComponent = root!!, event: IMessageEditCallback, update: (() -> Unit)? = null) {
+    fun updateComponent(element: AnyElement = root!!, event: IMessageEditCallback? = null, update: (() -> Unit)? = null) {
         renderer.addUpdateTask {
             update?.invoke()
 
             Payload(
                 comp = element,
-                afterUpdate = {
-                    editAndUpdate(event)
-                }
+                afterUpdate = if (event != null) ({ editAndUpdate(event) }) else null
             )
         }
     }
@@ -199,21 +189,21 @@ open class UI(private val option: Option = Option()) {
             option.afterUpdate()
         }
 
-        override fun createScanner(element: AnyComponent): ComponentTreeScanner {
+        override fun createScanner(element: AnyElement): ComponentTreeScanner {
             return ComponentTreeScannerImpl(element)
         }
     }
 
-    inner class ComponentTreeScannerImpl(val parent: AnyComponent) : ComponentTreeScanner() {
-        override fun unmounted(comp: AnyComponent) {
+    inner class ComponentTreeScannerImpl(val parent: AnyElement) : ComponentTreeScanner() {
+        override fun unmounted(comp: AnyElement) {
             comp.unmount()
         }
 
-        override fun mounted(comp: AnyComponent) {
+        override fun mounted(comp: AnyElement) {
             comp.mount(parent, this@UI)
         }
 
-        override fun<P : IProps> reused(comp: Component<out P>, props: P) {
+        override fun<P : IProps> reused(comp: Element<out P>, props: P) {
             comp.receiveProps(props)
         }
     }

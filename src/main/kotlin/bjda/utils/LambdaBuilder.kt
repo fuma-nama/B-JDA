@@ -1,8 +1,5 @@
 package bjda.utils
 
-import bjda.ui.component.Fragment
-import bjda.ui.types.AnyComponent
-
 typealias LambdaList<C> = LambdaBuilder<C>.() -> Unit
 
 fun <C>(LambdaBuilder<C>.() -> Unit).build(): List<C> {
@@ -15,12 +12,12 @@ fun <C>(LambdaBuilder<C>.() -> Unit).build(): List<C> {
 open class LambdaBuilder<C> {
     val elements = ArrayList<C>()
 
-    operator fun Collection<C>.unaryPlus() {
+    open operator fun Array<out C>.unaryPlus() {
         elements += this
     }
 
-    operator fun LambdaList<C>.unaryPlus() {
-        elements += this.build()
+    open operator fun Collection<C>.unaryPlus() {
+        elements += this
     }
 
     operator fun<T : C> T.unaryPlus(): T {
@@ -56,8 +53,8 @@ open class LambdaBuilder<C> {
      *
      * Otherwise, return empty list
      */
-    fun where(condition: Boolean, items: LambdaList<C>): List<C> {
-        return if (condition) items.build() else emptyList()
+    fun where(condition: Boolean, vararg items: C): Array<out C?> {
+        return if (condition) items else arrayOfNulls<Any?>(items.size) as Array<C?>
     }
 
     /**
@@ -67,10 +64,6 @@ open class LambdaBuilder<C> {
      */
     fun where(condition: Boolean, items: LambdaList<C>, min: Int): List<C?> {
         return if (condition) items.build() else List(min) { null }
-    }
-
-    operator fun Array<C>.unaryPlus() {
-        elements += this
     }
 
     fun build(): List<C> {

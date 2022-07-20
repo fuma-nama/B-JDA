@@ -1,19 +1,19 @@
 package bjda.ui.core
 
-import bjda.ui.types.AnyComponent
+import bjda.ui.types.AnyElement
 import bjda.ui.types.ComponentTree
 
-private val AnyComponent.key: Any?
+private val AnyElement.key: Any?
     get() {
         return props.key
     }
 
 abstract class ComponentTreeScanner {
-    protected abstract fun unmounted(comp: AnyComponent)
+    protected abstract fun unmounted(comp: AnyElement)
 
-    protected abstract fun mounted(comp: AnyComponent)
+    protected abstract fun mounted(comp: AnyElement)
 
-    protected abstract fun<P : IProps> reused(comp: Component<out P>, props: P)
+    protected abstract fun<P : IProps> reused(comp: Element<out P>, props: P)
 
     /**
      * Compare the snapshot and rendered components

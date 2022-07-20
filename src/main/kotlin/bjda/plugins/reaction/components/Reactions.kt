@@ -59,10 +59,10 @@ class Reactions(val id: String = UIEvent.createId()) : Component<Reactions.Props
             }
         }
 
-        override fun getValue() = Unit
-
-        override fun onCreate(component: AnyComponent) {
-            ui.listen(this)
+        override fun onCreate(component: AnyComponent, initial: Boolean) {
+            if (initial) {
+                ui.listen(this)
+            }
         }
 
         override fun onDestroy() {

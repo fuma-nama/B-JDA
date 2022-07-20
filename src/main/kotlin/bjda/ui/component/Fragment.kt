@@ -1,16 +1,16 @@
 package bjda.ui.component
 
-import bjda.ui.core.Component
+import bjda.ui.core.ElementImpl
 import bjda.ui.core.IProps
-import bjda.ui.types.AnyComponent
-import bjda.ui.types.Children
+import bjda.ui.types.AnyElement
+import bjda.ui.types.ComponentTree
 
-class Fragment(components: Collection<AnyComponent?>) : Component<Fragment.Props>(Props(components)) {
-    data class Props(val components: Collection<AnyComponent?>) : IProps()
+class Fragment(components: ComponentTree) : ElementImpl<Fragment.Props>(Props(components)) {
+    constructor(components: Collection<AnyElement?>) : this(components.toTypedArray())
 
-    override fun onRender(): Children {
-        return {
-            + props.components
-        }
+    class Props(val components: ComponentTree) : IProps()
+
+    override fun render(): ComponentTree {
+        return props.components
     }
 }

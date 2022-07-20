@@ -5,11 +5,11 @@ import bjda.ui.types.AnyComponent
 
 abstract class EventHook(private val id: String): IHook<String> {
 
-    override fun onCreate(component: AnyComponent) {
-        listen(id)
-    }
+    override fun onCreate(component: AnyComponent, initial: Boolean): String {
+        if (initial) {
+            listen(id)
+        }
 
-    override fun getValue(): String {
         return id
     }
 

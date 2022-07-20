@@ -1,11 +1,11 @@
 package bjda.ui.core
 
-import bjda.ui.types.AnyComponent
+import bjda.ui.types.AnyElement
 import java.util.*
 import kotlin.collections.ArrayList
 
 typealias UpdateTask = () -> Payload
-data class Payload(val comp: AnyComponent, val afterUpdate: (() -> Unit)? = null)
+data class Payload(val comp: AnyElement, val afterUpdate: (() -> Unit)? = null)
 
 abstract class Renderer {
     private val updateQueue: Queue<UpdateTask> = LinkedList()
@@ -17,24 +17,29 @@ abstract class Renderer {
         return rendering
     }
 
-    abstract fun createScanner(element: AnyComponent): ComponentTreeScanner
+    abstract fun createScanner(element: AnyElement): ComponentTreeScanner
 
     /**
      * If any render task is added when rendering component
      * It will also be rendered here
      */
-    fun renderComponent(comp: AnyComponent) {
+    fun renderElement(comp: AnyElement) {
         val snapshot = comp.snapshot
-        val scanned = createScanner(comp)
-            .scan(snapshot, comp.render())
+        var rendered = comp.render()
 
-        scanned.forEach {child ->
-            if (child != null) {
-                renderComponent(child)
+        if (rendered != null) {
+
+            rendered = createScanner(comp)
+                .scan(snapshot, rendered)
+
+            for (child in rendered) {
+                if (child != null) {
+                    renderElement(child)
+                }
             }
         }
 
-        comp.snapshot = scanned
+        comp.snapshot = rendered
     }
 
     private fun executeUpdateQueue() {
@@ -44,7 +49,7 @@ abstract class Renderer {
         while (updateQueue.isNotEmpty()) {
             val payload = updateQueue.peek().invoke()
 
-            renderComponent(payload.comp)
+            renderElement(payload.comp)
 
             payload.afterUpdate?.let(listeners::add)
 

@@ -3,9 +3,8 @@ package bjda.ui.core
 import bjda.ui.component.Fragment
 import bjda.ui.core.hooks.IHook
 import bjda.ui.types.*
-import bjda.utils.build
+import bjda.utils.LambdaBuilder
 import net.dv8tion.jda.api.interactions.callbacks.IMessageEditCallback
-import kotlin.reflect.KMutableProperty0
 import kotlin.reflect.KProperty
 
 open class IProps {
@@ -18,10 +17,6 @@ open class CProps<C : Any> : IProps() {
     operator fun C.not() {
         this@CProps.children = this@not
     }
-
-    infix fun with(children: C) {
-        this.children = children
-    }
 }
 
 fun <T> T.init(init: Init<T>): T {
@@ -30,18 +25,27 @@ fun <T> T.init(init: Init<T>): T {
     return this
 }
 
-operator fun Collection<AnyComponent?>.not(): Fragment {
-    return Fragment(this)
+class ComponentBuilder : LambdaBuilder<AnyElement?>() {
+
+    /**
+     * Add elements as a fragment
+     */
+    override operator fun Collection<AnyElement?>.unaryPlus() {
+        elements += Fragment(this)
+    }
+
+    /**
+     * Add elements as a fragment
+     */
+    override operator fun Array<out AnyElement?>.unaryPlus() {
+        elements += Fragment(this)
+    }
 }
 
-abstract class Component<P : IProps>(var props: P) {
+abstract class Component<P : IProps>(props: P): ElementImpl<P>(props) {
     constructor(props: ()-> P): this(props())
 
-    var snapshot: ComponentTree? = null
-    var parent: AnyComponent? = null
     val hooks = ArrayList<IHook<*>>()
-    lateinit var contexts : ContextMap
-    lateinit var ui: UI
 
     /**
      * Render component children
@@ -51,7 +55,7 @@ abstract class Component<P : IProps>(var props: P) {
      * Always invoked from its parent
      */
     open fun onRender(): Children = {}
-    open fun onBuild(data: RenderData) = Unit
+    override fun build(data: RenderData) = Unit
     open fun onReceiveProps(prev: P, next: P) = Unit
     open fun onMount() = Unit
     open fun onUnmount() = Unit
@@ -60,15 +64,7 @@ abstract class Component<P : IProps>(var props: P) {
         ui.updateComponent(this)
     }
 
-    fun<T> useState(initial: T): StateDelegate<T> {
-        return StateDelegate(initial)
-    }
-
-    fun<T> useState(initial: () -> T): LinkedStateDelegate<T> {
-        return LinkedStateDelegate(initial)
-    }
-
-    fun<T> useCombinedState(initial: T): StateWrapper<T> {
+    fun<T> useState(initial: T): StateWrapper<T> {
         return StateWrapper(initial)
     }
 
@@ -80,12 +76,12 @@ abstract class Component<P : IProps>(var props: P) {
      * Note: The Hook itself can be reused
      */
     infix fun<V> use(hook: IHook<V>): V {
-        if (!hooks.contains(hook)) {
-            hook.onCreate(this)
+        val initial = !hooks.contains(hook)
+        if (initial) {
             hooks.add(hook)
         }
 
-        return hook.getValue()
+        return hook.onCreate(this, initial)
     }
 
     /**
@@ -99,91 +95,29 @@ abstract class Component<P : IProps>(var props: P) {
         }
     }
 
-    internal fun mount(parent: AnyComponent?, manager: UI) {
-        this.parent = parent
-        this.ui = manager
+    override fun mount(parent: AnyElement?, manager: UI) {
+        super.mount(parent, manager)
 
         onMount()
     }
 
-    internal fun receiveProps(next: Any?) {
+    override fun receiveProps(next: Any?) {
         val prev = this.props
         this.props = next as P
 
         onReceiveProps(prev, next)
     }
 
-    internal fun build(data: RenderData) {
-        onBuild(data)
-
-        val elements = this.snapshot?: throw IllegalStateException("Component should be rendered before build")
-
-        elements.forEach { component ->
-            component?.build(data)
-        }
+    override fun render(): ComponentTree {
+        return parseChildren(onRender())
     }
 
-    internal fun render(): ComponentTree {
-        contexts = parent?.contexts ?: hashMapOf()
+    override fun unmount() {
+        super.unmount()
 
-        return onRender()
-            .build()
-            .toTypedArray()
-    }
-
-    internal fun unmount() {
         onUnmount()
-
-        snapshot?.forEach {child ->
-            child?.unmount()
-        }
-
         for (hook in hooks) {
             hook.onDestroy()
-        }
-    }
-
-    companion object {
-        operator fun<T: Component<P>, P : IProps> T.rangeTo(v: Init<P>): T {
-            props.init(v)
-
-            return this
-        }
-
-        operator fun<T: Component<P>, P: CProps<C>, C : Any> T.minus(v: C): T {
-            props.children = v
-            return this
-        }
-
-        operator fun<T: Component<P>, P: CProps<C>, C : Any> T.div(v: P.() -> C): T {
-            props.children = v(props)
-            return this
-        }
-    }
-
-    inner class LinkedStateDelegate<T>(val initial: () -> T): IStateDelegate<T>() {
-        private var wrapper: Wrapper? = null
-
-        override fun get(): T {
-            val wrapper = wrapper?: return initial()
-
-            return wrapper.value
-        }
-
-        override fun set(value: T) {
-            this.wrapper = Wrapper(value)
-        }
-
-        inner class Wrapper(var value: T)
-    }
-
-    inner class StateDelegate<T>(var value: T): IStateDelegate<T>() {
-        override fun set(value: T) {
-            this.value = value
-        }
-
-        override fun get(): T {
-            return value
         }
     }
 
@@ -192,17 +126,13 @@ abstract class Component<P : IProps>(var props: P) {
             return value
         }
 
-        fun ref(): KMutableProperty0<T> {
-            return this::value
-        }
-
-        fun set(value: T) {
+        infix fun update(value: T) {
             ui.updateComponent(this@Component) {
                 this.value = value
             }
         }
 
-        fun set(event: IMessageEditCallback, value: T) {
+        fun update(event: IMessageEditCallback, value: T) {
             ui.updateComponent(this@Component, event) {
                 this.value = value
             }
@@ -221,8 +151,16 @@ abstract class Component<P : IProps>(var props: P) {
         }
 
         fun updater(): Updater<T> {
-            return Updater(value, ::update, ::update)
+            return Updater(value, this::update, this::update)
         }
+
+        operator fun getValue(thisRef: Nothing?, property: KProperty<*>): T = get()
+
+        operator fun getValue(thisRef: Any?, property: KProperty<*>): T = get()
+
+        operator fun setValue(thisRef: Any?, property: KProperty<*>, value: T) = update(value)
+
+        operator fun setValue(thisRef: Nothing?, property: KProperty<*>, value: T) = update(value)
     }
 
     data class Updater<T>(
@@ -230,29 +168,4 @@ abstract class Component<P : IProps>(var props: P) {
         val updater: (T.() -> Unit) -> Unit,
         val eventUpdater: (event: IMessageEditCallback, T.() -> Unit) -> Unit
     )
-
-    abstract inner class IStateDelegate<T> {
-        abstract fun get(): T
-        abstract fun set(value: T)
-
-        operator fun getValue(thisRef: Nothing?, property: KProperty<*>): T {
-            return get()
-        }
-
-        operator fun setValue(thisRef: Nothing?, property: KProperty<*>, value: T) {
-            ui.updateComponent(this@Component) {
-                set(value)
-            }
-        }
-
-        operator fun getValue(thisRef: Any?, property: KProperty<*>): T {
-            return get()
-        }
-
-        operator fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
-            ui.updateComponent(this@Component) {
-                set(value)
-            }
-        }
-    }
 }

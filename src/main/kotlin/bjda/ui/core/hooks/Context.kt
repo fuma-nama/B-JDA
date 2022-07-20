@@ -1,37 +1,41 @@
 package bjda.ui.core.hooks
 
+import bjda.ui.core.CProps
+import bjda.ui.core.ComponentBuilder
+import bjda.ui.core.ElementImpl
+import bjda.ui.core.RenderData
 import bjda.ui.types.AnyComponent
+import bjda.ui.types.Children
+import bjda.ui.types.ComponentTree
+import bjda.ui.types.ContextMap
 
-class Context<V: Any> private constructor() {
-    inner class Consumer: IHook<V> {
-        lateinit var component: AnyComponent
-
-        override fun getValue(): V {
-            return component.contexts[this@Context] as V
-        }
-
-        override fun onCreate(component: AnyComponent) {
-            this.component = component
+class Context<V> private constructor() {
+    inner class Consumer(private val default: V): IHook<V> {
+        override fun onCreate(component: AnyComponent, initial: Boolean): V {
+            return component.contexts?.getOrDefault(this@Context, default) as V
         }
 
         override fun onDestroy() = Unit
     }
 
-    inner class Provider(private val value: V) : IHook<Unit> {
-        override fun getValue() = Unit
+    data class Props<T>(val value: T) : CProps<Children>()
+    inner class Provider(value: V) : ElementImpl<Props<V>>(Props(value)) {
+        override val contexts: ContextMap =
+            if (parent?.contexts == null) HashMap()
+            else HashMap(parent?.contexts)
 
-        override fun onCreate(component: AnyComponent) {
-            val contexts = HashMap(component.contexts)
-            contexts[this@Context] = value
+        override fun build(data: RenderData) = Unit
 
-            component.contexts = contexts
+        override fun render(): ComponentTree {
+            contexts[this@Context] = props.value
+
+            return ComponentBuilder().apply(props.children)
+                .build().toTypedArray()
         }
-
-        override fun onDestroy() = Unit
     }
 
     companion object {
-        fun<T: Any> create(): Context<T> {
+        fun<T> create(): Context<T> {
             return Context()
         }
     }
