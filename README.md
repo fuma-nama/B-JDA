@@ -72,7 +72,7 @@ class Hello : BJDACommand(name = "apps") { //BJDACommand is based on Clikt
 
 ## Getting Started
 ### Demo
-Demo is currently Unavailable, might be provided soon
+Full Demo of a Todo App: https://github.com/SonMooSans/bjda-example
 
 ### Creating an App
 ```kotlin
