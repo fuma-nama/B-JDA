@@ -3,11 +3,11 @@ package bjda.ui.component
 import bjda.plugins.ui.hook.ButtonClick
 import bjda.ui.component.action.Button
 import bjda.ui.core.*
-import bjda.ui.types.AnyElement
 import bjda.ui.types.Children
+import bjda.ui.types.ComponentTree
 
 class Pager : Component<Pager.Props>(Props()) {
-    lateinit var pages: Array<AnyElement?>
+    lateinit var pages: ComponentTree
     var page: Int by useState(props.defaultPage)
 
     override fun onReceiveProps(prev: Props, next: Props) {
