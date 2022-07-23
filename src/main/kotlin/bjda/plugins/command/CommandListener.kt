@@ -10,7 +10,7 @@ import java.awt.Color
 
 //TODO: support mention args and more types
 
-abstract class CommandListener(val commands: Array<out BJDACommand>): ListenerAdapter() {
+abstract class CommandListener(val commands: Array<out TextCommand>): ListenerAdapter() {
     abstract var prefix: String
 
     override fun onMessageReceived(event: MessageReceivedEvent) {

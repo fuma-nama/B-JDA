@@ -14,7 +14,7 @@ abstract class SuperCommand (
     val description: String = "No Description",
     override val guildOnly: Boolean? = null,
     override val permissions: DefaultMemberPermissions? = null
-): SuperNode, PermissionEntry {
+): SuperNode, PermissionEntry, NameLocalization, DescriptionLocalization {
     lateinit var event: SlashCommandInteractionEvent
     private val options = ArrayList<IOptionValue<*>>()
 
@@ -51,7 +51,10 @@ abstract class SuperCommand (
     abstract fun run()
 
     override fun build(listeners: Listeners): CommandDataImpl {
-        val data = CommandDataImpl(name, description).setPermissions()
+        val data = CommandDataImpl(name, description)
+            .setPermissions()
+            .setLocalName()
+            .setLocalDescription()
 
         data.addOptions(options.map {
             it.data
@@ -64,6 +67,8 @@ abstract class SuperCommand (
 
     open fun buildSub(group: String, subgroup: String? = null, listeners: Listeners): SubcommandData {
         val data = SubcommandData(name, description)
+            .setLocalName()
+            .setLocalDescription()
 
         data.addOptions(options.map {
             it.data

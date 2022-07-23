@@ -10,7 +10,7 @@ import net.dv8tion.jda.api.entities.IMentionable
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
-abstract class BJDACommand(
+abstract class TextCommand(
     help: String = "",
     epilog: String = "",
     name: String? = null,

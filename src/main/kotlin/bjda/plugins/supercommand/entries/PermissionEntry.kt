@@ -1,13 +1,13 @@
 package bjda.plugins.supercommand.entries
 
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions
-import net.dv8tion.jda.internal.interactions.CommandDataImpl
+import net.dv8tion.jda.api.interactions.commands.build.CommandData
 
 interface PermissionEntry {
     val guildOnly: Boolean?
     val permissions: DefaultMemberPermissions?
 
-    fun CommandDataImpl.setPermissions(): CommandDataImpl {
+    fun CommandData.setPermissions(): CommandData {
         guildOnly?.let {
             setGuildOnly(it)
         }
