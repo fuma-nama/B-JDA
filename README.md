@@ -61,9 +61,11 @@ class UserHelloCommand : SuperContext(name = "hello", type = Command.Type.USER) 
     }
 }
 ```
-The coolest thing is you can even create a normal command with Clikt
+The coolest thing is you can even create a text command with Clikt
+<br>
+Notice that Discord is going to replace text commands with slash commands, avoid to use it in production 
 ```kotlin
-class Hello : BJDACommand(name = "apps") { //BJDACommand is based on Clikt
+class Hello : TextCommand(name = "apps") { //TextCommand is based on Clikt
   override fun run() {
     UI(App()).reply(event.message)
   }
