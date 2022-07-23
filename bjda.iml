@@ -40,7 +40,7 @@
     <orderEntry type="library" name="Maven: com.github.ajalt.clikt:clikt-jvm:3.5.0" level="project" />
     <orderEntry type="library" name="Maven: org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.20" level="project" />
     <orderEntry type="library" name="Maven: org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.6.20" level="project" />
-    <orderEntry type="library" name="Maven: net.dv8tion:JDA:5.0.0-alpha.13" level="project" />
+    <orderEntry type="library" name="Maven: net.dv8tion:JDA:5.0.0-alpha.17" level="project" />
     <orderEntry type="library" name="Maven: com.google.code.findbugs:jsr305:3.0.2" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.36" level="project" />
     <orderEntry type="library" name="Maven: com.neovisionaries:nv-websocket-client:2.14" level="project" />

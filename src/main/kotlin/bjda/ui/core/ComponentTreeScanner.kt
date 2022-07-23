@@ -11,7 +11,7 @@ private val AnyElement.key: Any?
 abstract class ComponentTreeScanner {
     protected abstract fun unmounted(comp: AnyElement)
 
-    protected abstract fun mounted(comp: AnyElement)
+    protected abstract fun mounted(comp: AnyElement, parent: AnyElement)
 
     protected abstract fun<P : IProps> reused(comp: Element<out P>, props: P)
 
@@ -20,11 +20,12 @@ abstract class ComponentTreeScanner {
      *
      * and notify updates to children
      */
-    fun scan(snapshot: ComponentTree?, rendered: ComponentTree): ComponentTree {
+    open fun scan(parent: AnyElement, snapshot: ComponentTree?, rendered: ComponentTree): ComponentTree {
+
         if (snapshot == null) {
             return rendered.map {comp ->
                 if (comp != null) {
-                    mounted(comp)
+                    mounted(comp, parent)
                 }
 
                 comp
@@ -57,7 +58,7 @@ abstract class ComponentTreeScanner {
 
                     original
                 } else {
-                    mounted(comp)
+                    mounted(comp, parent)
 
                     comp
                 }

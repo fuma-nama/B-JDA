@@ -4,6 +4,7 @@ import bjda.plugins.supercommand.entries.PermissionEntry
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.entities.ChannelType
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
+import net.dv8tion.jda.api.interactions.DiscordLocale
 import net.dv8tion.jda.api.interactions.commands.Command.Choice
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions
 import net.dv8tion.jda.api.interactions.commands.OptionType
@@ -21,11 +22,15 @@ abstract class SuperCommand (
     lateinit var event: SlashCommandInteractionEvent
     private val options = ArrayList<OptionValue>()
 
-    fun option(type: OptionType, name: String, description: String = "No Description"): OptionValue {
+    open fun option(type: OptionType, name: String, description: String = "No Description"): OptionValue {
         val value = OptionValue(name, type, description)
         options.add(value)
 
         return value
+    }
+
+    fun localize(locale: DiscordLocale) {
+
     }
 
     internal fun execute(event: SlashCommandInteractionEvent) {
@@ -42,7 +47,7 @@ abstract class SuperCommand (
         }
     }
 
-    fun error(message: String?) {
+    open fun error(message: String?) {
         event.replyEmbeds(
             EmbedBuilder()
                 .setTitle(message?: "ERROR")
@@ -65,7 +70,7 @@ abstract class SuperCommand (
         return data
     }
 
-    internal fun buildSub(group: String, subgroup: String? = null, listeners: Listeners): SubcommandData {
+    open fun buildSub(group: String, subgroup: String? = null, listeners: Listeners): SubcommandData {
         val data = SubcommandData(name, description)
 
         data.addOptions(options.map {
@@ -90,6 +95,24 @@ abstract class SuperCommand (
             data = data.setRequired(value)
 
             return this
+        }
+
+        fun localizeName(map: Map<DiscordLocale, String>): OptionValue {
+            data.setNameLocalizations(map)
+            return this
+        }
+
+        fun localizeName(vararg lang: Pair<DiscordLocale, String>): OptionValue {
+            return this.localizeName(mapOf(*lang))
+        }
+
+        fun localizeDescription(map: Map<DiscordLocale, String>): OptionValue {
+            data.setDescriptionLocalizations(map)
+            return this
+        }
+
+        fun localizeDescription(vararg lang: Pair<DiscordLocale, String>): OptionValue {
+            return localizeDescription(mapOf(*lang))
         }
 
         fun default(value: () -> Any?): OptionValue {

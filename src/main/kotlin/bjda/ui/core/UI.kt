@@ -1,7 +1,6 @@
 package bjda.ui.core
 
 import bjda.ui.hook.*
-import bjda.ui.types.AnyComponent
 import bjda.ui.types.AnyElement
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.interactions.InteractionHook
@@ -17,7 +16,8 @@ open class UI(private val option: Option = Option()) {
         /**
          * Fired after updating components
          */
-        var afterUpdate: () -> Unit = {}
+        var afterUpdate: () -> Unit = {},
+        var renderer: Renderer? = null
     )
 
     var root: AnyElement? = null
@@ -30,7 +30,8 @@ open class UI(private val option: Option = Option()) {
             field = value
         }
 
-    private val renderer = DefaultRenderer()
+    private val renderer = option.renderer?: DefaultRenderer()
+
     val hooks = ArrayList<UIHook>()
 
     constructor(root: AnyElement) : this() {
@@ -54,6 +55,10 @@ open class UI(private val option: Option = Option()) {
 
     fun edit(callback: IMessageEditCallback, success: Consumer<InteractionHook>? = null) {
         callback.editMessage(this.build()).queue(success)
+    }
+
+    fun edit(hook: InteractionHook, success: Consumer<Message>? = null) {
+        hook.editOriginal(this.build()).queue(success)
     }
 
     /**
@@ -172,7 +177,8 @@ open class UI(private val option: Option = Option()) {
     }
 
     fun destroy() {
-        root!!.unmount()
+        root?.unmount()
+        root = null
 
         for (hook in hooks) {
             hook.onDestroy()
@@ -185,22 +191,24 @@ open class UI(private val option: Option = Option()) {
     }
 
     inner class DefaultRenderer : Renderer() {
+        private val scanner = ComponentTreeScannerImpl(this@UI)
+
         override fun onUpdated() {
             option.afterUpdate()
         }
 
-        override fun createScanner(element: AnyElement): ComponentTreeScanner {
-            return ComponentTreeScannerImpl(element)
+        override fun getScanner(): ComponentTreeScanner {
+            return scanner
         }
     }
 
-    inner class ComponentTreeScannerImpl(val parent: AnyElement) : ComponentTreeScanner() {
+    class ComponentTreeScannerImpl(val ui: UI) : ComponentTreeScanner() {
         override fun unmounted(comp: AnyElement) {
             comp.unmount()
         }
 
-        override fun mounted(comp: AnyElement) {
-            comp.mount(parent, this@UI)
+        override fun mounted(comp: AnyElement, parent: AnyElement) {
+            comp.mount(parent, this.ui)
         }
 
         override fun<P : IProps> reused(comp: Element<out P>, props: P) {

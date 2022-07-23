@@ -17,7 +17,7 @@ abstract class Renderer {
         return rendering
     }
 
-    abstract fun createScanner(element: AnyElement): ComponentTreeScanner
+    abstract fun getScanner(): ComponentTreeScanner
 
     /**
      * If any render task is added when rendering component
@@ -29,8 +29,7 @@ abstract class Renderer {
 
         if (rendered != null) {
 
-            rendered = createScanner(comp)
-                .scan(snapshot, rendered)
+            rendered = getScanner().scan(comp, snapshot, rendered)
 
             for (child in rendered) {
                 if (child != null) {
