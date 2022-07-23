@@ -2,13 +2,9 @@ package bjda.plugins.supercommand
 
 import bjda.plugins.supercommand.entries.PermissionEntry
 import net.dv8tion.jda.api.EmbedBuilder
-import net.dv8tion.jda.api.entities.ChannelType
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
-import net.dv8tion.jda.api.interactions.DiscordLocale
-import net.dv8tion.jda.api.interactions.commands.Command.Choice
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions
 import net.dv8tion.jda.api.interactions.commands.OptionType
-import net.dv8tion.jda.api.interactions.commands.build.OptionData
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
 import java.awt.Color
@@ -20,24 +16,20 @@ abstract class SuperCommand (
     override val permissions: DefaultMemberPermissions? = null
 ): SuperNode, PermissionEntry {
     lateinit var event: SlashCommandInteractionEvent
-    private val options = ArrayList<OptionValue>()
+    private val options = ArrayList<IOptionValue<*>>()
 
-    open fun option(type: OptionType, name: String, description: String = "No Description"): OptionValue {
-        val value = OptionValue(name, type, description)
+    open fun<T> option(type: OptionType, name: String, description: String = "No Description"): OptionValue<T> {
+        val value = OptionValue<T>(name, type, description)
         options.add(value)
 
         return value
-    }
-
-    fun localize(locale: DiscordLocale) {
-
     }
 
     internal fun execute(event: SlashCommandInteractionEvent) {
         this.event = event
 
         for (option in options) {
-            option.update(event)
+            option.onUpdate(event)
         }
 
         try {
@@ -80,103 +72,5 @@ abstract class SuperCommand (
         listeners[Info(group, subgroup, name)] = this
 
         return data
-    }
-
-    class OptionValue(
-        name: String,
-        type: OptionType,
-        description: String) {
-
-        private var default: () -> Any? = { null }
-        private var value: Any? = null
-        internal var data = OptionData(type, name, description)
-
-        fun required(value: Boolean): OptionValue {
-            data = data.setRequired(value)
-
-            return this
-        }
-
-        fun localizeName(map: Map<DiscordLocale, String>): OptionValue {
-            data.setNameLocalizations(map)
-            return this
-        }
-
-        fun localizeName(vararg lang: Pair<DiscordLocale, String>): OptionValue {
-            return this.localizeName(mapOf(*lang))
-        }
-
-        fun localizeDescription(map: Map<DiscordLocale, String>): OptionValue {
-            data.setDescriptionLocalizations(map)
-            return this
-        }
-
-        fun localizeDescription(vararg lang: Pair<DiscordLocale, String>): OptionValue {
-            return localizeDescription(mapOf(*lang))
-        }
-
-        fun default(value: () -> Any?): OptionValue {
-            this.default = value
-            return this
-        }
-
-        fun autoComplete(value: Boolean): OptionValue {
-            data = data.setAutoComplete(value)
-            return this
-        }
-
-        fun intRange(range: Pair<Long, Long>): OptionValue {
-            val (min, max) = range
-            data.setRequiredRange(min, max)
-
-            return this
-        }
-
-        fun doubleRange(range: Pair<Double, Double>): OptionValue {
-            val (min, max) = range
-            data.setRequiredRange(min, max)
-
-            return this
-        }
-
-        fun channel(vararg types: ChannelType): OptionValue {
-            if (data.type != OptionType.CHANNEL)
-                error("Option Type must be channel")
-
-            data.setChannelTypes(*types)
-
-            return this
-        }
-
-        fun choices(vararg choice: Pair<String, String>): OptionValue {
-            data.addChoices(choice.map {(key, value)->
-                Choice(key, value)
-            })
-
-            return this
-        }
-
-        fun update(event: SlashCommandInteractionEvent) {
-            val mapping = event.getOption(data.name)
-
-            value = if (mapping == null) {
-                this.default()
-            } else {
-                when (mapping.type) {
-                    OptionType.INTEGER -> mapping.asLong
-                    OptionType.NUMBER -> mapping.asDouble
-                    OptionType.BOOLEAN -> mapping.asBoolean
-                    OptionType.STRING -> mapping.asString
-                    OptionType.ATTACHMENT -> mapping.asAttachment
-                    //Role, User, Channels are all mentionable
-                    OptionType.MENTIONABLE, OptionType.ROLE, OptionType.CHANNEL, OptionType.USER -> mapping.asMentionable
-                    else -> error("Unknown option type ${mapping.type}")
-                }
-            }
-        }
-
-        operator fun<T> getValue(parent: Any, property: Any): T {
-            return value as T
-        }
     }
 }
