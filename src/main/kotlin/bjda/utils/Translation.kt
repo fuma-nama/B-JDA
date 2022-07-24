@@ -1,10 +1,10 @@
 package bjda.utils
 
-class Translation(words: Map<String, String>): Map<String, String> by words {
-    val groups = HashMap<String, Translation>()
+class Translation(private val words: Map<String, String>): Map<String, String> by words {
+    private val groups = HashMap<String, Translation>()
 
     override operator fun get(key: String): String {
-        return this[key]
+        return words[key]!!
     }
 
     operator fun invoke(group: String): Translation {
