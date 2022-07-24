@@ -1,6 +1,7 @@
 package bjda.ui.core
 
 import bjda.ui.component.Fragment
+import bjda.ui.core.hooks.Delegate
 import bjda.ui.core.hooks.IHook
 import bjda.ui.types.*
 import bjda.utils.LambdaBuilder
@@ -95,7 +96,20 @@ abstract class Component<P : IProps>(props: P): ElementImpl<P>(props) {
      *
      * You may use it anywhere, avoid to access its value outside the render function
      */
+    fun<V> useBy(hook: IHook<V>): Delegate<V> {
+
+        return Delegate {
+            use(hook)
+        }
+    }
+
+    /**
+     * Create a hook at global level
+     *
+     * You may use it anywhere, avoid to access its value outside the render function
+     */
     fun<V> useLazy(hook: IHook<V>): Lazy<V> {
+
         return lazy {
             use(hook)
         }
@@ -132,6 +146,10 @@ abstract class Component<P : IProps>(props: P): ElementImpl<P>(props) {
 
         fun get(): T {
             return value
+        }
+
+        fun<R> get(mapper: T.() -> R): R {
+            return mapper(value)
         }
 
         private fun updateComponent(event: IMessageEditCallback? = null, update: () -> Unit) {

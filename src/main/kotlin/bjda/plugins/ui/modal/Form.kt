@@ -25,15 +25,14 @@ import net.dv8tion.jda.internal.interactions.component.ModalImpl
  *
  * Note: use it as Hook to enable AutoReply
  */
-open class Form(val id: String = UIEvent.createId(),
-           props: Init<Props>
-): ModalListener {
-
+open class Form(
+    val id: String = UIEvent.createId(),
+    val create: Init<Props>
+) {
     class Props {
         lateinit var title: String
-        lateinit var render: LambdaList<ModalRow>
-
         lateinit var onSubmit: (ModalInteractionEvent) -> Unit
+        lateinit var render: LambdaList<ModalRow>
 
         fun row(items: LambdaList<Action>): ModalRow {
             return ModalRow(items.build())
@@ -59,19 +58,17 @@ open class Form(val id: String = UIEvent.createId(),
             }
         }
     }
-
-    val props = Props().init(props)
+    val props = Props().init(create)
 
     /**
      * Listen submit events
      */
     fun listen() {
-        UIEvent.listen(id, this)
+        UIEvent.listen(id, props.onSubmit)
     }
 
     /**
      * Build a modal and set up its listeners
-     * @param listen If disabled, Submit events of this modal will not be listened
      */
     fun create(listen: Boolean = true): ModalImpl {
         if (listen) {
@@ -91,16 +88,20 @@ open class Form(val id: String = UIEvent.createId(),
         UIEvent.modals.remove(id)
     }
 
-    override fun onSubmit(event: ModalInteractionEvent) {
-        props.onSubmit(event)
-    }
-
     companion object {
-        fun AnyComponent.form(props: Init<Props>): Delegate<Modal> {
-            val form = Form(props = props)
+        fun AnyComponent.form(create: Init<Props>): Delegate<Modal> {
+            val form = Form(create = create)
             val hook = ModalHook(form)
 
             return Delegate { this use hook }
+        }
+
+        fun ModalInteractionEvent.value(id: String): String {
+            return getValue(id)!!.asString
+        }
+
+        fun ModalInteractionEvent.value(item: Action): String {
+            return value(item.id)
         }
 
         class ModalHook(private val form: Form) : IHook<Modal> {

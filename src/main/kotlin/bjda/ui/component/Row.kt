@@ -12,14 +12,16 @@ class Row : ElementImpl<Row.Props>(Props()) {
     class Props : CProps<LambdaList<Action>>()
 
     override fun build(data: RenderData) {
+        data.addActionRow(build())
+    }
+
+    fun build(): ActionRow {
         val actions = props.children.build()
 
-        val row = ActionRow.of(
+        return ActionRow.of(
             actions.map {
                 it.build()
             }
         )
-
-        data.addActionRow(row)
     }
 }
