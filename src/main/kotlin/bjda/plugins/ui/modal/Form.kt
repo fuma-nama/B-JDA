@@ -1,13 +1,11 @@
 package bjda.plugins.ui.modal
 
 import bjda.plugins.ui.UIEvent
-import bjda.plugins.ui.hook.event.ModalListener
 import bjda.ui.component.action.Action
 import bjda.ui.core.hooks.Delegate
 import bjda.ui.core.hooks.IHook
-import bjda.ui.core.init
 import bjda.ui.types.AnyComponent
-import bjda.ui.types.Init
+import bjda.ui.types.Apply
 import bjda.utils.LambdaList
 import bjda.utils.build
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
@@ -27,7 +25,7 @@ import net.dv8tion.jda.internal.interactions.component.ModalImpl
  */
 open class Form(
     val id: String = UIEvent.createId(),
-    val create: Init<Props>
+    val create: Apply<Props>
 ) {
     class Props {
         lateinit var title: String
@@ -58,7 +56,7 @@ open class Form(
             }
         }
     }
-    val props = Props().init(create)
+    val props = Props().apply(create)
 
     /**
      * Listen submit events
@@ -89,7 +87,7 @@ open class Form(
     }
 
     companion object {
-        fun AnyComponent.form(create: Init<Props>): Delegate<Modal> {
+        fun AnyComponent.form(create: Apply<Props>): Delegate<Modal> {
             val form = Form(create = create)
             val hook = ModalHook(form)
 

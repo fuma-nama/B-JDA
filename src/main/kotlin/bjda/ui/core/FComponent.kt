@@ -1,12 +1,12 @@
 package bjda.ui.core
 
+import bjda.ui.types.AnyProps
 import bjda.ui.types.Children
-import bjda.ui.types.Init
 
 typealias FComponentBody<P> = FComponent<P>.() -> Children
-typealias FComponentConstructor<P> = (props: Init<P>) -> FComponent<P>
+typealias FComponentConstructor<P, C> = (props: P.() -> C) -> FComponent<P>
 
-class FComponent<P: IProps>(
+class FComponent<P: AnyProps>(
     props: P,
     private val component: FComponentBody<P>
 ) : Component<P>(props) {
@@ -17,13 +17,13 @@ class FComponent<P: IProps>(
     }
 
     companion object {
-        fun<P: IProps> component(props: () -> P, component: FComponentBody<P>): FComponentConstructor<P> {
+        fun<P: CProps<C>, C : Any> component(props: () -> P, component: FComponentBody<P>): FComponentConstructor<P, C> {
             return {init ->
                 FComponent(props().init(init), component)
             }
         }
 
-        fun component(component: FComponentBody<IProps>): FComponentConstructor<IProps> {
+        fun component(component: FComponentBody<IProps>): FComponentConstructor<IProps, Unit> {
             return {init ->
                 FComponent(IProps().init(init), component)
             }

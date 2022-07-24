@@ -2,6 +2,7 @@ package bjda.ui.core
 
 import bjda.ui.hook.*
 import bjda.ui.types.AnyElement
+import bjda.ui.types.AnyProps
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.interactions.callbacks.IMessageEditCallback
@@ -214,7 +215,7 @@ open class UI(private val option: Option = Option()) {
             comp.mount(parent, this.ui)
         }
 
-        override fun<P : IProps> reused(comp: Element<out P>, props: P) {
+        override fun <P : AnyProps> reused(comp: Element<out P>, props: P) {
             comp.receiveProps(props)
         }
     }

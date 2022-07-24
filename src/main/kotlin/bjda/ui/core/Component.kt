@@ -8,20 +8,21 @@ import bjda.utils.LambdaBuilder
 import net.dv8tion.jda.api.interactions.callbacks.IMessageEditCallback
 import kotlin.reflect.KProperty
 
-open class IProps {
+open class IProps : CProps<Unit>()
+
+open class CProps<C: Any> {
     var key: Key? = null
-}
-
-open class CProps<C : Any> : IProps() {
     open lateinit var children: C
-
-    operator fun C.not() {
-        this@CProps.children = this@not
-    }
 }
 
-fun <T> T.init(init: Init<T>): T {
-    init(this)
+fun <T> T.apply(apply: Apply<T>): T {
+    apply(this)
+
+    return this
+}
+
+fun <T: CProps<R>, R: Any> T.init(init: T.() -> R): T {
+    this.children = init(this)
 
     return this
 }
@@ -43,8 +44,8 @@ class ComponentBuilder : LambdaBuilder<AnyElement?>() {
     }
 }
 
-abstract class Component<P : IProps>(props: P): ElementImpl<P>(props) {
-    constructor(props: ()-> P): this(props())
+abstract class Component<P : CProps<*>>(props: P): ElementImpl<P>(props) {
+    constructor(props: () -> P): this(props())
 
     val hooks = ArrayList<IHook<*>>()
 

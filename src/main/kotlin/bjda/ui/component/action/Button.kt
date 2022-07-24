@@ -1,17 +1,17 @@
 package bjda.ui.component.action
 
-import bjda.ui.core.init
-import bjda.ui.types.Init
+import bjda.ui.core.apply
+import bjda.ui.types.Apply
 import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.interactions.components.ItemComponent
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle
 import net.dv8tion.jda.internal.interactions.component.ButtonImpl
 
-class Button(props: Init<Props>) : Action {
-    private val props = Props().init(props)
+class Button(props: Apply<Props>) : Action {
+    private val props = Props().apply(props)
     override val id by this.props::id
 
-    constructor(id: String, props: Init<Props>) : this(props) {
+    constructor(id: String, props: Apply<Props>) : this(props) {
         this.props.id = id
     }
 

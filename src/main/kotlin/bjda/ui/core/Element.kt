@@ -6,8 +6,13 @@ fun parseChildren(children: Children): ComponentTree {
     return ComponentBuilder().apply(children).build().toTypedArray()
 }
 
-operator fun<T: Element<P>, P : IProps> T.rangeTo(v: Init<P>): T {
+operator fun<T: Element<P>, P : CProps<C>, C: Any> T.rangeTo(v: P.() -> C): T {
     props.init(v)
+    return this
+}
+
+operator fun<T: Element<P>, P : AnyProps> T.invoke(v: P.() -> Unit): T {
+    props.apply(v)
 
     return this
 }
@@ -17,12 +22,7 @@ operator fun<T: Element<P>, P: CProps<C>, C : Any> T.minus(v: C): T {
     return this
 }
 
-operator fun<T: Element<P>, P: CProps<C>, C : Any> T.div(v: P.() -> C): T {
-    props.children = v(props)
-    return this
-}
-
-interface Element<P : IProps> {
+interface Element<P : AnyProps> {
     var props: P
     var snapshot: ComponentTree?
     val contexts : ContextMap?
@@ -52,7 +52,7 @@ interface Element<P : IProps> {
     }
 }
 
-abstract class ElementImpl<P : IProps>(override var props: P) : Element<P> {
+abstract class ElementImpl<P : AnyProps>(override var props: P) : Element<P> {
     override val contexts: ContextMap?
         get() {
             return parent?.contexts
