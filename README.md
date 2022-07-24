@@ -12,7 +12,7 @@ Used for my own bots only, might be out of maintenance
 <dependency>
   <groupId>io.github.sonmoosans</groupId>
   <artifactId>bjda</artifactId>
-  <version>4.1.0</version>
+  <version>4.2.0</version>
 </dependency>
 ```
 
@@ -78,7 +78,7 @@ Full Demo of a Todo App: https://github.com/SonMooSans/bjda-example
 
 ### Creating an App
 ```kotlin
-val Panel = FComponent.create(::IProps) {
+val Panel = FComponent.component {
   val onConfirm by onClick {event ->
     println("Confirmed")
     ui.edit(event)
@@ -199,45 +199,71 @@ Give component a `key` prop to help the Scanner knows which component is new or 
 <br>
 It can improve the performance of the Tree Scanner
 
-## What's New Since 3.0.0
-### useCombinedState is removed
-You should use `useState` instead.
+## What's New Since 4.0.0
+
+### UI Update Queue (since 4.2.0)
+Before 4.2.0, when you update the ui by using `ui.edit(event)` or `state.update(event)`
 <br>
-New method mixed the old one and `useCombinedState`, you can use it as a delegate or a StateWrapper  
+It will call `event.editMessage` asynchronously.
 
-### Group is replaced with Fragment
-
-### Supports Await updating
-To enable this, you must update hooks manually
-```kotlin
-ui.updateHooks(await = true)
-```
-
-### Improves performance
-Component class now split into multi interfaces
-
-The base of it is Element, it only stores props and contexts api which save a lot of memory
-
-### Component Listeners supports Delegate
-Now hooks can both supports those patterns:
-
-**Default Hook**
-```kotlin
-//declare
-val onCreate = ButtonClick {}
-//use
-Button(id = use(onCreate))
-```
-**Delegated invisible Hook**
-```kotlin
-//declare
-val onCreate by onClick {}
-//use
-Button(onCreate)
-```
-The design pattern of UIHooks is also updated,
+if you are calling it twice at same time, The previous task might be finish later than the current one
 <br>
-You can create a provider and receiver UIHook to access the message after sending
+which will make the ui displayed in message is not the current one
+
+### Await updating Unsupported
+`ui.updateHooks()` is not unsupported since 4.2.0
+
+### Form API supports Class version
+Example: 
+```kotlin
+class AddForm : FormFactory() {
+    override val title = "Add Todo"
+
+    override fun render(): LambdaList<Row> {
+        return {
+            + Row()-{
+                + TextField("todo") {
+                    label = "TODO"
+                    style = TextInputStyle.PARAGRAPH
+                }
+            }
+        }
+    }
+
+    override fun onSubmit(event: ModalInteractionEvent) {
+        //Do something...
+    }
+}
+```
+### Reaction Module Updated
+Notice: We still recommend you to use button instead of reaction
+<br>
+You can enable it by `ui.enableReaction(message)`
+
+### Localization
+It is easier to support multi languages with new `Translation` util
+<br>
+example: 
+```kotlin
+import commands.context.Translation.Companion.group
+
+val ch = group(
+    "todo" to "待辦事項",
+    "title" to "待辦事項面板",
+    "add" to "添加待辦事項",
+    "edit" to "編輯待辦事項",
+    "delete" to "刪除待辦事項",
+    "placeholder" to "還沒有待辦事項",
+    "close" to "關閉面板"
+)(
+    "menu" to group(
+        "placeholder" to "選擇一個待辦事項"
+    ),
+    "form" to group(
+        "new_content" to "新內容"
+    ),
+)
+```
 
 ## Coming soon
 
