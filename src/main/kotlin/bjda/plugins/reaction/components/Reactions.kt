@@ -14,6 +14,7 @@ import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.events.message.react.GenericMessageReactionEvent
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent
 import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent
+import net.dv8tion.jda.api.interactions.InteractionHook
 
 class Reactions(val id: String = UIEvent.createId()) : Component<Reactions.Props>(Props()) {
     private val receiver = ReactionReceiver()

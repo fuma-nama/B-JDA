@@ -31,6 +31,7 @@ open class UI(private val option: Option = Option()) {
         }
 
     private val renderer = option.renderer?: DefaultRenderer()
+    private val updater = Updater()
 
     val hooks = ArrayList<UIHook>()
 
@@ -53,38 +54,25 @@ open class UI(private val option: Option = Option()) {
             updateHooks(HookData())
     }
 
+    fun edit(message: Message, success: Consumer<Message>? = null) {
+        updater.addTask(
+            message.editMessage(this.build()),
+            success
+        )
+    }
+
     fun edit(callback: IMessageEditCallback, success: Consumer<InteractionHook>? = null) {
-        callback.editMessage(this.build()).queue(success)
+        updater.addTask(
+            callback.editMessage(this.build()),
+            success
+        )
     }
 
     fun edit(hook: InteractionHook, success: Consumer<Message>? = null) {
-        hook.editOriginal(this.build()).queue(success)
-    }
-
-    /**
-     * Edit event message then Update hooks which are not the same interaction
-     */
-    fun<T> editAndUpdate(events: Array<T>, success: Consumer<InteractionHook>? = null) where T: IMessageEditCallback {
-        for (event in events) {
-            edit(event, success)
-        }
-
-        var queue: RestAction<*>? = null
-        val originals = arrayListOf<Message>()
-
-        events.forEach {
-            val action = it.hook.retrieveOriginal().map {m -> originals += m }
-
-            queue = if (queue != null) {
-                queue!!.and(action)
-            } else {
-                action
-            }
-        }
-
-        queue?.queue {
-            updateHooks(ignore(originals))
-        }
+        updater.addTask(
+            hook.editOriginal(this.build()),
+            success
+        )
     }
 
     /**
@@ -93,9 +81,7 @@ open class UI(private val option: Option = Option()) {
     fun<T> editAndUpdate(event: T, success: Consumer<InteractionHook>? = null) where T: IMessageEditCallback {
         edit(event, success)
 
-        event.hook.retrieveOriginal().queue {
-            updateHooks(ignore(it))
-        }
+        updateHooks(event.hook)
     }
 
     fun reply(message: Message, success: Consumer<Message>? = null) {
@@ -131,34 +117,51 @@ open class UI(private val option: Option = Option()) {
             .build()
     }
 
-    fun updateHooks(ignore: List<Ignore> = emptyList(), await: Boolean = false) {
-        return updateHooks(HookData(ignore, await))
+    fun updateHooks(hook: InteractionHook) {
+        if (hooks.isNotEmpty()) {
+
+            hook.retrieveOriginal().queue {
+                updateHooks(ignore(it))
+            }
+        }
+    }
+
+    fun updateHooks(ignore: List<Ignore>) {
+        return updateHooks(HookData(ignore))
     }
 
     fun updateHooks(data: HookData = HookData()) {
         val message = build()
 
         for (hook in hooks) {
-            if (hook !is UpdateHook) continue
-            if (hook.isIgnored(data)) continue
+            if (hook !is UpdateHook || hook.isIgnored(data)) continue
 
-            val action = hook.onUpdate(message, data)
-
-            if (data.await) {
-                action.complete()
-            } else {
-                action.queue()
-            }
+            hook.onUpdate(message, data).queue()
         }
     }
 
-    fun updateComponent(element: AnyElement = root!!, event: IMessageEditCallback? = null, update: (() -> Unit)? = null) {
+    fun updateComponent(element: AnyElement) {
         renderer.addUpdateTask {
-            update?.invoke()
+            Payload(element)
+        }
+    }
+
+    fun updateComponent(
+        element: AnyElement,
+        event: IMessageEditCallback? = null,
+        update: () -> Unit,
+        onUpdated: (() -> Unit)? = null) {
+        renderer.addUpdateTask {
+            update()
 
             Payload(
                 comp = element,
-                afterUpdate = if (event != null) ({ editAndUpdate(event) }) else null
+                afterUpdate = {
+                    if (event != null)
+                        editAndUpdate(event)
+
+                    onUpdated?.invoke()
+                }
             )
         }
     }
@@ -213,6 +216,39 @@ open class UI(private val option: Option = Option()) {
 
         override fun<P : IProps> reused(comp: Element<out P>, props: P) {
             comp.receiveProps(props)
+        }
+    }
+
+    /**
+     *
+     * task task2 task3
+     */
+    class Updater {
+        private var current: RestAction<*>? = null
+        private var next: RestAction<*>? = null
+
+        fun addTask(action: RestAction<*>) {
+            if (current == null) {
+                current = action
+
+                update()
+            } else {
+                next = action
+            }
+        }
+
+        fun<T> addTask(action: RestAction<T>, success: Consumer<T>?) {
+            addTask(
+                if (success == null) action else action.map(success::accept)
+            )
+        }
+
+        private fun update() {
+            current?.queue {
+                current = next
+
+                update()
+            }
         }
     }
 }

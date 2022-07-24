@@ -64,8 +64,14 @@ abstract class Component<P : IProps>(props: P): ElementImpl<P>(props) {
         ui.updateComponent(this)
     }
 
-    fun<T> useState(initial: T): StateWrapper<T> {
-        return StateWrapper(initial)
+    fun<T> useState(initial: T): State<T> {
+        return State(initial)
+    }
+
+    fun<T> useState(initial: T, onUpdate: () -> Unit): State<T> {
+        return object : State<T>(initial) {
+            override val onUpdated = onUpdate
+        }
     }
 
     /**
@@ -121,31 +127,42 @@ abstract class Component<P : IProps>(props: P): ElementImpl<P>(props) {
         }
     }
 
-    inner class StateWrapper<T>(var value: T) {
+    open inner class State<T>(var value: T) {
+        open val onUpdated: (() -> Unit)? = null
+
         fun get(): T {
             return value
         }
 
+        private fun updateComponent(event: IMessageEditCallback? = null, update: () -> Unit) {
+            ui.updateComponent(
+                element = this@Component,
+                event = event,
+                update = update,
+                onUpdated = onUpdated
+            )
+        }
+
         infix fun update(value: T) {
-            ui.updateComponent(this@Component) {
+            updateComponent {
                 this.value = value
             }
         }
 
         fun update(event: IMessageEditCallback, value: T) {
-            ui.updateComponent(this@Component, event) {
+            updateComponent(event) {
                 this.value = value
             }
         }
 
         infix fun update(updater: T.() -> Unit) {
-            ui.updateComponent(this@Component) {
+            updateComponent {
                 updater(value)
             }
         }
 
         fun update(event: IMessageEditCallback, updater: T.() -> Unit) {
-            ui.updateComponent(this@Component, event) {
+            updateComponent(event) {
                 updater(value)
             }
         }
@@ -154,9 +171,9 @@ abstract class Component<P : IProps>(props: P): ElementImpl<P>(props) {
             return Updater(value, this::update, this::update)
         }
 
-        operator fun getValue(thisRef: Nothing?, property: KProperty<*>): T = get()
-
         operator fun getValue(thisRef: Any?, property: KProperty<*>): T = get()
+
+        operator fun getValue(thisRef: Nothing?, property: KProperty<*>): T = get()
 
         operator fun setValue(thisRef: Any?, property: KProperty<*>, value: T) = update(value)
 

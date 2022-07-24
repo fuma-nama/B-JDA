@@ -1,7 +1,6 @@
 package bjda.plugins.supercommand
 
 import net.dv8tion.jda.api.interactions.DiscordLocale
-import net.dv8tion.jda.api.interactions.commands.build.CommandData
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
 
@@ -11,7 +10,7 @@ interface NameLocalization {
     val localNames: LocalizeMap?
         get() = null
 
-    fun CommandData.setLocalName(): CommandData {
+    fun CommandDataImpl.setLocalName(): CommandDataImpl {
         return localNames?.let {
             setNameLocalizations(it)
         }?: this

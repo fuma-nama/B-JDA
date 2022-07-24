@@ -130,4 +130,8 @@ interface IOptionValue<T> {
     operator fun getValue(parent: Any, property: Any): T {
         return value
     }
+
+    operator fun getValue(parent: Nothing?, property: Any): T {
+        return value
+    }
 }

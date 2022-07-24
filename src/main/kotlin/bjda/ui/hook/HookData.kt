@@ -6,7 +6,7 @@ import net.dv8tion.jda.api.interactions.InteractionHook
 import kotlin.reflect.KClass
 data class Ignore(val interaction: String? = null, val message: String? = null)
 
-class HookData(val ignore: List<Ignore> = emptyList(), val await: Boolean = false)
+class HookData(val ignore: List<Ignore> = emptyList())
 
 /**
  * Build an array of HookData that will let UpdateHooks ignore given event

@@ -6,7 +6,6 @@ import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEven
 import net.dv8tion.jda.api.interactions.commands.Command.Type
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions
 import net.dv8tion.jda.api.interactions.commands.build.CommandData
-import net.dv8tion.jda.api.interactions.commands.build.Commands
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
 
 abstract class SuperContext(
@@ -19,7 +18,7 @@ abstract class SuperContext(
     open fun run(event: UserContextInteractionEvent) = Unit
 
     override fun build(listeners: Listeners): CommandData {
-        val data = Commands.context(type, name)
+        val data = CommandDataImpl(type, name)
             .setLocalName()
             .setPermissions()
 
