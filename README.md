@@ -12,7 +12,7 @@ Used for my own bots only, might be out of maintenance
 <dependency>
   <groupId>io.github.sonmoosans</groupId>
   <artifactId>bjda</artifactId>
-  <version>4.2.1</version>
+  <version>4.3.0</version>
 </dependency>
 ```
 
@@ -48,8 +48,10 @@ class SuperHello : SuperCommand(name = "hello", description = "Say Hello") {
     "Large" to "6xl"
   ).required(true)
 
-  override fun run() {
-    event.reply("size: $size").queue()
+  override val run: CommandHandler = {
+    //After 4.2.1, we must call option() or option.value(...)
+    //To get option value from event
+    event.reply("size: ${ size() }").queue()
   }
 }
 ```
@@ -107,7 +109,7 @@ Normally it should be synchronous but in some cases it is async.
 ### Creating the Command
 ```kotlin
 class MessageHelloCommand : SuperCommand(name = "hello", description = "Hello World") {
-    override fun run() {
+    override val run: CommandHandler = {
         event.reply("Hello").queue()
     }
 }
@@ -263,6 +265,10 @@ val ch = group(
         "new_content" to "新內容"
     ),
 )
+
+//getting localized text
+ch("todo")
+ch["form"]("new_content")
 ```
 
 ## Coming soon

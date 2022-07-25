@@ -9,13 +9,14 @@ import net.dv8tion.jda.api.interactions.commands.build.SubcommandData
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
 import java.awt.Color
 
+typealias CommandHandler = EventInfo.() -> Unit
+
 abstract class SuperCommand (
     override val name: String,
     val description: String = "No Description",
     override val guildOnly: Boolean? = null,
     override val permissions: DefaultMemberPermissions? = null
 ): SuperNode, PermissionEntry, NameLocalization, DescriptionLocalization {
-    lateinit var event: SlashCommandInteractionEvent
     private val options = ArrayList<IOptionValue<*>>()
 
     open fun<T> option(type: OptionType, name: String, description: String = "No Description"): OptionValue<T> {
@@ -26,29 +27,16 @@ abstract class SuperCommand (
     }
 
     internal fun execute(event: SlashCommandInteractionEvent) {
-        this.event = event
-
-        for (option in options) {
-            option.onUpdate(event)
-        }
+        val info = EventInfo(event)
 
         try {
-            run()
+            run(info)
         } catch (e: Throwable) {
-            error(e.message)
+            info.error(e.message)
         }
     }
 
-    open fun error(message: String?) {
-        event.replyEmbeds(
-            EmbedBuilder()
-                .setTitle(message?: "ERROR")
-                .setColor(Color.RED)
-                .build()
-        ).setEphemeral(true).queue()
-    }
-
-    abstract fun run()
+    abstract val run: CommandHandler
 
     override fun build(listeners: Listeners): CommandDataImpl {
         val data = CommandDataImpl(name, description)
@@ -77,5 +65,31 @@ abstract class SuperCommand (
         listeners[Info(group, subgroup, name)] = this
 
         return data
+    }
+}
+
+class EventInfo(
+    val event: SlashCommandInteractionEvent
+) {
+
+    operator fun<T, P> IOptionValue<T>.getValue(parent: P, property: Any): T {
+        return value(event)
+    }
+
+    fun<T> IOptionValue<T>.value(): T {
+        return value(event)
+    }
+
+    operator fun<T> IOptionValue<T>.invoke(): T {
+        return value(event)
+    }
+
+    fun error(message: String?) {
+        event.replyEmbeds(
+            EmbedBuilder()
+                .setTitle(message?: "ERROR")
+                .setColor(Color.RED)
+                .build()
+        ).setEphemeral(true).queue()
     }
 }

@@ -10,10 +10,13 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData
 
 class OptionValueMapper<T, R>(
     private val base: IOptionValue<T>,
-    val mapper: (T) -> R) {
+    val mapper: (T) -> R
+): IOptionValue<R> {
+    override val data: OptionData by base::data
 
-    operator fun getValue(parent: Any, property: Any): R {
-        return mapper(base.value)
+    override fun parseMapping(mapping: OptionMapping?): R {
+        val parsed = base.parseMapping(mapping)
+        return mapper(parsed)
     }
 }
 
@@ -22,7 +25,6 @@ open class OptionValue<T>(
     type: OptionType,
     description: String) : IOptionValue<T> {
 
-    override var value: T = null as T
     override var data = OptionData(type, name, description)
     var default: (() -> T)? = null
 
@@ -86,10 +88,6 @@ open class OptionValue<T>(
         return this
     }
 
-    fun<R> map(value: (T) -> R): OptionValueMapper<T, R> {
-        return OptionValueMapper(this, value)
-    }
-
     fun default(value: () -> T): OptionValue<T> {
         default = value
         return this
@@ -116,22 +114,23 @@ open class OptionValue<T>(
 }
 
 interface IOptionValue<T> {
-    var value: T
     val data: OptionData
 
     fun parseMapping(mapping: OptionMapping?): T
 
-    fun onUpdate(event: SlashCommandInteractionEvent) {
+    infix fun value(event: SlashCommandInteractionEvent): T {
         val mapping = event.getOption(data.name)
 
-        value = parseMapping(mapping)
+        return parseMapping(mapping)
     }
 
-    operator fun getValue(parent: Any, property: Any): T {
-        return value
+    fun<R> map(value: (T) -> R): OptionValueMapper<T, R> {
+        return OptionValueMapper(this, value)
     }
 
-    operator fun getValue(parent: Nothing?, property: Any): T {
-        return value
+    companion object {
+        infix fun<T> SlashCommandInteractionEvent.value(option: IOptionValue<T>): T {
+            return option value this
+        }
     }
 }
