@@ -9,14 +9,13 @@ import net.dv8tion.jda.internal.interactions.component.ButtonImpl
 
 class Button(props: Apply<Props>) : Action {
     private val props = Props().apply(props)
-    override val id by this.props::id
 
     constructor(id: String, props: Apply<Props>) : this(props) {
         this.props.id = id
     }
 
     class Props {
-        lateinit var id: String
+        var id: String? = null
         var style: ButtonStyle = ButtonStyle.PRIMARY
         var label: String? = null
         var emoji: Emoji? = null
