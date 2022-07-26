@@ -13,15 +13,14 @@ class MenuSelect(
     id: String = UIEvent.createId(),
     private val handler: (SelectMenuInteraction) -> Unit
 ) : EventHook(id), SelectListener {
-    override fun listen(id: String) {
+
+    override fun listen() {
         UIEvent.listen(id, this)
     }
 
-    override fun onSelect(event: SelectMenuInteraction) {
-        handler(event)
-    }
+    override fun onSelect(event: SelectMenuInteraction) = handler(event)
 
-    override fun destroy(id: String) {
+    override fun onDestroy() {
         UIEvent.menus.remove(id)
     }
 

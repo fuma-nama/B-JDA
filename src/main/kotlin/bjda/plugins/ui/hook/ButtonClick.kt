@@ -17,11 +17,11 @@ class ButtonClick(
         handler(event)
     }
 
-    override fun listen(id: String) {
+    override fun listen() {
         UIEvent.listen(id, this)
     }
 
-    override fun destroy(id: String) {
+    override fun onDestroy() {
         UIEvent.buttons.remove(id)
     }
 
