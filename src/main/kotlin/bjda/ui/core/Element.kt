@@ -27,6 +27,11 @@ interface Element<P : AnyProps> {
     var snapshot: ComponentTree?
     val contexts : ContextMap?
 
+    /**
+     * When no UI provided
+     */
+    fun mount(parent: AnyElement?)
+
     fun mount(parent: AnyElement?, manager: UI)
 
     fun receiveProps(next: Any?)
@@ -61,6 +66,10 @@ abstract class ElementImpl<P : AnyProps>(override var props: P) : Element<P> {
     override var snapshot: ComponentTree? = null
     lateinit var ui: UI
     var parent: AnyElement? = null
+
+    override fun mount(parent: AnyElement?) {
+        this.parent = parent
+    }
 
     override fun mount(parent: AnyElement?, manager: UI) {
         this.parent = parent

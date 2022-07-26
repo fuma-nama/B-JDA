@@ -116,6 +116,12 @@ abstract class Component<P : CProps<*>>(props: P): ElementImpl<P>(props) {
         }
     }
 
+    override fun mount(parent: AnyElement?) {
+        super.mount(parent)
+
+        onMount()
+    }
+
     override fun mount(parent: AnyElement?, manager: UI) {
         super.mount(parent, manager)
 

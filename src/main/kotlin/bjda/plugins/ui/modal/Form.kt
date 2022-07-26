@@ -45,7 +45,7 @@ open class Form(
         }
 
         fun ModalInteractionEvent.value(item: Action): String {
-            return value(item.id)
+            return value(item.id!!)
         }
 
         class ModalRow(val items: List<Action>) {
@@ -99,7 +99,7 @@ open class Form(
         }
 
         fun ModalInteractionEvent.value(item: Action): String {
-            return value(item.id)
+            return value(item.id!!)
         }
 
         class ModalHook(private val form: Form) : IHook<Modal> {

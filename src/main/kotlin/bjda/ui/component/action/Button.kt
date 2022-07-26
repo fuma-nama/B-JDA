@@ -9,6 +9,7 @@ import net.dv8tion.jda.internal.interactions.component.ButtonImpl
 
 class Button(props: Apply<Props>) : Action {
     private val props = Props().apply(props)
+    override val id by this.props::id
 
     constructor(id: String, props: Apply<Props>) : this(props) {
         this.props.id = id

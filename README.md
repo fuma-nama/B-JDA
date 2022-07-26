@@ -12,7 +12,7 @@ Used for my own bots only, might be out of maintenance
 <dependency>
   <groupId>io.github.sonmoosans</groupId>
   <artifactId>bjda</artifactId>
-  <version>4.3.0</version>
+  <version>4.3.1</version>
 </dependency>
 ```
 
@@ -241,6 +241,11 @@ class AddForm : FormFactory() {
 Notice: We still recommend you to use button instead of reaction
 <br>
 You can enable it by `ui.enableReaction(message)`
+
+### UI Once
+UIOnce is used for components that rendered once only
+<br>
+However, it will throw an exception if you try to access the `ui` property
 
 ### Localization
 It is easier to support multi languages with new `Translation` util
