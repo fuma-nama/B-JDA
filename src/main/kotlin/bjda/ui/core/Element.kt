@@ -86,3 +86,37 @@ abstract class ElementImpl<P : AnyProps>(override var props: P) : Element<P> {
         }
     }
 }
+typealias FElementBody<P> = FElement<P>.() -> Children
+typealias FElementConstructor<P, C> = (props: P.() -> C) -> FElement<P>
+
+class FElement<P: AnyProps>(props: P, val body: FElementBody<P>) : ElementImpl<P>(props) {
+    private lateinit var render: Children
+    var build: ((RenderData) -> Unit)? = null
+
+    override fun mount(parent: AnyElement?) {
+        super.mount(parent)
+        this.render = body.invoke(this)
+    }
+
+    override fun render(): ComponentTree {
+        return parseChildren(render)
+    }
+
+    override fun build(data: RenderData) {
+        this.build?.invoke(data)
+    }
+
+    companion object {
+        fun<P: CProps<C>, C: Any> element(props: () -> P, body: FElementBody<P>): FElementConstructor<P, C> {
+            return { init ->
+                FElement(props().init(init), body)
+            }
+        }
+
+        fun element(body: FElementBody<IProps>): FElementConstructor<IProps, Unit> {
+            return { init ->
+                FElement(IProps().init(init), body)
+            }
+        }
+    }
+}

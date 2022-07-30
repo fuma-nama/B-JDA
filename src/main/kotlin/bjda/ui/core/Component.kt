@@ -21,7 +21,7 @@ fun <T> T.apply(apply: Apply<T>): T {
     return this
 }
 
-fun <T: CProps<R>, R: Any> T.init(init: T.() -> R): T {
+fun <T: CProps<R>, R> T.init(init: T.() -> R): T {
     this.children = init(this)
 
     return this

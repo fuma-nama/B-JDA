@@ -1,12 +1,13 @@
 package bjda.plugins.supercommand
 
+import bjda.plugins.supercommand.entries.NameLocalization
 import bjda.plugins.supercommand.entries.PermissionEntry
+import bjda.plugins.supercommand.entries.SuperNode
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.Command.Type
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions
 import net.dv8tion.jda.api.interactions.commands.build.CommandData
-import net.dv8tion.jda.api.interactions.commands.build.Commands
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
 
 abstract class SuperContext(

@@ -1,6 +1,7 @@
 package bjda.plugins.supercommand
 
 import bjda.plugins.supercommand.entries.PermissionEntry
+import bjda.plugins.supercommand.entries.SuperNode
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions
 import net.dv8tion.jda.api.interactions.commands.build.CommandData
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData

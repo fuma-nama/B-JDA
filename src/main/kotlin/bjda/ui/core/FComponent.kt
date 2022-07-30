@@ -10,10 +10,25 @@ class FComponent<P: AnyProps>(
     props: P,
     private val component: FComponentBody<P>
 ) : Component<P>(props) {
-    lateinit var children: Children
+    private lateinit var render: Children
+    var build: ((data: RenderData) -> Unit)? = null
+    var unmount: (() -> Unit)? = null
+    var receiveProps: ((prev: P, next: P) -> Unit)? = null
 
     override fun onMount() {
-        children = component(this)
+        render = component(this)
+    }
+
+    override fun onUnmount() {
+        this.unmount?.invoke()
+    }
+
+    override fun build(data: RenderData) {
+        this.build?.invoke(data)
+    }
+
+    override fun onReceiveProps(prev: P, next: P) {
+        this.receiveProps?.invoke(prev, next)
     }
 
     companion object {
@@ -31,6 +46,6 @@ class FComponent<P: AnyProps>(
     }
 
     override fun onRender(): Children {
-        return children
+        return render
     }
 }

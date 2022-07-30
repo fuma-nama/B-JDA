@@ -1,4 +1,4 @@
-package bjda.plugins.supercommand
+package bjda.plugins.supercommand.entries
 
 import net.dv8tion.jda.api.interactions.DiscordLocale
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData

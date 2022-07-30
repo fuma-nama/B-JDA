@@ -1,5 +1,6 @@
 package bjda.plugins.command
 
+import bjda.utils.embed
 import bjda.utils.translateCommandline
 import com.github.ajalt.clikt.core.*
 import com.github.ajalt.clikt.output.CliktConsole
@@ -60,12 +61,12 @@ abstract class CommandListener(val commands: Array<out TextCommand>): ListenerAd
 
         private fun error(message: String?) {
             event.message.replyEmbeds(
-                EmbedBuilder()
-                    .setTitle("Error")
-                    .setDescription(message)
-                    .setColor(Color.RED)
-                    .build()
-            )
+                embed(
+                    title = "Error",
+                    description = message,
+                    color = Color.RED,
+                )
+            ).queue()
         }
 
         override fun promptForLine(prompt: String, hideInput: Boolean): String? {
