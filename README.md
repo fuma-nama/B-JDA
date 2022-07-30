@@ -12,7 +12,7 @@ Used for my own bots only, might be out of maintenance
 <dependency>
   <groupId>io.github.sonmoosans</groupId>
   <artifactId>bjda</artifactId>
-  <version>4.3.1</version>
+  <version>4.3.2</version>
 </dependency>
 ```
 
@@ -242,7 +242,7 @@ Notice: We still recommend you to use button instead of reaction
 <br>
 You can enable it by `ui.enableReaction(message)`
 
-### UI Once
+### UI Once and `component.buildMessage()`
 UIOnce is used for components that rendered once only
 <br>
 However, it will throw an exception if you try to access the `ui` property
