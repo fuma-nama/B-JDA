@@ -1,5 +1,6 @@
 package bjda.ui.component
 
+import bjda.ui.component.utils.Builder
 import bjda.ui.core.ElementImpl
 import bjda.ui.core.IProps
 import bjda.ui.core.RenderData
@@ -50,6 +51,15 @@ class Embed : ElementImpl<Embed.Props>(Props()) {
             }
 
             data.addEmbeds(builder.build())
+        }
+    }
+
+    companion object {
+        fun MessageEmbed.toComponent(): Builder {
+
+            return Builder { data ->
+                data.addEmbeds(this)
+            }
         }
     }
 }
