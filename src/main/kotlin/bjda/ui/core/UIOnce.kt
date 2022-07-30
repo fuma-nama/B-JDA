@@ -1,5 +1,6 @@
 package bjda.ui.core
 
+import bjda.ui.core.Renderer.Companion.renderSingle
 import bjda.ui.types.AnyElement
 import net.dv8tion.jda.api.entities.Message
 
@@ -15,7 +16,7 @@ open class UIOnce(element: ElementImpl<*>) {
 
     init {
         element.mount(null)
-        renderElement(element)
+        renderSingle(element)
 
         val data = RenderData()
         element.buildAll(data)
@@ -29,20 +30,16 @@ open class UIOnce(element: ElementImpl<*>) {
         return rendered
     }
 
-    fun renderElement(comp: AnyElement) {
-        val rendered = comp.render()
+    companion object {
+        fun Element<*>.buildMessage(): Message {
+            mount(null)
+            renderSingle(this)
 
-        if (rendered != null) {
+            val data = RenderData()
+            buildAll(data)
+            unmount()
 
-            for (child in rendered) {
-                if (child != null) {
-                    child.mount(comp)
-
-                    renderElement(child)
-                }
-            }
+            return data.build()
         }
-
-        comp.snapshot = rendered
     }
 }

@@ -69,4 +69,24 @@ abstract class Renderer {
             executeUpdateQueue()
         }
     }
+
+    companion object {
+
+        fun renderSingle(comp: AnyElement) {
+            val rendered = comp.render()
+
+            if (rendered != null) {
+
+                for (child in rendered) {
+                    if (child != null) {
+                        child.mount(comp)
+
+                        renderSingle(child)
+                    }
+                }
+            }
+
+            comp.snapshot = rendered
+        }
+    }
 }
