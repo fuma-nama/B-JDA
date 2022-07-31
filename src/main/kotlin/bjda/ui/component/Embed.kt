@@ -4,6 +4,7 @@ import bjda.ui.component.utils.Builder
 import bjda.ui.core.ElementImpl
 import bjda.ui.core.IProps
 import bjda.ui.core.RenderData
+import bjda.utils.embed
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.entities.MessageEmbed
 import java.awt.Color
@@ -12,7 +13,7 @@ import java.time.temporal.TemporalAccessor
 class Embed : ElementImpl<Embed.Props>(Props()) {
     class Props : IProps() {
         var title: String? = null
-        var titleUrl: String? = null
+        var url: String? = null
         var description: String? = null
         var author: String? = null
         var authorUrl: String? = null
@@ -29,7 +30,7 @@ class Embed : ElementImpl<Embed.Props>(Props()) {
     override fun build(data: RenderData) {
         with (props) {
             val builder = EmbedBuilder()
-                .setTitle(title, titleUrl)
+                .setTitle(title, url)
                 .setDescription(description)
                 .setAuthor(author, authorUrl, authorIcon)
                 .setFooter(footer, footerIcon)

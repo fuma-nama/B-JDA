@@ -1,5 +1,7 @@
 package bjda.utils
 
+import bjda.ui.component.Embed.Companion.toComponent
+import bjda.ui.component.utils.Builder
 import net.dv8tion.jda.api.entities.EmbedType
 import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.entities.MessageEmbed.*
@@ -11,7 +13,7 @@ fun embed(
     title: String? = null,
     description: String? = null,
     type: EmbedType? = null,
-    timestamp : OffsetDateTime? = null,
+    timestamp: OffsetDateTime? = null,
     color: Color = Color.BLACK,
     thumbnail: Thumbnail? = null,
     siteProvider: Provider? = null,
@@ -19,9 +21,9 @@ fun embed(
     videoInfo: VideoInfo? = null,
     footer: Footer? = null,
     image: ImageInfo? = null,
-    fields: MutableList<Field>? = null
-): MessageEmbed {
-    return MessageEmbed(url, title, description, type, timestamp, color.rgb, thumbnail, siteProvider, author, videoInfo, footer, image, fields)
+    fields: List<Field>? = null,
+): MessageEmbedImpl {
+    return MessageEmbedImpl(url, title, description, type, timestamp, color.rgb, thumbnail, siteProvider, author, videoInfo, footer, image, fields)
 }
 
 fun image(url: String? = null, proxy: String? = null, width: Int = 0, height: Int = 0): ImageInfo {
@@ -42,7 +44,7 @@ fun thumbnail(url: String? = null, proxyUrl: String? = null, width: Int = 0, hei
 
 fun author(
     name: String? = null, url: String? = null,
-    icon: String? = null, iconProxy: String? = null
+    icon: String? = null, iconProxy: String? = null,
 ): AuthorInfo {
     return AuthorInfo(name, url, icon, iconProxy)
 }
@@ -58,7 +60,28 @@ fun field(name: String, value: String, inline: Boolean = false): Field {
 fun footer(
     text: String? = null,
     icon: String? = null,
-    iconProxy: String? = null
+    iconProxy: String? = null,
 ): Footer {
     return Footer(text, icon, iconProxy)
+}
+
+class MessageEmbedImpl(
+    url: String?,
+    title: String?,
+    description: String?,
+    type: EmbedType?,
+    timestamp: OffsetDateTime?,
+    color: Int,
+    thumbnail: Thumbnail?,
+    siteProvider: Provider?,
+    author: AuthorInfo?,
+    videoInfo: VideoInfo?,
+    footer: Footer?,
+    image: ImageInfo?,
+    fields: List<Field?>?,
+) : MessageEmbed(url, title, description, type, timestamp, color, thumbnail, siteProvider, author, videoInfo, footer, image, fields),
+    Convert<Builder> {
+    override fun convert(): Builder {
+        return toComponent()
+    }
 }
