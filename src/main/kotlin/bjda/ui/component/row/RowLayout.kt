@@ -1,5 +1,6 @@
-package bjda.ui.component.action
+package bjda.ui.component.row
 
+import bjda.ui.component.action.Action
 import bjda.ui.core.CProps
 import bjda.ui.core.ElementImpl
 import bjda.ui.core.RenderData
@@ -16,6 +17,7 @@ import java.util.Stack
  */
 class RowLayout : ElementImpl<RowLayout.Props>(Props()) {
     class Props : CProps<LambdaList<Action>>()
+
     private val rowSpace = 1.0
 
     override fun build(data: RenderData) {

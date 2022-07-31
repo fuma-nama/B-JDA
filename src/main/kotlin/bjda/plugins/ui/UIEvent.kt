@@ -11,7 +11,10 @@ import net.dv8tion.jda.api.events.message.MessageDeleteEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import java.util.UUID
 
-class UIEvent : ListenerAdapter() {
+/**
+ * You may use you own UIEvent to control event handling
+ */
+open class UIEvent : ListenerAdapter() {
     override fun onButtonInteraction(event: ButtonInteractionEvent) {
         val listener = buttons[event.componentId]
 
