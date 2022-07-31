@@ -13,7 +13,7 @@
 
     <groupId>io.github.sonmoosans</groupId>
     <artifactId>bjda</artifactId>
-    <version>4.3.2</version>
+    <version>4.3.3</version>
     <packaging>jar</packaging>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>
