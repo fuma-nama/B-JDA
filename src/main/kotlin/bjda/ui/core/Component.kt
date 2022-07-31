@@ -1,11 +1,13 @@
 package bjda.ui.core
 
 import bjda.ui.component.Fragment
+import bjda.ui.component.utils.Builder
 import bjda.ui.core.hooks.Delegate
 import bjda.ui.core.hooks.IHook
 import bjda.ui.types.*
 import bjda.utils.LambdaBuilder
 import net.dv8tion.jda.api.interactions.callbacks.IMessageEditCallback
+import net.dv8tion.jda.api.interactions.components.ActionRow
 import kotlin.reflect.KProperty
 
 open class IProps : CProps<Unit>()
@@ -41,6 +43,12 @@ open class ComponentBuilder : LambdaBuilder<AnyElement?>() {
      */
     override operator fun Array<out AnyElement?>.unaryPlus() {
         elements += Fragment(this)
+    }
+
+    operator fun ActionRow.unaryPlus() {
+        elements += Builder {
+            it.addActionRow(this)
+        }
     }
 }
 

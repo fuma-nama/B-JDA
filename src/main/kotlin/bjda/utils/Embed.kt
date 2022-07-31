@@ -47,8 +47,8 @@ fun author(
     return AuthorInfo(name, url, icon, iconProxy)
 }
 
-fun field(inline: Boolean = false): Field {
-    return Field("", "", inline)
+fun blank(inline: Boolean = false): Field {
+    return Field("\u200e", "\u200e", inline)
 }
 
 fun field(name: String, value: String, inline: Boolean = false): Field {

@@ -9,8 +9,28 @@ fun <C>(LambdaBuilder<C>.() -> Unit).build(): List<C> {
     return builder.build()
 }
 
+fun interface Convert<out C> {
+    fun convert(): C
+}
+
+fun<C> Collection<Convert<C>>.convert(): Collection<C> {
+    return this.map {
+        it.convert()
+    }
+}
+
 open class LambdaBuilder<C> {
     val elements = ArrayList<C>()
+
+    open operator fun Convert<C>.unaryPlus() {
+        elements += this.convert()
+    }
+
+    open operator fun Array<Convert<C>>.unaryPlus() {
+        + this.map {
+            it.convert()
+        }
+    }
 
     open operator fun Array<out C>.unaryPlus() {
         elements += this
@@ -28,6 +48,7 @@ open class LambdaBuilder<C> {
     /**
      * Add element if condition is true
      */
+    @Deprecated("you can use a normal If loop instead", replaceWith = ReplaceWith("if"))
     fun addIf(condition: Boolean, item: () -> C) {
         if (condition) {
             elements += item()
