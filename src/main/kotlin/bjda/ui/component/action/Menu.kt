@@ -2,7 +2,9 @@ package bjda.ui.component.action
 
 import bjda.ui.core.apply
 import bjda.ui.types.Apply
-import net.dv8tion.jda.api.interactions.components.ItemComponent
+import bjda.utils.Convert
+import net.dv8tion.jda.api.interactions.components.ActionComponent
+import net.dv8tion.jda.api.interactions.components.selections.SelectMenu
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption
 import net.dv8tion.jda.internal.interactions.component.SelectMenuImpl
 
@@ -23,7 +25,7 @@ class Menu(props: Apply<Props>) : Action {
         lateinit var options: List<SelectOption>
     }
 
-    override fun build(): ItemComponent {
+    override fun build(): ActionComponent {
         with (props) {
             val max = maxValues.coerceAtMost(options.size)
 
@@ -35,6 +37,25 @@ class Menu(props: Apply<Props>) : Action {
         fun createOptions(selected: String? = null, vararg pairs: Pair<String, String>): List<SelectOption> {
             return pairs.map {(key, value) ->
                 SelectOption.of(key, value).withDefault(value == selected)
+            }
+        }
+
+        fun menu(
+            id: String,
+            placeholder: String? = null,
+            minValues: Int = 1,
+            maxValues: Int = 1,
+            disabled: Boolean = false,
+            options: List<SelectOption>? = null,
+        ): Impl {
+            return Impl(
+                SelectMenuImpl(id, placeholder, minValues, maxValues, disabled, options)
+            )
+        }
+
+        class Impl(base: SelectMenu): SelectMenu by base, Convert<Action> {
+            override fun convert(): Action {
+                return this.toAction()
             }
         }
     }
