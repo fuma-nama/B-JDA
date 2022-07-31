@@ -2,7 +2,7 @@ package bjda.plugins.ui.modal
 
 import bjda.plugins.ui.UIEvent
 import bjda.plugins.ui.hook.event.ModalListener
-import bjda.ui.component.Row
+import bjda.ui.component.action.Row
 import bjda.ui.core.hooks.IHook
 import bjda.ui.types.AnyComponent
 import bjda.utils.LambdaList

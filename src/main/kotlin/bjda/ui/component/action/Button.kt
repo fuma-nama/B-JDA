@@ -15,14 +15,14 @@ class Button(props: Apply<Props>) : Action {
         this.props.id = id
     }
 
-    class Props {
-        var id: String? = null
-        var style: ButtonStyle = ButtonStyle.PRIMARY
-        var label: String? = null
-        var emoji: Emoji? = null
-        var url: String? = null
+    class Props(
+        var id: String? = null,
+        var style: ButtonStyle = ButtonStyle.PRIMARY,
+        var label: String? = null,
+        var emoji: Emoji? = null,
+        var url: String? = null,
         var disabled: Boolean = false
-    }
+    )
 
     override fun build(): ItemComponent {
         with (props) {

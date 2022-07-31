@@ -1,8 +1,6 @@
-package bjda.ui.component
+package bjda.ui.component.action
 
-import bjda.ui.component.action.Action
 import bjda.ui.core.CProps
-import bjda.ui.core.Component
 import bjda.ui.core.ElementImpl
 import bjda.ui.core.RenderData
 import bjda.utils.LambdaList

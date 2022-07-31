@@ -27,7 +27,7 @@ fun <T: CProps<R>, R> T.init(init: T.() -> R): T {
     return this
 }
 
-class ComponentBuilder : LambdaBuilder<AnyElement?>() {
+open class ComponentBuilder : LambdaBuilder<AnyElement?>() {
 
     /**
      * Add elements as a fragment

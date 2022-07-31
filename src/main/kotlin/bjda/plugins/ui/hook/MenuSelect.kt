@@ -4,6 +4,8 @@ import bjda.plugins.ui.UIEvent
 import bjda.plugins.ui.hook.event.SelectListener
 import bjda.ui.core.hooks.Delegate
 import bjda.ui.types.AnyComponent
+import bjda.ui.types.AnyElement
+import net.dv8tion.jda.api.interactions.components.buttons.ButtonInteraction
 import net.dv8tion.jda.api.interactions.components.selections.SelectMenuInteraction
 
 /**
@@ -32,6 +34,16 @@ class MenuSelect(
             val hook = MenuSelect(id, handler)
 
             return Delegate { this use hook }
+        }
+
+        /**
+         * Listen menu events of specified id, but don't attach to any element
+         *
+         * @return menu id
+         */
+        fun onSelectStatic(id: String, handler: (event: SelectMenuInteraction) -> Unit): String {
+            MenuSelect(id, handler).listen()
+            return id
         }
     }
 }

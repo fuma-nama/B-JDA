@@ -1,12 +1,13 @@
-package bjda.ui.component
+package bjda.ui.component.action
 
-import bjda.ui.component.action.Action
+import bjda.ui.component.utils.Builder
 import bjda.ui.core.CProps
 import bjda.ui.core.ElementImpl
 import bjda.ui.core.RenderData
 import bjda.utils.LambdaList
 import bjda.utils.build
 import net.dv8tion.jda.api.interactions.components.ActionRow
+import net.dv8tion.jda.api.interactions.components.ItemComponent
 
 class Row : ElementImpl<Row.Props>(Props()) {
     class Props : CProps<LambdaList<Action>>()
@@ -22,6 +23,14 @@ class Row : ElementImpl<Row.Props>(Props()) {
             actions.map {
                 it.build()
             }
+        )
+    }
+}
+
+fun row(vararg actions: ItemComponent): Builder {
+    return Builder {
+        it.addActionRow(
+            ActionRow.of(*actions)
         )
     }
 }

@@ -2,6 +2,7 @@ package bjda.ui.component
 
 import bjda.plugins.ui.hook.ButtonClick
 import bjda.ui.component.action.Button
+import bjda.ui.component.action.Row
 import bjda.ui.core.*
 import bjda.ui.types.Children
 import bjda.ui.types.ComponentTree
@@ -38,7 +39,7 @@ class Pager : Component<Pager.Props>(Props()) {
 
         return {
             + pages.getOrNull(page)
-            + Row()-{
+            + Row() -{
                 + Button(id = use(onPrevPage)) {
                     id = use(onPrevPage)
                     label = "<-"
