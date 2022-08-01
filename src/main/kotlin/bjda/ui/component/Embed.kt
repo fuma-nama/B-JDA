@@ -5,45 +5,48 @@ import bjda.ui.core.ElementImpl
 import bjda.ui.core.IProps
 import bjda.ui.core.RenderData
 import bjda.utils.embed
-import net.dv8tion.jda.api.EmbedBuilder
+import net.dv8tion.jda.api.entities.EmbedType
 import net.dv8tion.jda.api.entities.MessageEmbed
+import net.dv8tion.jda.api.entities.MessageEmbed.*
 import java.awt.Color
-import java.time.temporal.TemporalAccessor
+import java.time.OffsetDateTime
 
 class Embed : ElementImpl<Embed.Props>(Props()) {
     class Props : IProps() {
-        var title: String? = null
         var url: String? = null
+        var title: String? = null
         var description: String? = null
-        var author: String? = null
-        var authorUrl: String? = null
-        var authorIcon: String? = null
-        var footer: String? = null
-        var footerIcon: String? = null
-        var thumbnail: String? = null
-        var image: String? = null
-        var timestamp: TemporalAccessor? = null
-        var color: Color? = null
-        var fields: List<MessageEmbed.Field>? = null
+        var type: EmbedType? = null
+        var timestamp: OffsetDateTime? = null
+        var color: Color = Color.BLACK
+        var thumbnail: Thumbnail? = null
+        var provider: Provider? = null
+        var author: AuthorInfo? = null
+        var videoInfo: VideoInfo? = null
+        var footer: Footer? = null
+        var image: ImageInfo? = null
+        var fields: List<Field>? = null
     }
 
     override fun build(data: RenderData) {
         with (props) {
-            val builder = EmbedBuilder()
-                .setTitle(title, url)
-                .setDescription(description)
-                .setAuthor(author, authorUrl, authorIcon)
-                .setFooter(footer, footerIcon)
-                .setColor(color)
-                .setThumbnail(thumbnail)
-                .setImage(image)
-                .setTimestamp(timestamp)
+            val embed = embed(
+                url,
+                title,
+                description,
+                type,
+                timestamp,
+                color,
+                thumbnail,
+                provider,
+                author,
+                videoInfo,
+                footer,
+                image,
+                fields
+            )
 
-            fields?.forEach {
-                builder.fields.add(it)
-            }
-
-            data.addEmbeds(builder.build())
+            data.addEmbeds(embed)
         }
     }
 
