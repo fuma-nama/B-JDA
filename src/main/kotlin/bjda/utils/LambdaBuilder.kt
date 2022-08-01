@@ -23,11 +23,17 @@ open class LambdaBuilder<C> {
     val elements = ArrayList<C>()
 
     open operator fun Convert<C>.unaryPlus() {
-        elements += this.convert()
+        + this.convert()
     }
 
     open operator fun Array<Convert<C>>.unaryPlus() {
         + this.map {
+            it.convert()
+        }
+    }
+
+    open operator fun Collection<Convert<C>>.unaryMinus() {
+        elements += this.map {
             it.convert()
         }
     }
@@ -53,38 +59,6 @@ open class LambdaBuilder<C> {
         if (condition) {
             elements += item()
         }
-    }
-
-    /**
-     * Return item if condition is true, otherwise return null
-     */
-    inline fun <T: C> on(condition: Boolean, item: () -> T): T? {
-        return if (condition) item() else null
-    }
-
-    /**
-     * Return item if condition is false, otherwise return null
-     */
-    inline fun <T: C> not(condition: Boolean, item: () -> T): T? {
-        return if (!condition) item() else null
-    }
-
-    /**
-     * Return a list of items if condition is true
-     *
-     * Otherwise, return empty list
-     */
-    fun where(condition: Boolean, vararg items: C): Array<out C?> {
-        return if (condition) items else arrayOfNulls<Any?>(items.size) as Array<C?>
-    }
-
-    /**
-     * Return a list of items if condition is true
-     *
-     * Otherwise, return a list filled with null with min size
-     */
-    fun where(condition: Boolean, items: LambdaList<C>, min: Int): List<C?> {
-        return if (condition) items.build() else List(min) { null }
     }
 
     fun build(): List<C> {
