@@ -16,14 +16,14 @@ fun embed(
     timestamp: OffsetDateTime? = null,
     color: Color = Color.BLACK,
     thumbnail: Thumbnail? = null,
-    siteProvider: Provider? = null,
+    provider: Provider? = null,
     author: AuthorInfo? = null,
     videoInfo: VideoInfo? = null,
     footer: Footer? = null,
     image: ImageInfo? = null,
     fields: List<Field>? = null,
 ): MessageEmbedImpl {
-    return MessageEmbedImpl(url, title, description, type, timestamp, color.rgb, thumbnail, siteProvider, author, videoInfo, footer, image, fields)
+    return MessageEmbedImpl(url, title, description, type, timestamp, color.rgb, thumbnail, provider, author, videoInfo, footer, image, fields)
 }
 
 fun image(url: String? = null, proxy: String? = null, width: Int = 0, height: Int = 0): ImageInfo {
@@ -73,13 +73,13 @@ class MessageEmbedImpl(
     timestamp: OffsetDateTime?,
     color: Int,
     thumbnail: Thumbnail?,
-    siteProvider: Provider?,
+    provider: Provider?,
     author: AuthorInfo?,
     videoInfo: VideoInfo?,
     footer: Footer?,
     image: ImageInfo?,
     fields: List<Field?>?,
-) : MessageEmbed(url, title, description, type, timestamp, color, thumbnail, siteProvider, author, videoInfo, footer, image, fields),
+) : MessageEmbed(url, title, description, type, timestamp, color, thumbnail, provider, author, videoInfo, footer, image, fields),
     Convert<Builder> {
     override fun convert(): Builder {
         return toComponent()
