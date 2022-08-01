@@ -21,7 +21,7 @@ abstract class SuperCommand (
     override val guildOnly: Boolean? = null,
     override val permissions: DefaultMemberPermissions? = null
 ): SuperNode, PermissionEntry, NameLocalization, DescriptionLocalization {
-    private val options = ArrayList<IOptionValue<*>>()
+    private val options = ArrayList<AnyOption>()
 
     open fun<T> option(type: OptionType, name: String, description: String = "No Description"): OptionValue<T> {
         val value = OptionValue<T>(name, type, description)
@@ -97,15 +97,15 @@ class EventInfo(
     val event: SlashCommandInteractionEvent
 ) {
 
-    operator fun<T, P> IOptionValue<T>.getValue(parent: P, property: Any): T {
+    operator fun<T, P> IOptionValue<T, *>.getValue(parent: P, property: Any): T {
         return value(event)
     }
 
-    fun<T> IOptionValue<T>.value(): T {
+    fun<T> IOptionValue<T, *>.value(): T {
         return value(event)
     }
 
-    operator fun<T> IOptionValue<T>.invoke(): T {
+    operator fun<T> IOptionValue<T, *>.invoke(): T {
         return value(event)
     }
 
