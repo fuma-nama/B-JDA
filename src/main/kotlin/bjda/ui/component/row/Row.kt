@@ -10,24 +10,30 @@ import bjda.utils.build
 import net.dv8tion.jda.api.interactions.components.ActionComponent
 import net.dv8tion.jda.api.interactions.components.ActionRow
 
-class Row(action: List<Action>) : ElementImpl<Row.Props>(Props(action)) {
-    constructor(vararg action: Action) : this(
-        action.toList()
-    )
+class Row : ElementImpl<Row.Props> {
+    constructor(row: ActionRow) : super(Props(row))
+    constructor(action: List<Action>) : super(Props(action))
 
     constructor(action: LambdaList<Action>) : this(
         action.build()
+    )
+
+    constructor(vararg action: Action) : this(
+        action.toList()
     )
 
     constructor(vararg action: ActionComponent) : this(
         action.map { it.toAction() }
     )
 
-    class Props(actions: List<Action>) : CProps<ActionRow>() {
-        override var children = ActionRow.of(
-            actions.map {
-                it.build()
-            }
+    class Props(override var children: ActionRow) : CProps<ActionRow>() {
+
+        constructor(actions: List<Action>) : this(
+            ActionRow.of(
+                actions.map {
+                    it.build()
+                }
+            )
         )
     }
 
@@ -40,8 +46,14 @@ class Row(action: List<Action>) : ElementImpl<Row.Props>(Props(action)) {
     }
 
     companion object {
-        fun row(action: LambdaList<ActionComponent>): ActionRow {
+        fun ActionRow(action: LambdaList<ActionComponent>): ActionRow {
             return ActionRow.of(action.build())
+        }
+
+        fun rowOf(action: LambdaList<ActionComponent>): Row {
+            return Row(
+                ActionRow(action)
+            )
         }
     }
 }
