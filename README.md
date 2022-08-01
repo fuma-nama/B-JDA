@@ -12,7 +12,7 @@ Used for my own bots only, might be out of maintenance
 <dependency>
   <groupId>io.github.sonmoosans</groupId>
   <artifactId>bjda</artifactId>
-  <version>4.3.3</version>
+  <version>4.3.5</version>
 </dependency>
 ```
 
@@ -91,12 +91,12 @@ val Panel = FComponent.component {
       title = "Hello World"
     }
 
-    + Row()-{
-      + Button(onConfirm) {
+    + Row(
+      Button.success(
+        id = onConfirm,
         label = "Confirm"
-        style = ButtonStyle.SUCCESS
-      }
-    }
+      )
+    )
   }
 }
 ```
@@ -201,35 +201,22 @@ Give component a `key` prop to help the Scanner knows which component is new or 
 <br>
 It can improve the performance of the Tree Scanner
 
-## What's New Since 4.0.0
+## What's New Since 4.2.0
 
-### UI Update Queue (since 4.2.0)
-Before 4.2.0, when you update the ui by using `ui.edit(event)` or `state.update(event)`
-<br>
-It will call `event.editMessage` asynchronously.
+### Form API 2.0
+> You must unmount the component to avoid memory leaks
 
-if you are calling it twice at same time, The previous task might be finish later than the current one
-<br>
-which will make the ui displayed in message is not the current one
-
-### Await updating Unsupported
-`ui.updateHooks()` is not unsupported since 4.2.0
-
-### Form API supports Class version
-Example: 
+For modals that is attached to component lifecycle, use Form API.
 ```kotlin
+val AddForm = Form {
+    //set properties
+}
+
 class AddForm : FormFactory() {
-    override val title = "Add Todo"
+    override val title = "..."
 
     override fun render(): LambdaList<Row> {
-        return {
-            + Row()-{
-                + TextField("todo") {
-                    label = "TODO"
-                    style = TextInputStyle.PARAGRAPH
-                }
-            }
-        }
+        return {}
     }
 
     override fun onSubmit(event: ModalInteractionEvent) {
@@ -237,10 +224,57 @@ class AddForm : FormFactory() {
     }
 }
 ```
-### Reaction Module Updated
-Notice: We still recommend you to use button instead of reaction
-<br>
-You can enable it by `ui.enableReaction(message)`
+**Modal Pool**
+Modal Pool used to Manage modal listeners.
+
+Creating a Modal Pool:
+```kotlin
+val AddTodoPool = ModalPool.multi(
+    modal("Add Todo") {
+        + Row(
+            input(
+                id = "todo",
+                label = "Todo",
+                style = TextInputStyle.PARAGRAPH
+            )
+        )
+    }
+)
+```
+Create a Listener with random id
+```kotlin
+val onSubmitTodo = AddTodoPool.listen { event ->
+  state.update(event) {
+    todos += event.value("todo")
+  }
+}
+```
+Getting Modal instance
+```kotlin
+val onAddTodo by onClick {
+  val modal = AddTodoPool.next(onSubmitTodo)
+  it.replyModal(modal).queue()
+}
+```
+
+### Convert Interface
+By extending the Convert interface, you can simply your code on LambdaList
+
+**Before:**
+```kotlin
+{
+    //Create a MessageEmbed and convert it to Component
+    + embed(title = "Hello World").convert() 
+}
+```
+**Now:**
+```kotlin
+{
+    //MessageEmbed that extended the Convert<Component> interface
+    //doesn't need to call convert manually
+    + embed(title = "Hello World")
+}
+```
 
 ### UI Once and `component.buildMessage()`
 UIOnce is used for components that rendered once only
