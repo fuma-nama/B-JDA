@@ -79,6 +79,7 @@ abstract class SuperCommand (
         val int = wrap<Int>(OptionType.INTEGER)
         val number = wrap<Double>(OptionType.NUMBER)
         val user = wrap<User>(OptionType.USER)
+        val member = wrap<Member>(OptionType.USER)
         val role = wrap<Role>(OptionType.ROLE)
         val text = wrap<String>(OptionType.STRING)
         val boolean = wrap<Boolean>(OptionType.BOOLEAN)
