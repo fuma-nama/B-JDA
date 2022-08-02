@@ -79,7 +79,19 @@ class MessageEmbedImpl(
     footer: Footer?,
     image: ImageInfo?,
     fields: List<Field?>?,
-) : MessageEmbed(url, title, description, type, timestamp, color, thumbnail, provider, author, videoInfo, footer, image, fields),
+) : MessageEmbed(url,
+    title,
+    description,
+    type?: EmbedType.RICH,
+    timestamp,
+    color,
+    thumbnail,
+    provider,
+    author,
+    videoInfo,
+    footer,
+    image,
+    fields),
     Convert<Builder> {
     override fun convert(): Builder {
         return toComponent()
