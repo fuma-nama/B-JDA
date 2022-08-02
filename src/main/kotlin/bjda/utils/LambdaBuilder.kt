@@ -33,7 +33,7 @@ open class LambdaBuilder<C> {
     }
 
     open operator fun Collection<Convert<C>>.unaryMinus() {
-        elements += this.map {
+        + this.map {
             it.convert()
         }
     }

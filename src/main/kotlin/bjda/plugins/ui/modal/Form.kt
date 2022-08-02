@@ -69,14 +69,6 @@ open class Form(
             return Delegate { this use hook }
         }
 
-        fun ModalInteractionEvent.value(id: String): String {
-            return getValue(id)!!.asString
-        }
-
-        fun ModalInteractionEvent.value(item: Action): String {
-            return value(item.id!!)
-        }
-
         class ModalHook(private val form: Form) : IHook<Modal> {
             override fun onCreate(component: AnyComponent, initial: Boolean): Modal {
                 if (initial) {
