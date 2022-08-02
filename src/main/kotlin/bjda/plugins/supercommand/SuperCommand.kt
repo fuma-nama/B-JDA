@@ -23,8 +23,18 @@ abstract class SuperCommand (
 ): SuperNode, PermissionEntry, NameLocalization, DescriptionLocalization {
     private val options = ArrayList<AnyOption>()
 
-    open fun<T> option(type: OptionType, name: String, description: String = "No Description"): OptionValue<T> {
+    open fun<T> option(
+        type: OptionType,
+        name: String,
+        description: String = "No Description",
+        init: (OptionValue<T>.() -> Unit)? = null
+    ): OptionValue<T> {
+
         val value = OptionValue<T>(name, type, description)
+
+        if (init != null) {
+            value.apply(init)
+        }
 
         options.add(value)
         return value

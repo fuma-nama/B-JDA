@@ -13,25 +13,21 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData
 
 class Listeners {
     private val commands = HashMap<Info, SuperCommand>()
-    private val contexts = HashMap<ContextInfo, SuperContext>()
+    private val contexts = HashMap<ContextInfo, SuperContext<*>>()
 
     fun run(info: Info, event: SlashCommandInteractionEvent) {
         commands[info]?.execute(event)
     }
 
     fun run(info: ContextInfo, event: GenericContextInteractionEvent<*>) {
-        when (event) {
-            is UserContextInteractionEvent -> {
-                contexts[info]?.run(event)
-            }
-
-            is MessageContextInteractionEvent -> {
-                contexts[info]?.run(event)
-            }
-        }
+        contexts[info]?.call(event)
     }
 
-    operator fun set(info: ContextInfo, context: SuperContext) {
+    private fun<T : GenericContextInteractionEvent<*>> SuperContext<T>.call(event: GenericContextInteractionEvent<*>) {
+        this.run(event as T)
+    }
+
+    operator fun set(info: ContextInfo, context: SuperContext<*>) {
         contexts[info] = context
     }
 

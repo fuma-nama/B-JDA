@@ -3,21 +3,39 @@ package bjda.plugins.supercommand
 import bjda.plugins.supercommand.entries.NameLocalization
 import bjda.plugins.supercommand.entries.PermissionEntry
 import bjda.plugins.supercommand.entries.SuperNode
+import net.dv8tion.jda.api.events.interaction.command.GenericContextInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent
+import net.dv8tion.jda.api.interactions.DiscordLocale
 import net.dv8tion.jda.api.interactions.commands.Command.Type
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions
 import net.dv8tion.jda.api.interactions.commands.build.CommandData
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
+import java.util.EnumMap
 
-abstract class SuperContext(
+abstract class SuperUserContext(
+    name: String,
+    guildOnly: Boolean? = null,
+    permissions: DefaultMemberPermissions? = null
+): SuperContext<UserContextInteractionEvent>(
+    name, Type.USER, guildOnly, permissions
+)
+
+abstract class SuperMessageContext(
+    name: String,
+    guildOnly: Boolean? = null,
+    permissions: DefaultMemberPermissions? = null
+): SuperContext<MessageContextInteractionEvent>(
+    name, Type.MESSAGE, guildOnly, permissions
+)
+
+abstract class SuperContext<E: GenericContextInteractionEvent<*>>(
     override val name: String,
     val type: Type,
     override val guildOnly: Boolean? = null,
     override val permissions: DefaultMemberPermissions? = null
 ) : SuperNode, PermissionEntry, NameLocalization {
-    open fun run(event: MessageContextInteractionEvent) = Unit
-    open fun run(event: UserContextInteractionEvent) = Unit
+    open fun run(event: E) = Unit
 
     override fun build(listeners: Listeners): CommandData {
         val data = CommandDataImpl(type, name)

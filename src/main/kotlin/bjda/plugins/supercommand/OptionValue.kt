@@ -111,20 +111,6 @@ interface IOptionValue<T, O: IOptionValue<T, O>> {
         return self
     }
 
-    fun intRange(range: Pair<Long, Long>): O {
-        val (min, max) = range
-        data.setRequiredRange(min, max)
-
-        return self
-    }
-
-    fun doubleRange(range: Pair<Double, Double>): O {
-        val (min, max) = range
-        data.setRequiredRange(min, max)
-
-        return self
-    }
-
     fun channel(vararg types: ChannelType) = channel(types.toList())
 
     fun channel(types: Collection<ChannelType>): O {
@@ -140,7 +126,7 @@ interface IOptionValue<T, O: IOptionValue<T, O>> {
         choices.toList()
     )
 
-    fun<V> choices(vararg choice: Pair<String, V>) = choices(
+    fun choices(vararg choice: Pair<String, T>) = choices(
         choice.map {(key, value) ->
             choice(key, value)
         }
@@ -153,6 +139,27 @@ interface IOptionValue<T, O: IOptionValue<T, O>> {
     }
 
     companion object {
+        fun<V: Number, O: IOptionValue<V, O>> O.range(range: Pair<V?, V?>): O {
+            val (min, max) = range
+
+            if (min != null) {
+                when (min) {
+                    is Int -> data.setMinValue(min.toLong())
+                    is Long -> data.setMinValue(min)
+                    is Double -> data.setMinValue(min)
+                }
+            }
+
+            if (max != null) {
+                when (max) {
+                    is Int -> data.setMinValue(max.toLong())
+                    is Long -> data.setMinValue(max)
+                    is Double -> data.setMinValue(max)
+                }
+            }
+
+            return self
+        }
 
         infix fun<T> SlashCommandInteractionEvent.value(option: IOptionValue<T, *>): T {
             return option value this
@@ -161,6 +168,7 @@ interface IOptionValue<T, O: IOptionValue<T, O>> {
         fun<V> choice(key: String, value: V): Command.Choice {
             return when (value) {
                 is Long -> Command.Choice(key, value)
+                is Int -> Command.Choice(key, value.toLong())
                 is Double -> Command.Choice(key, value)
                 else -> Command.Choice(key, value.toString())
             }
