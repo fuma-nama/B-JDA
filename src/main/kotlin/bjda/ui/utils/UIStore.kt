@@ -2,6 +2,11 @@ package bjda.ui.utils
 
 import bjda.ui.core.UI
 
+/**
+ * For production, you might use other cache libraries.
+ *
+ * And set an expiry time for each entry
+ */
 open class UIStore<T>: HashMap<T, UI>() {
     /**
      * get UI instance or put the default value
