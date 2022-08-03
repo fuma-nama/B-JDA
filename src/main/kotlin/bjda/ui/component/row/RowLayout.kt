@@ -21,6 +21,7 @@ class RowLayout(actions: List<Action>) : ElementImpl<RowLayout.Props>(Props(acti
         override var children = actions
     }
 
+    constructor() : this(emptyList())
     constructor(vararg action: Action) : this(action.toList())
     constructor(action: LambdaList<Action>) : this(action.build())
 
