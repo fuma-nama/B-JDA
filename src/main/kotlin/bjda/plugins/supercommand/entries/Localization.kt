@@ -2,42 +2,70 @@ package bjda.plugins.supercommand.entries
 
 import net.dv8tion.jda.api.interactions.DiscordLocale
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
+import java.util.*
 
 typealias LocalizeMap = Map<DiscordLocale, String>
 
-interface NameLocalization {
+fun localizes() = EnumMap<DiscordLocale, String>(DiscordLocale::class.java)
+
+interface CommandLocalization {
     val localNames: LocalizeMap?
         get() = null
 
-    fun CommandDataImpl.setLocalName(): CommandDataImpl {
+    fun CommandDataImpl.setLocalize(): CommandDataImpl {
         return localNames?.let {
             setNameLocalizations(it)
         }?: this
     }
 
-    fun SubcommandData.setLocalName(): SubcommandData {
+    fun SubcommandData.setLocalize(): SubcommandData {
         return localNames?.let {
             setNameLocalizations(it)
         }?: this
     }
 }
 
-interface DescriptionLocalization {
+interface SlashLocalization : CommandLocalization {
+
     val localDescriptions: LocalizeMap?
         get() = null
 
-    fun CommandDataImpl.setLocalDescription(): CommandDataImpl {
-
-        return localDescriptions?.let {
+    override fun CommandDataImpl.setLocalize(): CommandDataImpl {
+        localNames?.let {
+            setNameLocalizations(it)
+        }
+        
+        localDescriptions?.let {
             setDescriptionLocalizations(it)
-        }?: this
+        }
+        
+        return this
+    }
+    
+    fun SubcommandGroupData.setLocalize(): SubcommandGroupData {
+        localNames?.let {
+            setNameLocalizations(it)
+        }
+        
+        localDescriptions?.let {
+            setDescriptionLocalizations(it)
+        }
+        
+        return this
     }
 
-    fun SubcommandData.setLocalDescription(): SubcommandData {
+    override fun SubcommandData.setLocalize(): SubcommandData {
 
-        return localDescriptions?.let {
+        localNames?.let {
+            setNameLocalizations(it)
+        }
+
+        localDescriptions?.let {
             setDescriptionLocalizations(it)
-        }?: this
+        }
+        
+        return this
     }
 }
