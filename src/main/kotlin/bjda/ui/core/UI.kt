@@ -198,11 +198,14 @@ open class UI(private val option: Option = Option()) {
         root?.unmount()
         root = null
 
-        for (hook in hooks) {
+        val itr = hooks.iterator()
+
+        while (itr.hasNext()) {
+            val hook = itr.next()
+            itr.remove()
+
             hook.onDestroy()
         }
-
-        hooks.clear()
     }
 
     fun destroyHook(hook: UIHook) {
