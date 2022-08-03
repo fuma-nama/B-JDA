@@ -4,7 +4,7 @@ import net.dv8tion.jda.api.MessageBuilder
 import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.interactions.components.ActionRow
 
-class RenderData : MessageBuilder() {
+open class RenderData : MessageBuilder() {
     fun addActionRow(vararg rows: ActionRow) {
         this.addActionRow(listOf(*rows))
     }
