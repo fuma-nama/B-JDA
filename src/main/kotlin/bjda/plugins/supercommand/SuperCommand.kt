@@ -1,7 +1,7 @@
 package bjda.plugins.supercommand
 
-import bjda.plugins.supercommand.entries.DescriptionLocalization
-import bjda.plugins.supercommand.entries.NameLocalization
+import bjda.plugins.supercommand.entries.SlashLocalization
+import bjda.plugins.supercommand.entries.CommandLocalization
 import bjda.plugins.supercommand.entries.PermissionEntry
 import bjda.plugins.supercommand.entries.SuperNode
 import bjda.utils.embed
@@ -20,7 +20,7 @@ abstract class SuperCommand (
     val description: String = "No Description",
     override val guildOnly: Boolean? = null,
     override val permissions: DefaultMemberPermissions? = null
-): SuperNode, PermissionEntry, NameLocalization, DescriptionLocalization {
+): SuperNode, PermissionEntry, SlashLocalization {
     private val options = ArrayList<AnyOption>()
 
     open fun<T> option(
@@ -59,8 +59,8 @@ abstract class SuperCommand (
     override fun build(listeners: Listeners): CommandDataImpl {
         val data = CommandDataImpl(name, description)
             .setPermissions()
-            .setLocalName()
-            .setLocalDescription()
+            .setLocalize()
+            .setLocalize()
 
         data.addOptions(options.map {
             it.data
@@ -73,8 +73,8 @@ abstract class SuperCommand (
 
     open fun buildSub(group: String, subgroup: String? = null, listeners: Listeners): SubcommandData {
         val data = SubcommandData(name, description)
-            .setLocalName()
-            .setLocalDescription()
+            .setLocalize()
+            .setLocalize()
 
         data.addOptions(options.map {
             it.data

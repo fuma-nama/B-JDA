@@ -11,7 +11,7 @@ typealias OptionInit<T> = OptionValue<T>.() -> Unit
 
 fun command(
     name: String,
-    description: String = "No Description",
+    description: String,
     guildOnly: Boolean? = null,
     permissions: DefaultMemberPermissions? = null,
     init: SuperCommandBuilder.() -> Unit

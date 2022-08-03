@@ -22,13 +22,25 @@ open class OptionValueMapper<T, R>(
     }
 }
 
-open class OptionValue<T>(
+class OptionValue<T>(
     name: String,
     type: OptionType,
     description: String) : IOptionValue<T, OptionValue<T>> {
 
     override var data = OptionData(type, name, description)
     var default: (() -> T)? = null
+
+    var autoComplete
+        get() = data.isAutoComplete
+        set(v) {
+            data.isAutoComplete = v
+        }
+
+    var required
+        get() = data.isRequired
+        set(v) {
+            data.isRequired = v
+        }
 
     fun optional(): OptionValue<T?> = this as OptionValue<T?>
 
@@ -40,6 +52,12 @@ open class OptionValue<T>(
     fun default(value: () -> T): OptionValue<T> {
         default = value
         return this
+    }
+
+    fun<R> map(value: (T) -> R, init: OptionValue<T>.() -> Unit): OptionValueMapper<T, R> {
+        this.apply(init)
+
+        return OptionValueMapper(this, value)
     }
 
     override fun parseMapping(mapping: OptionMapping?): T {
@@ -87,20 +105,32 @@ interface IOptionValue<T, O: IOptionValue<T, O>> {
         return self
     }
 
-    fun localizeName(vararg lang: Pair<DiscordLocale, String>) = localizeName(
+    fun name(locale: DiscordLocale, name: String): O {
+        data.setNameLocalization(locale, name)
+
+        return self
+    }
+
+    fun description(locale: DiscordLocale, description: String): O {
+        data.setDescriptionLocalization(locale, description)
+
+        return self
+    }
+
+    fun names(vararg lang: Pair<DiscordLocale, String>) = names(
         mapOf(*lang)
     )
 
-    fun localizeDescription(vararg lang: Pair<DiscordLocale, String>) = localizeDescription(
+    fun descriptions(vararg lang: Pair<DiscordLocale, String>) = descriptions(
         mapOf(*lang)
     )
 
-    fun localizeName(map: Map<DiscordLocale, String>): O {
+    fun names(map: Map<DiscordLocale, String>): O {
         data.setNameLocalizations(map)
         return self
     }
 
-    fun localizeDescription(map: Map<DiscordLocale, String>): O {
+    fun descriptions(map: Map<DiscordLocale, String>): O {
         data.setDescriptionLocalizations(map)
         return self
     }
