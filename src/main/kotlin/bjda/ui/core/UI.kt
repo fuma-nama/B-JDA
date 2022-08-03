@@ -17,7 +17,14 @@ open class UI(private val option: Option = Option()) {
         /**
          * Fired after updating components
          */
-        var afterUpdate: () -> Unit = {},
+        var afterUpdate: (ui: UI) -> Unit = {},
+        /**
+         * Fired when ui is destroying
+         */
+        var onDestroy: (ui: UI) -> Unit = {},
+        /**
+         * Renderer to render elements
+         */
         var renderer: Renderer? = null
     )
 
@@ -180,7 +187,14 @@ open class UI(private val option: Option = Option()) {
         hooks += hook
     }
 
+    /**
+     * Destroy root element and ui hooks
+     *
+     * @see Option.onDestroy
+     */
     fun destroy() {
+        option.onDestroy(this)
+
         root?.unmount()
         root = null
 
@@ -200,7 +214,7 @@ open class UI(private val option: Option = Option()) {
         private val scanner = ComponentTreeScannerImpl(this@UI)
 
         override fun onUpdated() {
-            option.afterUpdate()
+            option.afterUpdate(this@UI)
         }
 
         override fun getScanner(): ComponentTreeScanner {

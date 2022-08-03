@@ -5,7 +5,7 @@ import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.requests.RestAction
 
-class InteractionUpdateHook(private val hook: InteractionHook): UpdateHook() {
+open class InteractionUpdateHook(private val hook: InteractionHook): UpdateHook() {
     override fun isIgnored(data: HookData): Boolean {
         return data.ignore.any {it.interaction == hook.interaction.id}
     }
