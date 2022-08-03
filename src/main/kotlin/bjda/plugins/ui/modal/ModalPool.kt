@@ -56,6 +56,56 @@ interface ModalPool {
         fun multi(creator: ModalCreator): ModalPoolMulti {
             return ModalPoolMulti(creator)
         }
+
+        fun fixed(id: String = UIEvent.createId(), creator: ModalCreator): FixedModalPool {
+            return FixedModalPool(id, creator)
+        }
+
+        fun fixed(id: String = UIEvent.createId(), creator: ModalCreator, listener: ModalListener): FixedModalPool {
+            val pool = FixedModalPool(id, creator)
+            pool.listen(listener)
+
+            return pool
+        }
+    }
+}
+
+/**
+ * A Fixed ID pool to store modals with only one modal listeners.
+ *
+ * When no modal is waiting for submit, its listener will be temporarily destroyed.
+ */
+open class FixedModalPool(id: String, val creator: ModalCreator) {
+    private var info = Info(id)
+
+    fun listen(listener: ModalListener) {
+
+        UIEvent.listen(info.id, Listener(listener))
+    }
+
+    fun destroy() {
+        info.used--
+
+        if (info.used == 0) {
+            println("destroy")
+            UIEvent.modals.remove(info.id)
+        }
+    }
+
+    fun next(): Modal {
+        info.used++
+
+        return creator(info.id)
+    }
+
+    data class Info(val id: String, var used: Int = 0)
+
+    inner class Listener(private val base: ModalListener): ModalListener {
+        override fun onSubmit(event: ModalInteractionEvent) {
+            base.onSubmit(event)
+
+            destroy()
+        }
     }
 }
 
