@@ -87,7 +87,6 @@ open class FixedModalPool(id: String, val creator: ModalCreator) {
         info.used--
 
         if (info.used == 0) {
-            println("destroy")
             UIEvent.modals.remove(info.id)
         }
     }

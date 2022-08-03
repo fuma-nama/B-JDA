@@ -60,7 +60,6 @@ abstract class SuperCommand (
         val data = CommandDataImpl(name, description)
             .setPermissions()
             .setLocalize()
-            .setLocalize()
 
         data.addOptions(options.map {
             it.data
@@ -73,7 +72,6 @@ abstract class SuperCommand (
 
     open fun buildSub(group: String, subgroup: String? = null, listeners: Listeners): SubcommandData {
         val data = SubcommandData(name, description)
-            .setLocalize()
             .setLocalize()
 
         data.addOptions(options.map {
