@@ -16,6 +16,18 @@ open class UIStore<T>: HashMap<T, UI>() {
     }
 
     /**
+     * Put and Destroy the old instance with the new one
+     *
+     * @return Destroyed UI
+     */
+    fun putUI(key: T, new: UI): UI? {
+        val ui = this.put(key, new)
+        ui?.destroy()
+
+        return ui
+    }
+
+    /**
      * Replace and Destroy the old instance with the new one
      *
      * @return Destroyed UI
