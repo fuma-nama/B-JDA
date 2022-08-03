@@ -15,15 +15,20 @@ import java.util.Stack
  *
  * Auto create a row when no space available
  */
-class RowLayout : ElementImpl<RowLayout.Props>(Props()) {
-    class Props : CProps<LambdaList<Action>>()
+class RowLayout(actions: List<Action>) : ElementImpl<RowLayout.Props>(Props(actions)) {
+
+    class Props(actions: List<Action>) : CProps<List<Action>>() {
+        override var children = actions
+    }
+
+    constructor(vararg action: Action) : this(action.toList())
+    constructor(action: LambdaList<Action>) : this(action.build())
 
     private val rowSpace = 1.0
 
     override fun build(data: RenderData) {
-        val actions = props.children.build()
-
         val row: Stack<ItemComponent> = Stack()
+        val actions = props.children
         var space = rowSpace
 
         actions.forEach {
