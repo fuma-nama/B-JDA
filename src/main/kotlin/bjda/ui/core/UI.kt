@@ -187,6 +187,8 @@ open class UI(private val option: Option = Option()) {
         for (hook in hooks) {
             hook.onDestroy()
         }
+
+        hooks.clear()
     }
 
     fun destroyHook(hook: UIHook) {
