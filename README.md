@@ -12,7 +12,7 @@ Used for my own bots only, might be out of maintenance
 <dependency>
   <groupId>io.github.sonmoosans</groupId>
   <artifactId>bjda</artifactId>
-  <version>4.3.7</version>
+  <version>4.5.0</version>
 </dependency>
 ```
 
@@ -41,31 +41,34 @@ app.reply(event)
 ```
 Declare slash command 
 ```kotlin
-class SuperHello : SuperCommand(name = "hello", description = "Say Hello") {
-  private val size: String by option(OptionType.STRING, "size").choices(
-    "Small" to "2xl",
-    "Medium" to "4xl",
-    "Large" to "6xl"
-  ).required(true)
-
-  override val run: CommandHandler = {
-    //After 4.2.1, we must call option() or option.value(...)
-    //To get option value from event
-    event.reply("size: ${ size() }").queue()
+command(name = "hello", description = "Say Hello") {
+  name(DiscordLocale.CHINESE_TAIWAN, "測試命令")
+  
+  val size = int("size", "Size of example").map({ "${it}xl" }) {
+    choices(
+      "Small" to 2,
+      "Medium" to 4,
+      "Large" to 6
+    )
+    optional { 6 }
+  }
+  
+  execute {
+    event.reply("size: ${size()}").queue()
   }
 }
 ```
 Application Command is also supported
 ```kotlin
-class UserHelloCommand : SuperContext(name = "hello", type = Command.Type.USER) {
-    override fun run(event: UserContextInteractionEvent) {
-        event.reply("Hello").queue()
-    }
+val UserHelloCommand = userCommand(name = "hello") {
+  execute { event ->
+    event.reply("Hello").queue()
+  }
 }
 ```
 The coolest thing is you can even create a text command with Clikt
 <br>
-Notice that Discord is going to replace text commands with slash commands, avoid to use it in production 
+Notice that It is better to replace text commands with slash commands 
 ```kotlin
 class Hello : TextCommand(name = "apps") { //TextCommand is based on Clikt
   override fun run() {
@@ -108,10 +111,10 @@ Normally it should be synchronous but in some cases it is async.
 
 ### Creating the Command
 ```kotlin
-class MessageHelloCommand : SuperCommand(name = "hello", description = "Hello World") {
-    override val run: CommandHandler = {
-        event.reply("Hello").queue()
-    }
+val MessageHelloCommand = command(name = "hello", description = "Hello World") {
+  execute {
+    event.reply("Hello").queue()
+  }
 }
 ```
 
@@ -312,4 +315,4 @@ ch["form"]("new_content")
 
 ## Coming soon
 
-We will move to Kord soon which is a better discord api written in kotlin
+We will move to Kord soon which is a discord api written in kotlin
