@@ -75,12 +75,20 @@ interface ModalPool {
  *
  * When no modal is waiting for submit, its listener will be temporarily destroyed.
  */
-open class FixedModalPool(id: String, val creator: ModalCreator) {
+open class FixedModalPool(id: String, val creator: ModalCreator): ModalListener {
+
     private var info = Info(id)
+    private var listener: ModalListener? = null
 
+    /**
+     * Start listening at given id
+     *
+     * If there's an existing listener, replace it with the new one
+     */
     fun listen(listener: ModalListener) {
+        this.listener = listener
 
-        UIEvent.listen(info.id, Listener(listener))
+        UIEvent.listen(info.id, this)
     }
 
     fun destroy() {
@@ -92,6 +100,10 @@ open class FixedModalPool(id: String, val creator: ModalCreator) {
     }
 
     fun next(): Modal {
+        if (info.used == 0) {
+            UIEvent.listen(info.id, this)
+        }
+
         info.used++
 
         return creator(info.id)
@@ -99,12 +111,10 @@ open class FixedModalPool(id: String, val creator: ModalCreator) {
 
     data class Info(val id: String, var used: Int = 0)
 
-    inner class Listener(private val base: ModalListener): ModalListener {
-        override fun onSubmit(event: ModalInteractionEvent) {
-            base.onSubmit(event)
+    override fun onSubmit(event: ModalInteractionEvent) {
+        listener?.onSubmit(event)
 
-            destroy()
-        }
+        destroy()
     }
 }
 
