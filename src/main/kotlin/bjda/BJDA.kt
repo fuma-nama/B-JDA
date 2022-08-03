@@ -8,8 +8,8 @@ class BJDA private constructor(private val jda: JDA) {
     private val modules = ArrayList<IModule>()
 
     companion object {
-        fun create(jda: JDA): BJDA {
-            return BJDA(jda)
+        fun create(jda: JDA, init: BJDA.() -> Unit = {}): BJDA {
+            return BJDA(jda).apply(init)
         }
     }
 
