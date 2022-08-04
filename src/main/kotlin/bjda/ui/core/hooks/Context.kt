@@ -1,7 +1,7 @@
 package bjda.ui.core.hooks
 
 import bjda.ui.core.CProps
-import bjda.ui.core.ComponentBuilder
+import bjda.ui.utils.ComponentBuilder
 import bjda.ui.core.ElementImpl
 import bjda.ui.core.RenderData
 import bjda.ui.types.AnyComponent

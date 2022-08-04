@@ -1,6 +1,7 @@
 package bjda.ui.core
 
 import bjda.ui.types.*
+import bjda.ui.utils.ComponentBuilder
 
 fun parseChildren(children: Children): ComponentTree {
     return ComponentBuilder().apply(children).build().toTypedArray()

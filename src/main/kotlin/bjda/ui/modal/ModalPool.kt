@@ -57,10 +57,12 @@ interface ModalPool {
             return ModalPoolMulti(creator)
         }
 
+        @Deprecated("You should use ModalSubmit and a Static ModalCreator instead")
         fun fixed(id: String = UIEvent.createId(), creator: ModalCreator): FixedModalPool {
             return FixedModalPool(id, creator)
         }
 
+        @Deprecated("You should use ModalSubmit and a Static ModalCreator instead")
         fun fixed(id: String = UIEvent.createId(), creator: ModalCreator, listener: ModalListener): FixedModalPool {
             val pool = FixedModalPool(id, creator)
             pool.listen(listener)
@@ -75,6 +77,7 @@ interface ModalPool {
  *
  * When no modal is waiting for submit, its listener will be temporarily destroyed.
  */
+@Deprecated("You should use ModalSubmit and a Static ModalCreator instead")
 open class FixedModalPool(id: String, val creator: ModalCreator): ModalListener {
 
     private var info = Info(id)

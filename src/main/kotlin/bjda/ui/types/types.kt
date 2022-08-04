@@ -2,7 +2,7 @@ package bjda.ui.types
 
 import bjda.ui.core.CProps
 import bjda.ui.core.Component
-import bjda.ui.core.ComponentBuilder
+import bjda.ui.utils.ComponentBuilder
 import bjda.ui.core.Element
 import bjda.ui.core.hooks.Context
 
