@@ -1,6 +1,8 @@
+![Banner](https://i.ibb.co/J33rn9j/bjda.png|width=200)
 # BJDA - Better Java Discord API
+![GitHub](https://img.shields.io/github/license/SonMooSans/B-JDA) ![Maven Central](https://img.shields.io/maven-central/v/io.github.sonmoosans/bjda) ![Sonatype Nexus (Releases)](https://img.shields.io/nexus/r/io.github.sonmoosans/bjda?server=https%3A%2F%2Fs01.oss.sonatype.org%2F) ![GitHub Repo stars](https://img.shields.io/github/stars/SonMooSans/B-JDA?style=social)
 
-A discord library based on jda for kotlin
+A Discord Bot Framework based on JDA for **Kotlin**
 <br>
 Provides a flexible UI System which is inspired by React.js
 <br>
