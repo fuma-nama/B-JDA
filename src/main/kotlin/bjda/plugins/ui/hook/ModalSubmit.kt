@@ -42,7 +42,7 @@ class ModalSubmit(
          *
          * @return menu id
          */
-        fun onSubmitStatic(id: String, handler: (event: ModalInteractionEvent) -> Unit): String {
+        fun onSubmitStatic(id: String = UIEvent.createId(), handler: (event: ModalInteractionEvent) -> Unit): String {
             ModalSubmit(id, handler).listen()
             return id
         }
