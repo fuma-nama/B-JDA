@@ -144,7 +144,7 @@ open class UI(private val option: Option = Option()) {
         for (hook in hooks) {
             if (hook !is UpdateHook || hook.isIgnored(data)) continue
 
-            hook.onUpdate(message, data).queue()
+            hook.onUpdate(message, data)?.queue()
         }
     }
 

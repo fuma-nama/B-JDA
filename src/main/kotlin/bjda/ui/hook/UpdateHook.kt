@@ -5,22 +5,23 @@ import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.requests.RestAction
 
 abstract class UpdateHook : UIHook {
+
+    open lateinit var ui: UI
+
     /**
      * Update hooks will be unmounted after related messages are destroyed
      *
      * Notice that It is different from onDestroy
      */
-    lateinit var ui: UI
-
     open fun unmount() {
         ui.hooks.remove(this)
     }
 
     abstract fun isIgnored(data: HookData): Boolean
-    abstract fun onUpdate(message: Message, data: HookData): RestAction<*>
+    abstract fun onUpdate(message: Message, data: HookData): RestAction<*>?
     abstract fun listen()
 
-    final override fun onEnable(ui: UI) {
+    override fun onEnable(ui: UI) {
         this.ui = ui
 
         listen()
