@@ -11,6 +11,18 @@ import net.dv8tion.jda.api.interactions.components.ItemComponent
 import java.awt.Color
 import java.time.OffsetDateTime
 
+fun message(init: MessageBuilder.() -> Unit): MessageBuilder {
+    return MessageBuilder().apply(init)
+}
+
+fun IReplyCallback.reply(init: MessageBuilder.() -> Unit) = this.reply(
+    MessageBuilder().apply(init).build()
+)
+
+fun IMessageEditCallback.edit(init: MessageBuilder.() -> Unit) = editMessage(
+    MessageBuilder().apply(init).build()
+)
+
 open class MessageBuilder: RenderData() {
     fun content(text: String) {
         setContent(text)
@@ -72,19 +84,5 @@ open class MessageBuilder: RenderData() {
 
     fun rows(vararg rows: ActionRow) {
         addActionRow(* rows)
-    }
-
-    companion object {
-        fun message(init: MessageBuilder.() -> Unit): MessageBuilder {
-            return MessageBuilder().apply(init)
-        }
-
-        fun IReplyCallback.reply(init: MessageBuilder.() -> Unit) = this.reply(
-            MessageBuilder().apply(init).build()
-        )
-
-        fun IMessageEditCallback.edit(init: MessageBuilder.() -> Unit) = editMessage(
-            MessageBuilder().apply(init).build()
-        )
     }
 }
