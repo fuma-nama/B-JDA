@@ -1,4 +1,4 @@
-package bjda.plugins.ui.modal
+package bjda.ui.modal
 
 import bjda.plugins.ui.UIEvent
 import bjda.plugins.ui.hook.event.ModalListener

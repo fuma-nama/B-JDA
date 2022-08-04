@@ -1,4 +1,4 @@
-package bjda.plugins.ui.modal
+package bjda.ui.modal
 
 import bjda.ui.component.action.Action
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
