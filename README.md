@@ -2,9 +2,9 @@
 
 A discord library based on jda for kotlin
 <br>
-Added a flexible UI API which inspired by React.js
+Provides a flexible UI System which is inspired by React.js
 <br>
-Used for my own bots only, might be out of maintenance
+And many utility functions to speed up you development.
 
 ## Installation
 ### Maven:
@@ -12,7 +12,7 @@ Used for my own bots only, might be out of maintenance
 <dependency>
   <groupId>io.github.sonmoosans</groupId>
   <artifactId>bjda</artifactId>
-  <version>4.5.1</version>
+  <version>4.5.2</version>
 </dependency>
 ```
 
@@ -78,6 +78,7 @@ class Hello : TextCommand(name = "apps") { //TextCommand is based on Clikt
 ```
 
 ## Getting Started
+You can see the documentation [here](https://github.com/SonMooSans/B-JDA/wiki)
 ### Demo
 Full Demo of a Todo App: https://github.com/SonMooSans/bjda-example
 
@@ -86,7 +87,7 @@ Full Demo of a Todo App: https://github.com/SonMooSans/bjda-example
 val Panel = FComponent.component {
   val onConfirm by onClick {event ->
     println("Confirmed")
-    ui.edit(event)
+    ui.edit(event) //You may use defer edit for this example too
   };
 
   {
@@ -109,7 +110,7 @@ and Invoke `state.update` to update state and render the component again
 
 Normally it should be synchronous but in some cases it is async.
 
-### Creating the Command
+### Creating a Slash Command
 ```kotlin
 val MessageHelloCommand = command(name = "hello", description = "Hello World") {
   execute {
@@ -117,71 +118,6 @@ val MessageHelloCommand = command(name = "hello", description = "Hello World") {
   }
 }
 ```
-
-## Update Message after update
-It is painful to real-time update messages in multiplayer game
-
-Now you can write it clearly with hooks or manually update
-### You have two ways:
-- #### Auto update (For updating multi messages realtime)
-
-  it will update listened hooks when ui is updated
-  <br>
-  <br>
-  If you are replying to an event
-
-  You should use `state.update(event)` so that hooks will reply to the event instead of updating the message 
-
-  Otherwise, the message will be edited twice times
-  ```kotlin
-  //reply and listen
-  ui.reply(event) {
-    ui.listen(it)
-  }
-  
-  //update state
-  state.update(event) {
-    name = "Hello World"
-  }
-  ```
-  Notice that if you directly call `state.update` without the `event` parameter, ui will not be updated
-
-  You must reply to the ui manually, it is called **Half-Auto Update**
-- #### Half-Auto update:
-  To half-auto update state, use `state.update {..}` instead of `state.update(event) {..}`
-  
-  You can call `ui.updateHooks` or `ui.editAndUpdate` manually to update hooks
-  <br>
-  <br>
-  Make sure you are calling `ui.editAndUpdate(event)` when you are replying to an event,
-  
-  it is equal to `state.update(event)`
-  ```kotlin
-  //reply and listen
-  ui.reply(event) {
-    ui.listen(it)
-  }
-  
-  //update state
-  player update {
-      score++
-  }
-  
-  ui.editAndUpdate(event)
-  ```
-- #### Manually Update (For event handlers)
-
-  When you wanted to update state only without updating hooks
-  
-  you can easily use `ui.edit` or `ui.reply` from the component
-
-  ```kotlin
-  private val onAddItem = ButtonClick { event ->
-    state update "Hello World" //don't pass the event parameter
-  
-    ui.edit(event)
-  }
-  ```
 
 ## Performance
 
@@ -284,35 +220,6 @@ UIOnce is used for components that rendered once only
 <br>
 However, it will throw an exception if you try to access the `ui` property
 
-### Localization
-It is easier to support multi languages with new `Translation` util
-<br>
-example: 
-```kotlin
-import commands.context.Translation.Companion.group
-
-val ch = group(
-    "todo" to "待辦事項",
-    "title" to "待辦事項面板",
-    "add" to "添加待辦事項",
-    "edit" to "編輯待辦事項",
-    "delete" to "刪除待辦事項",
-    "placeholder" to "還沒有待辦事項",
-    "close" to "關閉面板"
-)(
-    "menu" to group(
-        "placeholder" to "選擇一個待辦事項"
-    ),
-    "form" to group(
-        "new_content" to "新內容"
-    ),
-)
-
-//getting localized text
-ch("todo")
-ch["form"]("new_content")
-```
-
 ## Coming soon
 
-We will move to Kord soon which is a discord api written in kotlin
+We will move to Kord which is a discord api written in kotlin
