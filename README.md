@@ -12,7 +12,7 @@ And many utility functions to speed up you development.
 <dependency>
   <groupId>io.github.sonmoosans</groupId>
   <artifactId>bjda</artifactId>
-  <version>4.5.2</version>
+  <version>4.5.3</version>
 </dependency>
 ```
 
