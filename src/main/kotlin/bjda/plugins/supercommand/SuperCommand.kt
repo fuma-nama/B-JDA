@@ -1,5 +1,6 @@
 package bjda.plugins.supercommand
 
+import bjda.plugins.supercommand.builder.OptionBuilder
 import bjda.plugins.supercommand.entries.SlashLocalization
 import bjda.plugins.supercommand.entries.CommandLocalization
 import bjda.plugins.supercommand.entries.PermissionEntry
@@ -20,16 +21,15 @@ abstract class SuperCommand (
     val description: String = "No Description",
     override val guildOnly: Boolean? = null,
     override val permissions: DefaultMemberPermissions? = null
-): SuperNode, PermissionEntry, SlashLocalization {
+): SuperNode, PermissionEntry, SlashLocalization, OptionBuilder {
     private val options = ArrayList<AnyOption>()
 
-    open fun<T> option(
+    override fun<T> option(
         type: OptionType,
         name: String,
-        description: String = "No Description",
-        init: (OptionValue<T>.() -> Unit)? = null
+        description: String,
+        init: (OptionValue<T>.() -> Unit)?
     ): OptionValue<T> {
-
         val value = OptionValue<T>(name, type, description)
 
         if (init != null) {
@@ -38,10 +38,6 @@ abstract class SuperCommand (
 
         options.add(value)
         return value
-    }
-
-    fun<T: Channel> channel(name: String, description: String, vararg types: ChannelType): OptionValue<T> {
-        return option<T>(OptionType.CHANNEL, name, description).channel(*types)
     }
 
     internal fun execute(event: SlashCommandInteractionEvent) {
@@ -81,24 +77,6 @@ abstract class SuperCommand (
         listeners[Info(group, subgroup, name)] = this
 
         return data
-    }
-
-    companion object {
-        val int = wrap<Int>(OptionType.INTEGER)
-        val number = wrap<Double>(OptionType.NUMBER)
-        val user = wrap<User>(OptionType.USER)
-        val member = wrap<Member>(OptionType.USER)
-        val role = wrap<Role>(OptionType.ROLE)
-        val text = wrap<String>(OptionType.STRING)
-        val boolean = wrap<Boolean>(OptionType.BOOLEAN)
-        val mentionable = wrap<IMentionable>(OptionType.MENTIONABLE)
-
-        private fun<T> wrap(type: OptionType): SuperCommand.(name: String, description: String) -> OptionValue<T> {
-            return {name, description ->
-
-                option(type, name, description)
-            }
-        }
     }
 }
 

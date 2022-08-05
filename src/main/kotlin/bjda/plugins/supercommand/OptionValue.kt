@@ -54,12 +54,6 @@ class OptionValue<T>(
         return this
     }
 
-    fun<R> map(value: (T) -> R, init: OptionValue<T>.() -> Unit): OptionValueMapper<T, R> {
-        this.apply(init)
-
-        return OptionValueMapper(this, value)
-    }
-
     override fun parseMapping(mapping: OptionMapping?): T {
         if (mapping == null) {
             return default?.invoke()?: null as T
@@ -95,6 +89,12 @@ interface IOptionValue<T, O: IOptionValue<T, O>> {
     }
 
     fun<R> map(value: (T) -> R): OptionValueMapper<T, R> {
+
+        return OptionValueMapper(this, value)
+    }
+
+    fun<R> map(value: (T) -> R, init: O.() -> Unit): OptionValueMapper<T, R> {
+        self.apply(init)
 
         return OptionValueMapper(this, value)
     }

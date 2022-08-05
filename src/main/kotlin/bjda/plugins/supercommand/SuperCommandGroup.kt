@@ -1,5 +1,6 @@
 package bjda.plugins.supercommand
 
+import bjda.plugins.supercommand.builder.SuperCommandBuilder
 import bjda.plugins.supercommand.entries.*
 import net.dv8tion.jda.api.interactions.DiscordLocale
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions
@@ -122,7 +123,7 @@ class SuperCommandGroupBuilder(val base: SuperCommandGroupImpl) {
         permissions: DefaultMemberPermissions? = null,
         init: SuperCommandBuilder.() -> Unit
     ) {
-        val command = bjda.plugins.supercommand.command(
+        val command = bjda.plugins.supercommand.builder.command(
             name, description, guildOnly, permissions, init
         )
 

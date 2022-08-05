@@ -1,5 +1,6 @@
-package bjda.plugins.supercommand
+package bjda.plugins.supercommand.builder
 
+import bjda.plugins.supercommand.SuperContext
 import net.dv8tion.jda.api.events.interaction.command.GenericContextInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent
