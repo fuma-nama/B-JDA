@@ -1,4 +1,9 @@
-<img src="https://i.ibb.co/J33rn9j/bjda.png" width="200" />
+
+<p align="center">
+    <img src="https://i.ibb.co/J33rn9j/bjda.png" width="200"  alt="banner"/>
+    <br>
+    The Most Powerful Discord Bot Framework in Kotlin
+</p>
 
 # BJDA - Better Java Discord API
 ![GitHub](https://img.shields.io/github/license/SonMooSans/B-JDA) ![Maven Central](https://img.shields.io/maven-central/v/io.github.sonmoosans/bjda) ![Sonatype Nexus (Releases)](https://img.shields.io/nexus/r/io.github.sonmoosans/bjda?server=https%3A%2F%2Fs01.oss.sonatype.org%2F) ![GitHub Repo stars](https://img.shields.io/github/stars/SonMooSans/B-JDA?style=social)
@@ -47,7 +52,7 @@ Declare slash command
 command(name = "hello", description = "Say Hello") {
   name(DiscordLocale.CHINESE_TAIWAN, "測試命令")
   
-  val size = int("size", "Size of example").map({ "${it}xl" }) {
+  val size = long("size", "Size of example").map({ "${it}xl" }) {
     choices(
       "Small" to 2,
       "Medium" to 4,
@@ -84,7 +89,10 @@ class Hello : TextCommand(name = "apps") { //TextCommand is based on Clikt
 You can see the documentation [here](https://github.com/SonMooSans/B-JDA/wiki)
 ### Demo
 Full Demo of a Todo App: https://github.com/SonMooSans/bjda-example
-
+### Demo for production?
+If your bot is going to be used by more than a hundred servers, you can take a look at [Dishub](https://github.com/SonMooSans/dishub).
+<br>
+It is a great example with high performance.
 ### Creating an App
 ```kotlin
 val Panel = FComponent.component {
