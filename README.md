@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="https://i.ibb.co/J33rn9j/bjda.png" width="200"  alt="banner"/>
+    <img src="https://i.ibb.co/J33rn9j/bjda.png" width="200" alt="banner"/>
     <br>
     The Most Powerful Discord Bot Framework in Kotlin
 </p>
@@ -87,7 +87,7 @@ class Hello : TextCommand(name = "apps") { //TextCommand is based on Clikt
 ## Getting Started
 You can see the documentation [here](https://github.com/SonMooSans/B-JDA/wiki)
 
-<img src="https://i.ibb.co/nfddT3X/example-1.gif" alt="demo-gif" width="500px" />
+<img src="https://i.ibb.co/nfddT3X/example-1.gif" alt="demo-gif" style="max-width: 500px" />
 
 ### Demo
 Full Demo of a Todo App: https://github.com/SonMooSans/bjda-example
@@ -132,7 +132,7 @@ val MessageHelloCommand = command(name = "hello", description = "Hello World") {
 }
 ```
 
-<img src="https://i.ibb.co/BLSNNcQ/UI-1-25x-1.png" alt="diagram" width="500px" />
+<img src="https://i.ibb.co/BLSNNcQ/UI-1-25x-1.png" alt="diagram" style="max-width: 500px" />
 
 ## Performance
 
