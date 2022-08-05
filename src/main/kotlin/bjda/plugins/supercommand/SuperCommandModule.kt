@@ -40,7 +40,20 @@ data class ContextInfo(val name: String, val type: Command.Type)
 
 data class Info(val group: String? = null, val subgroup: String? = null, val name: String)
 
-class SuperCommandModule(vararg val nodes: SuperNode) : IModule {
+open class SuperCommandModule(
+    /**
+     * Commands to register
+     */
+    vararg val nodes: SuperNode,
+    /**
+     * Guilds which allow to use commands when global is false
+     */
+    val guilds: Array<String>? = null,
+    /**
+     * If false, only specified guilds will be able to use commands
+     */
+    val global: Boolean = true
+) : IModule {
     val listeners = Listeners()
 
     private fun parse(): List<CommandData> {
@@ -52,7 +65,16 @@ class SuperCommandModule(vararg val nodes: SuperNode) : IModule {
     override fun init(jda: JDA) {
         val commands = parse()
 
-        jda.updateCommands().addCommands(commands).queue()
+        if (global) {
+            jda.updateCommands().addCommands(commands).queue()
+        } else {
+            guilds?.forEach { guild ->
+                jda.getGuildById(guild)
+                    ?.updateCommands()
+                    ?.addCommands(commands)
+                    ?.queue()
+            }
+        }
 
         jda.addEventListener(EventListener())
     }
