@@ -1,7 +1,6 @@
 package bjda.plugins.supercommand
 
-import net.dv8tion.jda.api.entities.Channel
-import net.dv8tion.jda.api.entities.ChannelType
+import bjda.plugins.supercommand.builder.choice
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.DiscordLocale
 import net.dv8tion.jda.api.interactions.commands.Command
@@ -56,8 +55,8 @@ class OptionValue<T>(
     }
 
     fun choices(vararg choices: Pair<String, T>) = choices(
-        choices.map {(key, value) ->
-            IOptionValue.choice(key, value)
+        choices.map { (key, value) ->
+            choice(key, value)
         }
     )
 
@@ -99,7 +98,7 @@ interface IOptionValue<T, O: IOptionValue<T, O>> {
 
     fun parseMapping(mapping: OptionMapping?): T
 
-    infix fun value(event: SlashCommandInteractionEvent): T {
+    infix fun valueOf(event: SlashCommandInteractionEvent): T {
         val mapping = event.getOption(data.name)
 
         return parseMapping(mapping)
@@ -159,50 +158,8 @@ interface IOptionValue<T, O: IOptionValue<T, O>> {
     }
 
     companion object {
-        fun<V: Number, O: IOptionValue<V, O>> O.range(range: Pair<V?, V?>): O {
-            val (min, max) = range
-
-            if (min != null) {
-                when (min) {
-                    is Long -> data.setMinValue(min)
-                    is Double -> data.setMinValue(min)
-                    else -> data.setMinValue(min.toLong())
-                }
-            }
-
-            if (max != null) {
-                when (max) {
-                    is Long -> data.setMaxValue(max)
-                    is Double -> data.setMaxValue(max)
-                    else -> data.setMaxValue(max.toLong())
-                }
-            }
-
-            return self
-        }
-
-        fun<O: OptionValue<V>, V: Channel> O.channel(vararg types: ChannelType) = channel(types.toList())
-
-        fun<O: OptionValue<V>, V: Channel> O.channel(types: Collection<ChannelType>): O {
-            if (data.type != OptionType.CHANNEL)
-                error("Option Type must be channel")
-
-            data.setChannelTypes(types)
-
-            return this
-        }
-
-        infix fun<T> SlashCommandInteractionEvent.value(option: IOptionValue<T, *>): T {
-            return option value this
-        }
-
-        fun<V> choice(key: String, value: V): Command.Choice {
-            return when (value) {
-                is Long -> Command.Choice(key, value)
-                is Int -> Command.Choice(key, value.toLong())
-                is Double -> Command.Choice(key, value)
-                else -> Command.Choice(key, value.toString())
-            }
+        infix fun<T> SlashCommandInteractionEvent.valueOf(option: IOptionValue<T, *>): T {
+            return option valueOf this
         }
     }
 }

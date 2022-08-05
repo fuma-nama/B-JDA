@@ -1,8 +1,52 @@
 package bjda.plugins.supercommand.builder
 
+import bjda.plugins.supercommand.IOptionValue
 import bjda.plugins.supercommand.OptionValue
 import net.dv8tion.jda.api.entities.*
+import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.interactions.commands.OptionType
+
+fun<O: OptionValue<V>, V: Channel> O.channel(vararg types: ChannelType) = channel(types.toList())
+
+fun<O: OptionValue<V>, V: Channel> O.channel(types: Collection<ChannelType>): O {
+    if (data.type != OptionType.CHANNEL)
+        error("Option Type must be channel")
+
+    data.setChannelTypes(types)
+
+    return this
+}
+
+fun<V> choice(key: String, value: V): Command.Choice {
+    return when (value) {
+        is Long -> Command.Choice(key, value)
+        is Int -> Command.Choice(key, value.toLong())
+        is Double -> Command.Choice(key, value)
+        else -> Command.Choice(key, value.toString())
+    }
+}
+
+fun<V: Number, O: IOptionValue<V, O>> O.range(range: Pair<V?, V?>): O {
+    val (min, max) = range
+
+    if (min != null) {
+        when (min) {
+            is Long -> data.setMinValue(min)
+            is Double -> data.setMinValue(min)
+            else -> data.setMinValue(min.toLong())
+        }
+    }
+
+    if (max != null) {
+        when (max) {
+            is Long -> data.setMaxValue(max)
+            is Double -> data.setMaxValue(max)
+            else -> data.setMaxValue(max.toLong())
+        }
+    }
+
+    return this
+}
 
 interface OptionBuilder {
     fun<T> option(

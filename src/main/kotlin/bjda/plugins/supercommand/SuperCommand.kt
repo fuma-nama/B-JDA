@@ -2,11 +2,9 @@ package bjda.plugins.supercommand
 
 import bjda.plugins.supercommand.builder.OptionBuilder
 import bjda.plugins.supercommand.entries.SlashLocalization
-import bjda.plugins.supercommand.entries.CommandLocalization
 import bjda.plugins.supercommand.entries.PermissionEntry
 import bjda.plugins.supercommand.entries.SuperNode
 import bjda.utils.embed
-import net.dv8tion.jda.api.entities.*
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions
 import net.dv8tion.jda.api.interactions.commands.OptionType
@@ -85,15 +83,15 @@ class EventInfo(
 ) {
 
     operator fun<T, P> IOptionValue<T, *>.getValue(parent: P, property: Any): T {
-        return value(event)
+        return valueOf(event)
     }
 
     fun<T> IOptionValue<T, *>.value(): T {
-        return value(event)
+        return valueOf(event)
     }
 
     operator fun<T> IOptionValue<T, *>.invoke(): T {
-        return value(event)
+        return valueOf(event)
     }
 
     fun error(message: String?) {
