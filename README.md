@@ -1,5 +1,3 @@
-> The New version of BJDA seems not uploading to the maven central, We are fixing it now
-
 <p align="center">
     <img src="https://i.ibb.co/J33rn9j/bjda.png" width="200"  alt="banner"/>
     <br>
