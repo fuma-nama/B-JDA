@@ -87,7 +87,7 @@ class Hello : TextCommand(name = "apps") { //TextCommand is based on Clikt
 ## Getting Started
 You can see the documentation [here](https://github.com/SonMooSans/B-JDA/wiki)
 
-<img src="https://i.ibb.co/nfddT3X/example-1.gif" alt="demo-gif" width="1000px" />
+<img src="https://i.ibb.co/nfddT3X/example-1.gif" alt="demo-gif" width="500px" />
 
 ### Demo
 Full Demo of a Todo App: https://github.com/SonMooSans/bjda-example
