@@ -40,6 +40,9 @@ data class ContextInfo(val name: String, val type: Command.Type)
 
 data class Info(val group: String? = null, val subgroup: String? = null, val name: String)
 
+/**
+ * This module can be installed twice
+ */
 open class SuperCommandModule(
     /**
      * Commands to register
