@@ -1,6 +1,6 @@
 package bjda.utils
 
-import bjda.ui.component.TextType
+import bjda.ui.component.TextStyle
 import bjda.ui.core.RenderData
 import net.dv8tion.jda.api.entities.EmbedType
 import net.dv8tion.jda.api.entities.MessageEmbed
@@ -31,13 +31,13 @@ open class MessageBuilder: RenderData() {
     fun text(
         content: String? = null,
         language: String? = null,
-        type: TextType = TextType.NORMAL
+        type: TextStyle = TextStyle.NORMAL
     ) {
         when (type) {
-            TextType.NORMAL -> append(content)
-            TextType.LINE -> appendLine(content)
-            TextType.CODE_LINE -> appendCodeLine(content)
-            TextType.CODE_BLOCK -> appendCodeBlock(content, language)
+            TextStyle.NORMAL -> append(content)
+            TextStyle.LINE -> appendLine(content)
+            TextStyle.CODE_LINE -> appendCodeLine(content)
+            TextStyle.CODE_BLOCK -> appendCodeBlock(content, language)
         }
     }
 
