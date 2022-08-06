@@ -1,11 +1,17 @@
 package bjda.ui.component.row
 
+import bjda.ui.component.Content
 import bjda.ui.component.action.Action
+import bjda.ui.component.action.toAction
 import bjda.ui.core.CProps
 import bjda.ui.core.ElementImpl
 import bjda.ui.core.RenderData
+import bjda.ui.core.rangeTo
+import bjda.ui.utils.ComponentBuilder
+import bjda.utils.LambdaBuilder
 import bjda.utils.LambdaList
 import bjda.utils.build
+import net.dv8tion.jda.api.interactions.components.ActionComponent
 import net.dv8tion.jda.api.interactions.components.ActionRow
 import net.dv8tion.jda.api.interactions.components.ItemComponent
 import java.util.Stack
@@ -23,7 +29,7 @@ class RowLayout(actions: List<Action>) : ElementImpl<RowLayout.Props>(Props(acti
 
     constructor() : this(emptyList())
     constructor(vararg action: Action) : this(action.toList())
-    constructor(action: LambdaList<Action>) : this(action.build())
+    constructor(vararg action: ActionComponent) : this(action.map { it.toAction() })
 
     private val rowSpace = 1.0
 
@@ -50,5 +56,14 @@ class RowLayout(actions: List<Action>) : ElementImpl<RowLayout.Props>(Props(acti
 
         if (row.isNotEmpty())
             data.addActionRow(ActionRow.of(row))
+    }
+
+    companion object {
+        fun LambdaBuilder<in RowLayout>.rowLayout(actions: List<Action>) = + RowLayout(actions)
+        fun LambdaBuilder<in RowLayout>.rowLayout(actions: LambdaList<Action>) = + RowLayout(actions.build())
+
+        operator fun rangeTo(actions: LambdaList<Action>): RowLayout {
+            return RowLayout(actions.build())
+        }
     }
 }

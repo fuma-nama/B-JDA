@@ -5,6 +5,7 @@ import bjda.ui.component.action.toAction
 import bjda.ui.core.CProps
 import bjda.ui.core.ElementImpl
 import bjda.ui.core.RenderData
+import bjda.utils.LambdaBuilder
 import bjda.utils.LambdaList
 import bjda.utils.build
 import net.dv8tion.jda.api.interactions.components.ActionComponent
@@ -13,10 +14,7 @@ import net.dv8tion.jda.api.interactions.components.ActionRow
 class Row : ElementImpl<Row.Props> {
     constructor(row: ActionRow) : super(Props(row))
     constructor(action: List<Action>) : super(Props(action))
-
-    constructor(action: LambdaList<Action>) : this(
-        action.build()
-    )
+    constructor(action: LambdaList<Action>) : this(action.build())
 
     constructor(vararg action: Action) : this(
         action.toList()
@@ -25,6 +23,7 @@ class Row : ElementImpl<Row.Props> {
     constructor(vararg action: ActionComponent) : this(
         action.map { it.toAction() }
     )
+
 
     class Props(override var children: ActionRow) : CProps<ActionRow>() {
 
@@ -46,14 +45,12 @@ class Row : ElementImpl<Row.Props> {
     }
 
     companion object {
-        fun ActionRow(action: LambdaList<ActionComponent>): ActionRow {
-            return ActionRow.of(action.build())
-        }
+        fun LambdaBuilder<in Row>.row(action: LambdaList<Action>) = + Row(action)
 
-        fun rowOf(action: LambdaList<ActionComponent>): Row {
-            return Row(
-                ActionRow(action)
-            )
-        }
+        fun LambdaBuilder<in Row>.row(vararg action: ActionComponent) = + Row(*action)
+
+        fun LambdaBuilder<in Row>.rowOf(action: LambdaList<ActionComponent>) = + Row(
+            ActionRow.of(action.build())
+        )
     }
 }

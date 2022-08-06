@@ -2,7 +2,7 @@ package bjda.ui.component.action
 
 import bjda.ui.core.apply
 import bjda.ui.types.Apply
-import bjda.utils.Convert
+import bjda.utils.LambdaBuilder
 import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.interactions.components.ActionComponent
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle
@@ -37,39 +37,16 @@ class Button(props: Apply<Props>) : Action {
     }
 
     companion object {
-        fun primary(id: String? = null, label: String = "", disabled: Boolean = false, emoji: Emoji? = null): Impl {
-            return Impl(id, null, label, disabled, emoji, ButtonStyle.PRIMARY)
+        fun LambdaBuilder<in Button>.button(init: Props.() -> Unit) = + Button(init)
+
+        fun LambdaBuilder<in Button>.button(label: String, init: Props.() -> Unit) = + Button {
+            this.label = label
+            init(this)
         }
 
-        fun secondary(id: String? = null, label: String = "", disabled: Boolean = false, emoji: Emoji? = null): Impl {
-            return Impl(id, null, label, disabled, emoji, ButtonStyle.SECONDARY)
-        }
-
-        fun danger(id: String? = null, label: String = "", disabled: Boolean = false, emoji: Emoji? = null): Impl {
-            return Impl(id, null, label, disabled, emoji, ButtonStyle.DANGER)
-        }
-
-        fun success(id: String? = null, label: String = "", disabled: Boolean = false, emoji: Emoji? = null): Impl {
-            return Impl(id, null, label, disabled, emoji, ButtonStyle.SUCCESS)
-        }
-
-        fun link(url: String? = null, label: String = "", disabled: Boolean = false, emoji: Emoji? = null): Impl  {
-            return Impl(null, url, label, disabled, emoji, ButtonStyle.LINK)
-        }
-
-        class Impl(
-            id: String? = null,
-            url: String? = null,
-            label: String = "",
-            disabled: Boolean = false,
-            emoji: Emoji? = null,
-            style: ButtonStyle = ButtonStyle.PRIMARY)
-
-            : ButtonImpl(id, label, style, url, disabled, emoji), Convert<Action> {
-
-            override fun convert(): Action {
-                return this.toAction()
-            }
+        fun LambdaBuilder<in Button>.button(label: String? = null, id: String, init: Props.() -> Unit) = + Button(id) {
+            this.label = label
+            init(this)
         }
     }
 }

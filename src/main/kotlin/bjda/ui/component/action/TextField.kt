@@ -3,6 +3,7 @@ package bjda.ui.component.action
 import bjda.ui.core.apply
 import bjda.ui.types.Apply
 import bjda.utils.Convert
+import bjda.utils.LambdaBuilder
 import net.dv8tion.jda.api.interactions.components.ActionComponent
 import net.dv8tion.jda.api.interactions.components.text.TextInput
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle
@@ -39,34 +40,6 @@ class TextField(override val id: String, props: Apply<Props>) : Action {
     }
 
     companion object {
-        fun input(
-            id: String,
-            label: String,
-            style: TextInputStyle = TextInputStyle.SHORT,
-            minLength: Int = -1,
-            maxLength: Int = -1,
-            required: Boolean = true,
-            value: String? = null,
-            placeholder: String? = null
-        ): Impl {
-            return Impl(
-                TextInputImpl(
-                    id,
-                    style,
-                    label,
-                    minLength,
-                    maxLength,
-                    required,
-                    value,
-                    placeholder
-                )
-            )
-        }
-
-        class Impl(base: TextInput) : TextInput by base, Convert<Action> {
-            override fun convert(): Action {
-                return this.toAction()
-            }
-        }
+        fun LambdaBuilder<in TextField>.input(id: String, init: Apply<Props>) = + TextField(id, init)
     }
 }
