@@ -2,9 +2,17 @@ package bjda.ui.core
 
 import bjda.ui.types.AnyProps
 import bjda.ui.types.Children
+import bjda.ui.utils.ComponentBuilder
+import bjda.utils.LambdaBuilder
 
 typealias FComponentBody<P> = FComponent<P>.() -> Children
-typealias FComponentConstructor<P, C> = (props: P.() -> C) -> FComponent<P>
+
+fun interface FComponentConstructor<P : CProps<C>, C : Any> {
+    /**
+     * Create a component with props
+     */
+    operator fun rangeTo(props: P.() -> C): FComponent<P>
+}
 
 class FComponent<P: AnyProps>(
     props: P,
@@ -33,13 +41,13 @@ class FComponent<P: AnyProps>(
 
     companion object {
         fun<P: CProps<C>, C : Any> component(props: () -> P, component: FComponentBody<P>): FComponentConstructor<P, C> {
-            return {init ->
+            return FComponentConstructor {init ->
                 FComponent(props().init(init), component)
             }
         }
 
         fun component(component: FComponentBody<IProps>): FComponentConstructor<IProps, Unit> {
-            return {init ->
+            return FComponentConstructor {init ->
                 FComponent(IProps().init(init), component)
             }
         }

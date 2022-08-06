@@ -1,8 +1,10 @@
 package bjda.ui.core
 
+import bjda.ui.component.Fragment
 import bjda.ui.hook.*
 import bjda.ui.types.AnyElement
 import bjda.ui.types.AnyProps
+import bjda.ui.types.Children
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.interactions.callbacks.IMessageEditCallback
@@ -12,7 +14,9 @@ import net.dv8tion.jda.api.requests.RestAction
 import java.util.function.Consumer
 import kotlin.collections.ArrayList
 
-open class UI(private val option: Option = Option()) {
+open class UI(option: Option? = null) {
+    val option: Option = option?: Option()
+
     data class Option(
         /**
          * Fired after updating components
@@ -38,17 +42,17 @@ open class UI(private val option: Option = Option()) {
             field = value
         }
 
-    private val renderer = option.renderer?: DefaultRenderer()
+    private val renderer = this.option.renderer?: DefaultRenderer()
     private val updater = Updater()
 
     val hooks = ArrayList<UIHook>()
 
-    constructor(root: AnyElement) : this() {
+    constructor(root: AnyElement, option: Option? = null) : this(option) {
         this.root = root
     }
 
-    constructor(root: AnyElement, option: Option) : this(option) {
-        this.root = root
+    constructor(root: Children, option: Option? = null) : this(option) {
+        this.root = Fragment(parseChildren(root))
     }
 
     /**

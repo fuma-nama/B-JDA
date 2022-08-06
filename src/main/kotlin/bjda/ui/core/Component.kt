@@ -3,11 +3,13 @@ package bjda.ui.core
 import bjda.ui.core.hooks.Delegate
 import bjda.ui.core.hooks.IHook
 import bjda.ui.types.*
+import bjda.utils.Builder
 import net.dv8tion.jda.api.interactions.callbacks.IMessageEditCallback
 import kotlin.reflect.KProperty
 
 open class IProps : CProps<Unit>()
 
+@Builder
 open class CProps<C: Any> {
     var key: Key? = null
     open lateinit var children: C
@@ -23,8 +25,12 @@ fun<T: Collection<E>, E, R> Component<*>.State<T>.mapIndexed(mapper: (Int, E) ->
     return this.get().mapIndexed(mapper)
 }
 
-fun<T: Collection<E>, E, R> Component<*>.State<T>.map(mapper: (E) -> R): List<R> {
-    return this.get().map(mapper)
+fun<T: Collection<E>, E> Component<*>.State<T>.forEachIndexed(action: (Int, E) -> Unit) {
+    return this.get().forEachIndexed(action)
+}
+
+fun<T: Collection<E>, E> Component<*>.State<T>.forEach(action: (E) -> Unit) {
+    return this.get().forEach(action)
 }
 
 fun <T: CProps<R>, R> T.init(init: T.() -> R): T {

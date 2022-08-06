@@ -87,6 +87,7 @@ abstract class ElementImpl<P : AnyProps>(override var props: P) : Element<P> {
         }
     }
 }
+
 typealias FElementBody<P> = FElement<P>.() -> Children
 typealias FElementConstructor<P, C> = (props: P.() -> C) -> FElement<P>
 
