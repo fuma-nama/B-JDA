@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="https://i.ibb.co/J33rn9j/bjda.png" width="200"  alt="banner"/>
+    <img src="https://i.ibb.co/J33rn9j/bjda.png" width="200" alt="banner"/>
     <br>
     The Most Powerful Discord Bot Framework in Kotlin
 </p>
