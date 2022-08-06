@@ -19,7 +19,7 @@ And many utility functions to speed up you development.
 <dependency>
   <groupId>io.github.sonmoosans</groupId>
   <artifactId>bjda</artifactId>
-  <version>4.5.4</version>
+  <version>5.0.0</version>
 </dependency>
 ```
 
@@ -33,16 +33,14 @@ You can manage all modules easily
 
 Create an interactive UI easily in few lines of code
 ```kotlin
-val app = UI(
-    Pager()-{
-        + Text()..{
-            content = "Hello"
-        }
-        + Embed()..{
+val app = UI {
+    pager {
+        text("Hello") {}
+        embed {
             title = "Hello World"
         }
     }
-)
+}
 
 app.reply(event)
 ```
@@ -87,7 +85,7 @@ class Hello : TextCommand(name = "apps") { //TextCommand is based on Clikt
 ## Getting Started
 You can see the documentation [here](https://github.com/SonMooSans/B-JDA/wiki)
 
-<img src="https://i.ibb.co/nfddT3X/example-1.gif" alt="demo-gif" width="1000px" />
+<img src="https://i.ibb.co/nfddT3X/example-1.gif" alt="demo-gif" style="max-width: 500px" />
 
 ### Demo
 Full Demo of a Todo App: https://github.com/SonMooSans/bjda-example
@@ -98,23 +96,23 @@ It is a great example with high performance.
 ### Creating an App
 ```kotlin
 val Panel = FComponent.component {
-  val onConfirm by onClick {event ->
-    println("Confirmed")
-    ui.edit(event) //You may use defer edit for this example too
-  };
+    val onConfirm by onClick { event ->
+        println("Confirmed")
+        ui.edit(event) //You may use defer edit for this example too
+    };
 
-  {
-    + Embed()..{
-      title = "Hello World"
+    {
+        embed {
+            title = "Hello World"
+        }
+
+        row {
+            button("Confirm") {
+                id = onConfirm
+                style = ButtonStyle.SUCCESS
+            }
+        }
     }
-
-    + Row(
-      Button.success(
-        id = onConfirm,
-        label = "Confirm"
-      )
-    )
-  }
 }
 ```
 Declare `val state = useState()` variable
@@ -132,7 +130,7 @@ val MessageHelloCommand = command(name = "hello", description = "Hello World") {
 }
 ```
 
-<img src="https://i.ibb.co/BLSNNcQ/UI-1-25x-1.png" alt="diagram" width="500px" />
+<img src="https://i.ibb.co/BLSNNcQ/UI-1-25x-1.png" alt="diagram" style="max-width: 500px" />
 
 ## Performance
 
@@ -155,85 +153,60 @@ Give component a `key` prop to help the Scanner knows which component is new or 
 <br>
 It can improve the performance of the Tree Scanner
 
-## What's New Since 4.2.0
+## What's New Since 5.0.0
 
-### Form API 2.0
-> You must unmount the component to avoid memory leaks
+### ModalSubmit Hook
+ModalSubmit finally comes with same usage of `ButtonClick` and `MenuSelect` Listeners
 
-For modals that is attached to component lifecycle, use Form API.
+It also provides `onSubmit` and `onSubmitStatic` methods.
 ```kotlin
-val AddForm = Form {
-    //set properties
-}
-
-class AddForm : FormFactory() {
-    override val title = "..."
-
-    override fun render(): LambdaList<Row> {
-        return {}
-    }
-
-    override fun onSubmit(event: ModalInteractionEvent) {
-        //Do something...
+component {
+    val onSubmitTodo by onSubmit { event ->
+        event.reply("Hello World").queue()
     }
 }
 ```
-**Modal Pool**
-Modal Pool used to Manage modal listeners.
 
-Creating a Modal Pool:
-```kotlin
-val AddTodoPool = ModalPool.multi(
-    modal("Add Todo") {
-        + Row(
-            input(
-                id = "todo",
-                label = "Todo",
-                style = TextInputStyle.PARAGRAPH
-            )
-        )
-    }
-)
-```
-Create a Listener with random id
-```kotlin
-val onSubmitTodo = AddTodoPool.listen { event ->
-  state.update(event) {
-    todos += event.value("todo")
-  }
-}
-```
-Getting Modal instance
-```kotlin
-val onAddTodo by onClick {
-  val modal = AddTodoPool.next(onSubmitTodo)
-  it.replyModal(modal).queue()
-}
-```
-
-### Convert Interface
-By extending the Convert interface, you can simply your code on LambdaList
+### New Components Syntax System
+Since 5.0.0, we can finally use "kotlin" style to add children components.
 
 **Before:**
 ```kotlin
 {
-    //Create a MessageEmbed and convert it to Component
-    + embed(title = "Hello World").convert() 
+    + Content("Message Content")
+    + embed(title = "Hello World")
+    + Pager()..{
+        + Embed()..{
+            title = "Title"
+            color = Color.RED
+        }
+    }
 }
 ```
 **Now:**
 ```kotlin
 {
-    //MessageEmbed that extended the Convert<Component> interface
-    //doesn't need to call convert manually
-    + embed(title = "Hello World")
+    //don't need the operator anymore
+    embed {
+        title = "Hello World"
+    }
+    
+    pager {
+        embed {
+            title = "Title"
+            color = Color.RED
+        }
+    }
 }
 ```
+### Notes
+We can use `ComponentCompanion..{}` or `FComponentConstructor..{}` to create component without adding it to children automatically
 
-### UI Once and `component.buildMessage()`
-UIOnce is used for components that rendered once only
+For class Components, you can also use the constructor instead.
 <br>
-However, it will throw an exception if you try to access the `ui` property
+Use the `-` operator if you only want to set the children
+
+Example: `Pager()-{ children }`, `fComponentExample..{ name = "Something" }`
 
 ## Coming soon
 
