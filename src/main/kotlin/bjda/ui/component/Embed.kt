@@ -1,9 +1,10 @@
 package bjda.ui.component
 
 import bjda.ui.component.utils.Builder
-import bjda.ui.core.ElementImpl
-import bjda.ui.core.IProps
-import bjda.ui.core.RenderData
+import bjda.ui.core.*
+import bjda.ui.utils.ComponentBuilder
+import bjda.ui.utils.LeafFactory
+import bjda.utils.LambdaBuilder
 import bjda.utils.embed
 import net.dv8tion.jda.api.entities.EmbedType
 import net.dv8tion.jda.api.entities.MessageEmbed
@@ -12,6 +13,7 @@ import java.awt.Color
 import java.time.OffsetDateTime
 
 class Embed : ElementImpl<Embed.Props>(Props()) {
+
     class Props : IProps() {
         var url: String? = null
         var title: String? = null
@@ -50,12 +52,18 @@ class Embed : ElementImpl<Embed.Props>(Props()) {
         }
     }
 
-    companion object {
+    companion object : LeafFactory<Embed, Props> {
         fun MessageEmbed.toComponent(): Builder {
 
             return Builder { data ->
                 data.addEmbeds(this)
             }
+        }
+
+        fun LambdaBuilder<in Embed>.embed(init: Props.() -> Unit) = + create(init)
+
+        override fun create(init: Props.() -> Unit): Embed {
+            return Embed()..init
         }
     }
 }
