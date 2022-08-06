@@ -44,7 +44,7 @@ class Button(props: Apply<Props>) : Action {
             init(this)
         }
 
-        fun LambdaBuilder<in Button>.button(label: String? = null, id: String, init: Props.() -> Unit) = + Button(id) {
+        fun LambdaBuilder<in Button>.button(id: String, label: String? = null, init: Props.() -> Unit) = + Button(id) {
             this.label = label
             init(this)
         }

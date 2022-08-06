@@ -29,6 +29,9 @@ class Fragment : ElementImpl<Fragment.Props> {
     companion object : ElementFactory<Fragment, Props, ComponentTree> {
         override fun create(init: Props.() -> ComponentTree) = Fragment()..init
 
+        fun LambdaBuilder<in Fragment>.fragment(components: Collection<AnyElement?>) =
+            + Fragment(components)
+
         fun LambdaBuilder<in Fragment>.fragment(children: Children) =
             + Fragment(parseChildren(children))
     }

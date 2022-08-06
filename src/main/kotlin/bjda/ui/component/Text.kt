@@ -31,6 +31,7 @@ open class Text : ElementImpl<Text.Props> {
     }
 
     companion object : LeafFactory<Text, Props> {
+        fun LambdaBuilder<in Text>.text(content: String) = + Text(content)
         fun LambdaBuilder<in Text>.text(init: Props.() -> Unit) = + Text()..init
         fun LambdaBuilder<in Text>.text(content: String, init: Props.() -> Unit) = + Text(content)..init
 

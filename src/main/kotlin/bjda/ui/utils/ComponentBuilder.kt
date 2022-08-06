@@ -107,15 +107,6 @@ open class ComponentBuilder : LambdaBuilder<AnyElement?>() {
     }
 
     /**
-     * Return a list of items if condition is true
-     *
-     * Otherwise, return a list filled with null with min size
-     */
-    fun where(condition: Boolean, items: LambdaList<AnyElement?>, min: Int) {
-        + if (condition) items.build() else List(min) { null }
-    }
-
-    /**
      * Add elements as a fragment
      */
     override operator fun Collection<AnyElement?>.unaryPlus() {
