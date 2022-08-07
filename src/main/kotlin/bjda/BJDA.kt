@@ -1,10 +1,16 @@
 package bjda
 
 import bjda.plugins.IModule
+import bjda.wrapper.BJDABuilder
+import bjda.wrapper.Mode
 import net.dv8tion.jda.api.JDA
 import java.util.*
 
-class BJDA private constructor(private val jda: JDA) {
+fun bjda(mode: Mode, init: BJDABuilder.() -> Unit): BJDA {
+    return BJDABuilder(mode).apply(init).ready()
+}
+
+class BJDA(private val jda: JDA) {
     private val modules = ArrayList<IModule>()
 
     companion object {
@@ -14,6 +20,11 @@ class BJDA private constructor(private val jda: JDA) {
     }
 
     fun install(vararg modules: IModule): BJDA {
+
+        return install(modules.toList())
+    }
+
+    fun install(modules: Collection<IModule>): BJDA {
         for (module in modules) {
 
             this.modules.add(module)

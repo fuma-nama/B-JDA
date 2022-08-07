@@ -2,6 +2,7 @@ package bjda.plugins.supercommand
 
 import bjda.plugins.IModule
 import bjda.plugins.supercommand.entries.SuperNode
+import bjda.wrapper.BJDABuilder
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.events.interaction.command.GenericContextInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent
@@ -10,6 +11,23 @@ import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEven
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.interactions.commands.build.CommandData
+
+fun BJDABuilder.supercommand(
+    /**
+     * Commands to register
+     */
+    vararg nodes: SuperNode,
+    /**
+     * Guilds which allow to use commands when global is false
+     */
+    guilds: Array<String>? = null,
+    /**
+     * If false, only specified guilds will be able to use commands
+     */
+    global: Boolean = true
+) {
+    + SuperCommandModule(nodes = nodes, guilds, global)
+}
 
 class Listeners {
     private val commands = HashMap<Info, SuperCommand>()
