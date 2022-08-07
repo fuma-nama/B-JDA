@@ -1,17 +1,70 @@
-<p align="center">
-    <img src="https://i.ibb.co/J33rn9j/bjda.png" width="200" alt="banner"/>
+<div align="center">
+    <img src="https://i.ibb.co/d6rcGkh/BJDA.jpg" alt="banner"/>
     <br>
-    The Most Powerful Discord Bot Framework in Kotlin
-</p>
 
 # BJDA - Better Java Discord API
 ![GitHub](https://img.shields.io/github/license/SonMooSans/B-JDA) ![Maven Central](https://img.shields.io/maven-central/v/io.github.sonmoosans/bjda) ![Sonatype Nexus (Releases)](https://img.shields.io/nexus/r/io.github.sonmoosans/bjda?server=https%3A%2F%2Fs01.oss.sonatype.org%2F) ![GitHub Repo stars](https://img.shields.io/github/stars/SonMooSans/B-JDA?style=social)
 
-A Discord Bot Framework based on JDA for **Kotlin**
+A Discord Bot Framework based on JDA written in **Kotlin**
 <br>
-Provides a flexible UI System which is inspired by React.js
+A UI System inspired by React.js
 <br>
-And many utility functions to speed up you development.
+With many utilities to speed up you development.
+</div>
+
+## Why BJDA
+
+## Commands Utilities
+
+Create **Slash Commands**, **Text Commands** with few lines of code
+
+```kotlin
+command(name = "hello", description = "Say Hello") {
+  
+  val size = long("size", "Size of example") {
+    optional { 6 }
+  }
+  
+  execute {
+    event.reply("size: ${size()}").queue()
+  }
+}
+```
+**Application Command** is also supported
+```kotlin
+val UserHelloCommand = userCommand(name = "hello") {
+  execute { event ->
+    event.reply("Hello").queue()
+  }
+}
+```
+## React.js in Discord Bot
+Create an interactive UI easily in few lines of code
+<br>
+Updating UI with component `state`
+
+*Beautiful, Readable, Flexible*
+
+<img src="https://i.ibb.co/QrP1s16/example-2.gif" alt="example-2" />
+
+[Full Demo](https://github.com/SonMooSans/bjda-example) of above example
+
+### Built-in Components
+Code less, Do more
+```kotlin
+val app = UI {
+    pager {
+        embed {
+            title = "Page 1"
+        }
+        embed {
+            title = "Page 2"
+        }
+    }
+}
+
+app.reply(event)
+```
 
 ## Installation
 ### Maven:
@@ -23,81 +76,18 @@ And many utility functions to speed up you development.
 </dependency>
 ```
 
-## Why BJDA
-
-### Fully Modularized Design
-
-You can manage all modules easily
-
-### Beautiful, Readable, Flexible
-
-Create an interactive UI easily in few lines of code
-```kotlin
-val app = UI {
-    pager {
-        text("Hello") {}
-        embed {
-            title = "Hello World"
-        }
-    }
-}
-
-app.reply(event)
-```
-Declare slash command 
-```kotlin
-command(name = "hello", description = "Say Hello") {
-  name(DiscordLocale.CHINESE_TAIWAN, "測試命令")
-  
-  val size = long("size", "Size of example").map({ "${it}xl" }) {
-    choices(
-      "Small" to 2,
-      "Medium" to 4,
-      "Large" to 6
-    )
-    optional { 6 }
-  }
-  
-  execute {
-    event.reply("size: ${size()}").queue()
-  }
-}
-```
-Application Command is also supported
-```kotlin
-val UserHelloCommand = userCommand(name = "hello") {
-  execute { event ->
-    event.reply("Hello").queue()
-  }
-}
-```
-The coolest thing is you can even create a text command with Clikt
-<br>
-Notice that It is better to replace text commands with slash commands 
-```kotlin
-class Hello : TextCommand(name = "apps") { //TextCommand is based on Clikt
-  override fun run() {
-    UI(App()).reply(event.message)
-  }
-}
-```
-
 ## Getting Started
 You can see the documentation [here](https://github.com/SonMooSans/B-JDA/wiki)
 
-
 ### Demo
-Youtube Example Video: https://youtu.be/ksk890SdLvQ
 
-Full Demo of a Todo App: https://github.com/SonMooSans/bjda-example
+* **Full Demo of a Todo App:** [Todo Bot](https://github.com/SonMooSans/bjda-example)
+* **Demo for production:** [Dishub](https://github.com/SonMooSans/dishub) is a great example with high performance.
 
-### Demo for production?
-If your bot is going to be used by more than a hundred servers, you can take a look at [Dishub](https://github.com/SonMooSans/dishub).
-<br>
-It is a great example with high performance.
 ### Creating an App
+Example at YouTube: https://youtu.be/ksk890SdLvQ
 ```kotlin
-val Panel = FComponent.component {
+val Panel = component {
     val onConfirm by onClick { event ->
         println("Confirmed")
         ui.edit(event) //You may use defer edit for this example too
@@ -117,20 +107,24 @@ val Panel = FComponent.component {
     }
 }
 ```
-Declare `val state = useState()` variable
+Create a state by using `val state = useState()`
 <br>
-and Invoke `state.update` to update state and render the component again
+and Invoke `state.update` to update state and re-render the component
 
-Normally it should be synchronous but in some cases it is async.
-
-### Creating a Slash Command
+### Creating the Slash Command
 ```kotlin
 val MessageHelloCommand = command(name = "hello", description = "Hello World") {
   execute {
-    event.reply("Hello").queue()
+      val ui = UI(
+          Panel..{}
+      )
+      
+      ui.reply(event)
   }
 }
 ```
+
+<br>
 
 <img src="https://i.ibb.co/BLSNNcQ/UI-1-25x-1.png" alt="diagram" style="max-width: 500px" />
 
@@ -152,8 +146,6 @@ To render a collection of components, convert it to a Fragment by using `Fragmen
 Since 4.0.0, collections of components will automatically convert to a Fragment 
 <br>
 Give component a `key` prop to help the Scanner knows which component is new or removed
-<br>
-It can improve the performance of the Tree Scanner
 
 ## What's New Since 5.0.0
 
