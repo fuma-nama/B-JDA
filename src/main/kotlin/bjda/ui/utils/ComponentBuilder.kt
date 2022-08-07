@@ -3,6 +3,7 @@ package bjda.ui.utils
 import bjda.ui.component.Fragment
 import bjda.ui.component.utils.Builder
 import bjda.ui.core.*
+import bjda.ui.core.hooks.Context
 import bjda.ui.types.AnyElement
 import bjda.ui.types.Children
 import bjda.utils.Blocking
@@ -33,12 +34,25 @@ open class ComponentBuilder : LambdaBuilder<AnyElement?>() {
     /**
      * Create and add Component as children
      */
+    operator fun<P : CProps<C>, C: Any> FElementConstructor<P, C>.invoke(props: P.() -> C): FElement<P> {
+        val comp = this..(props)
+        + comp
+
+        return comp
+    }
+
+    /**
+     * Create and add Component as children
+     */
     operator fun<P : CProps<C>, C: Any> FComponentConstructor<P, C>.invoke(props: P.() -> C): FComponent<P> {
         val comp = this..(props)
         + comp
 
         return comp
     }
+
+    fun<V> Context<V>.provider(value: V, children: Children) = + Provider(value, children)
+
 
     /**
      * Add children when condition is true

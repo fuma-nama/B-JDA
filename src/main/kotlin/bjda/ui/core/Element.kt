@@ -1,5 +1,8 @@
 package bjda.ui.core
 
+import bjda.ui.core.hooks.Context
+import bjda.ui.core.hooks.Delegate
+import bjda.ui.core.internal.RenderData
 import bjda.ui.types.*
 import bjda.ui.utils.ComponentBuilder
 
@@ -56,6 +59,14 @@ interface Element<P : AnyProps> {
             component?.buildAll(data)
         }
     }
+
+    fun<V> Context<V>.consumer(default: V): V {
+        return contexts?.getOrDefault(this, default) as V
+    }
+
+    fun<V> Context<V>.consumerBy(default: V) = Delegate {
+        contexts?.getOrDefault(this, default) as V
+    }
 }
 
 abstract class ElementImpl<P : AnyProps>(override var props: P) : Element<P> {
@@ -88,11 +99,15 @@ abstract class ElementImpl<P : AnyProps>(override var props: P) : Element<P> {
     }
 }
 
-typealias FElementBody<P> = FElement<P>.() -> Children
-typealias FElementConstructor<P, C> = (props: P.() -> C) -> FElement<P>
+typealias FElementBody<P> = FElement<P>.() -> Children?
+
+fun interface FElementConstructor<P : AnyProps, C> {
+
+    operator fun rangeTo(props: P.() -> C): FElement<P>
+}
 
 class FElement<P: AnyProps>(props: P, val body: FElementBody<P>) : ElementImpl<P>(props) {
-    private lateinit var render: Children
+    private var render: Children? = null
     var build: ((RenderData) -> Unit)? = null
 
     override fun mount(parent: AnyElement?) {
@@ -100,8 +115,10 @@ class FElement<P: AnyProps>(props: P, val body: FElementBody<P>) : ElementImpl<P
         this.render = body.invoke(this)
     }
 
-    override fun render(): ComponentTree {
-        return parseChildren(render)
+    override fun render(): ComponentTree? {
+        return render?.let {
+            parseChildren(it)
+        }
     }
 
     override fun build(data: RenderData) {
@@ -110,13 +127,15 @@ class FElement<P: AnyProps>(props: P, val body: FElementBody<P>) : ElementImpl<P
 
     companion object {
         fun<P: CProps<C>, C: Any> element(props: () -> P, body: FElementBody<P>): FElementConstructor<P, C> {
-            return { init ->
+            return FElementConstructor { init ->
+
                 FElement(props().init(init), body)
             }
         }
 
         fun element(body: FElementBody<IProps>): FElementConstructor<IProps, Unit> {
-            return { init ->
+            return FElementConstructor { init ->
+
                 FElement(IProps().init(init), body)
             }
         }
