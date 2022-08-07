@@ -80,7 +80,7 @@ abstract class Renderer {
 
                 for (child in rendered) {
                     if (child != null) {
-                        child.mount(comp)
+                        child.mount(comp, null)
 
                         renderSingle(child)
                     }

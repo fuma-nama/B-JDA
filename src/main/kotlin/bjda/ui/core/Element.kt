@@ -31,12 +31,7 @@ interface Element<P : AnyProps> {
     var snapshot: ComponentTree?
     val contexts : ContextMap?
 
-    /**
-     * When no UI provided
-     */
-    fun mount(parent: AnyElement?)
-
-    fun mount(parent: AnyElement?, manager: UI)
+    fun mount(parent: AnyElement?, manager: UI?)
 
     fun receiveProps(next: Any?)
 
@@ -79,13 +74,12 @@ abstract class ElementImpl<P : AnyProps>(override var props: P) : Element<P> {
     lateinit var ui: UI
     var parent: AnyElement? = null
 
-    override fun mount(parent: AnyElement?) {
+    override fun mount(parent: AnyElement?, ui: UI?) {
         this.parent = parent
-    }
 
-    override fun mount(parent: AnyElement?, manager: UI) {
-        this.parent = parent
-        this.ui = manager
+        if (ui != null) {
+            this.ui = ui
+        }
     }
 
     override fun receiveProps(next: Any?) {
@@ -110,12 +104,14 @@ class FElement<P: AnyProps>(props: P, val body: FElementBody<P>) : ElementImpl<P
     private var render: Children? = null
     var build: ((RenderData) -> Unit)? = null
 
-    override fun mount(parent: AnyElement?) {
-        super.mount(parent)
+    override fun mount(parent: AnyElement?, ui: UI?) {
+        super.mount(parent, ui)
+
         this.render = body.invoke(this)
     }
 
     override fun render(): ComponentTree? {
+
         return render?.let {
             parseChildren(it)
         }

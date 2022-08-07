@@ -15,7 +15,7 @@ open class UIOnce(element: ElementImpl<*>) {
     private val rendered: Message
 
     init {
-        element.mount(null)
+        element.mount(null, null)
         renderSingle(element)
 
         val data = RenderData()
@@ -32,7 +32,7 @@ open class UIOnce(element: ElementImpl<*>) {
 
     companion object {
         fun Element<*>.buildMessage(): Message {
-            mount(null)
+            mount(null, null)
             renderSingle(this)
 
             val data = RenderData()

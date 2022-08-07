@@ -38,21 +38,21 @@ class FComponent<P: AnyProps>(
         this.receiveProps?.invoke(prev, next)
     }
 
+    override fun onRender(): Children {
+        return render
+    }
+
     companion object {
+
         fun<P: CProps<C>, C : Any> component(props: () -> P, component: FComponentBody<P>): FComponentConstructor<P, C> {
             return FComponentConstructor {init ->
                 FComponent(props().init(init), component)
             }
         }
-
         fun component(component: FComponentBody<IProps>): FComponentConstructor<IProps, Unit> {
             return FComponentConstructor {init ->
                 FComponent(IProps().init(init), component)
             }
         }
-    }
-
-    override fun onRender(): Children {
-        return render
     }
 }

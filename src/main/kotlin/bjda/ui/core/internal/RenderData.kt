@@ -36,10 +36,7 @@ fun Message.replyRendered(message: RenderedMessage) = reply(message).apply {
 }
 
 fun IReplyCallback.replyRendered(message: RenderedMessage) = reply(message).apply {
-    println("Files")
-
     for (file in message.files) {
-        println("Files $file")
         addFile(file.data, file.name)
     }
 }
