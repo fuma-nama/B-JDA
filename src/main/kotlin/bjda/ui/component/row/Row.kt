@@ -4,7 +4,7 @@ import bjda.ui.component.action.Action
 import bjda.ui.component.action.toAction
 import bjda.ui.core.CProps
 import bjda.ui.core.ElementImpl
-import bjda.ui.core.RenderData
+import bjda.ui.core.internal.RenderData
 import bjda.utils.LambdaBuilder
 import bjda.utils.LambdaList
 import bjda.utils.build

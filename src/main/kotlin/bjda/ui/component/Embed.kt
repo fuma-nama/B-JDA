@@ -2,7 +2,7 @@ package bjda.ui.component
 
 import bjda.ui.component.utils.Builder
 import bjda.ui.core.*
-import bjda.ui.utils.ComponentBuilder
+import bjda.ui.core.internal.RenderData
 import bjda.ui.utils.LeafFactory
 import bjda.utils.LambdaBuilder
 import bjda.utils.embed

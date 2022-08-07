@@ -1,7 +1,7 @@
 package bjda.utils
 
 import bjda.ui.component.TextStyle
-import bjda.ui.core.RenderData
+import bjda.ui.core.internal.RenderData
 import net.dv8tion.jda.api.entities.EmbedType
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.MessageEmbed
@@ -49,12 +49,14 @@ open class ReplyMessageBuilder(val base: ReplyCallbackAction) : MessageBuilder()
     fun file(data: InputStream, name: String, vararg options: AttachmentOption) = base.addFile(data, name, * options)
     fun file(file: File, name: String, vararg options: AttachmentOption) = base.addFile(file, name, * options)
     fun file(file: File, vararg options: AttachmentOption) = base.addFile(file, * options)
+    fun file(file: ByteArray, name: String, vararg options: AttachmentOption) = base.addFile(file, name, * options)
 }
 
 open class EditMessageBuilder(val base: MessageEditCallbackAction) : MessageBuilder() {
     fun file(data: InputStream, name: String, vararg options: AttachmentOption) = base.addFile(data, name, * options)
     fun file(file: File, name: String, vararg options: AttachmentOption) = base.addFile(file, name, * options)
     fun file(file: File, vararg options: AttachmentOption) = base.addFile(file, * options)
+    fun file(file: ByteArray, name: String, vararg options: AttachmentOption) = base.addFile(file, name, * options)
 
     fun retainFiles(vararg attachments: Message.Attachment): MessageEditCallbackAction {
         return base.retainFiles(* attachments)

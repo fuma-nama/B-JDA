@@ -1,6 +1,7 @@
 package bjda.ui.core
 
 import bjda.ui.component.Fragment
+import bjda.ui.core.internal.*
 import bjda.ui.hook.*
 import bjda.ui.types.AnyElement
 import bjda.ui.types.AnyProps
@@ -29,7 +30,9 @@ open class UI(option: Option? = null) {
         /**
          * Renderer to render elements
          */
-        var renderer: Renderer? = null
+        var renderer: Renderer? = null,
+
+        var updater: Updater? = null
     )
 
     var root: AnyElement? = null
@@ -43,7 +46,7 @@ open class UI(option: Option? = null) {
         }
 
     private val renderer = this.option.renderer?: DefaultRenderer()
-    private val updater = Updater()
+    private val updater = this.option.updater?: UpdaterImpl()
 
     val hooks = ArrayList<UIHook>()
 
@@ -67,22 +70,23 @@ open class UI(option: Option? = null) {
     }
 
     fun edit(message: Message, success: Consumer<Message>? = null) {
+
         updater.addTask(
-            message.editMessage(this.build()),
+            message.edit(this.build()),
             success
         )
     }
 
     fun edit(callback: IMessageEditCallback, success: Consumer<InteractionHook>? = null) {
         updater.addTask(
-            callback.editMessage(this.build()),
+            callback.edit(this.build()),
             success
         )
     }
 
     fun edit(hook: InteractionHook, success: Consumer<Message>? = null) {
         updater.addTask(
-            hook.editOriginal(this.build()),
+            hook.edit(this.build()),
             success
         )
     }
@@ -97,16 +101,16 @@ open class UI(option: Option? = null) {
     }
 
     fun reply(message: Message, success: Consumer<Message>? = null) {
-        message.reply(this.build()).queue(success)
+        message.replyRendered(this.build()).queue(success)
     }
 
     fun reply(callback: IReplyCallback, ephemeral: Boolean = false, success: Consumer<InteractionHook>? = null) {
-        callback.reply(this.build())
+        callback.replyRendered(this.build())
             .setEphemeral(ephemeral)
             .queue(success)
     }
 
-    fun build(): Message {
+    fun build(): RenderedMessage {
         val data = RenderData()
 
         root!!.buildAll(data)
@@ -121,6 +125,7 @@ open class UI(option: Option? = null) {
      *
      * Note: the title is assigned to the content of built message if not specified
      */
+    @Deprecated("Use the new Modal API")
     fun buildModal(id: String, title: String? = null): Modal {
         val message = build()
 
@@ -243,15 +248,11 @@ open class UI(option: Option? = null) {
         }
     }
 
-    /**
-     *
-     * task task2 task3
-     */
-    class Updater {
+    open class UpdaterImpl : Updater {
         private var current: RestAction<*>? = null
         private var next: RestAction<*>? = null
 
-        fun addTask(action: RestAction<*>) {
+        override fun addTask(action: RestAction<*>) {
             if (current == null) {
                 current = action
 
@@ -259,12 +260,6 @@ open class UI(option: Option? = null) {
             } else {
                 next = action
             }
-        }
-
-        fun<T> addTask(action: RestAction<T>, success: Consumer<T>?) {
-            addTask(
-                if (success == null) action else action.map(success::accept)
-            )
         }
 
         private fun update() {

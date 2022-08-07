@@ -1,9 +1,8 @@
 package bjda.ui.core
 
+import bjda.ui.core.internal.RenderData
 import bjda.ui.types.AnyProps
 import bjda.ui.types.Children
-import bjda.ui.utils.ComponentBuilder
-import bjda.utils.LambdaBuilder
 
 typealias FComponentBody<P> = FComponent<P>.() -> Children
 

@@ -1,5 +1,6 @@
-package bjda.ui.core
+package bjda.ui.core.internal
 
+import bjda.ui.core.ComponentTreeScanner
 import bjda.ui.types.AnyElement
 import java.util.*
 import kotlin.collections.ArrayList

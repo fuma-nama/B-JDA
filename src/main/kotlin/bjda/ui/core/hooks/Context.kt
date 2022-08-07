@@ -3,13 +3,15 @@ package bjda.ui.core.hooks
 import bjda.ui.core.CProps
 import bjda.ui.utils.ComponentBuilder
 import bjda.ui.core.ElementImpl
-import bjda.ui.core.RenderData
+import bjda.ui.core.internal.RenderData
+import bjda.ui.core.minus
 import bjda.ui.types.AnyComponent
 import bjda.ui.types.Children
 import bjda.ui.types.ComponentTree
 import bjda.ui.types.ContextMap
 
 class Context<V> private constructor() {
+    @Deprecated("Use consumer instead", replaceWith = ReplaceWith("consumer(default)"))
     inner class Consumer(private val default: V): IHook<V> {
         override fun onCreate(component: AnyComponent, initial: Boolean): V {
             return component.contexts?.getOrDefault(this@Context, default) as V
@@ -20,6 +22,10 @@ class Context<V> private constructor() {
 
     data class Props<T>(val value: T) : CProps<Children>()
     inner class Provider(value: V) : ElementImpl<Props<V>>(Props(value)) {
+        constructor(value: V, children: Children) : this(value) {
+            this-children
+        }
+
         override val contexts: ContextMap =
             if (parent?.contexts == null) HashMap()
             else HashMap(parent?.contexts)

@@ -2,9 +2,8 @@ package bjda.ui.component
 
 import bjda.ui.core.ElementImpl
 import bjda.ui.core.IProps
-import bjda.ui.core.RenderData
+import bjda.ui.core.internal.RenderData
 import bjda.ui.core.rangeTo
-import bjda.ui.utils.ComponentBuilder
 import bjda.ui.utils.LeafFactory
 import bjda.utils.LambdaBuilder
 

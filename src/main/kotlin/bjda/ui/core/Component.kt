@@ -2,6 +2,7 @@ package bjda.ui.core
 
 import bjda.ui.core.hooks.Delegate
 import bjda.ui.core.hooks.IHook
+import bjda.ui.core.internal.RenderData
 import bjda.ui.types.*
 import bjda.utils.Builder
 import net.dv8tion.jda.api.interactions.callbacks.IMessageEditCallback

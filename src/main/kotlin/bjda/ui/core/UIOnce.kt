@@ -1,7 +1,7 @@
 package bjda.ui.core
 
-import bjda.ui.core.Renderer.Companion.renderSingle
-import bjda.ui.types.AnyElement
+import bjda.ui.core.internal.RenderData
+import bjda.ui.core.internal.Renderer.Companion.renderSingle
 import net.dv8tion.jda.api.entities.Message
 
 /**
