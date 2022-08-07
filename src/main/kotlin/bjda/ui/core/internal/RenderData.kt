@@ -48,7 +48,7 @@ fun Message.edit(message: RenderedMessage) = editMessage(message).apply {
 }
 
 open class RenderData : MessageBuilder() {
-    val files = arrayListOf<FileUpload>()
+    var files: ArrayList<FileUpload>? = null
 
     fun addActionRow(vararg rows: ActionRow) {
         this.addActionRow(listOf(*rows))
@@ -80,6 +80,10 @@ open class RenderData : MessageBuilder() {
         else
             name
 
+        val files = this.files?: arrayListOf<FileUpload>().also {
+            this.files = it
+        }
+
         files.add(FileUpload.fromData(data, fileName))
     }
 
@@ -97,7 +101,7 @@ open class RenderData : MessageBuilder() {
             allowedMentions, mentionedUsers.toTypedArray(), mentionedRoles.toTypedArray(),
             components.toTypedArray(),
             ArrayList(stickers),
-            files
+            files?: emptyList()
         )
     }
 }
