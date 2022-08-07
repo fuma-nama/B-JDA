@@ -3,25 +3,68 @@ package bjda.utils
 import bjda.ui.component.TextStyle
 import bjda.ui.core.RenderData
 import net.dv8tion.jda.api.entities.EmbedType
+import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.interactions.callbacks.IMessageEditCallback
 import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback
 import net.dv8tion.jda.api.interactions.components.ActionRow
 import net.dv8tion.jda.api.interactions.components.ItemComponent
+import net.dv8tion.jda.api.requests.restaction.interactions.MessageEditCallbackAction
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction
+import net.dv8tion.jda.api.utils.AttachmentOption
+import net.dv8tion.jda.internal.requests.restaction.interactions.MessageEditCallbackActionImpl
+import net.dv8tion.jda.internal.requests.restaction.interactions.ReplyCallbackActionImpl
 import java.awt.Color
+import java.io.File
+import java.io.InputStream
 import java.time.OffsetDateTime
 
 fun message(init: MessageBuilder.() -> Unit): MessageBuilder {
     return MessageBuilder().apply(init)
 }
 
-fun IReplyCallback.reply(init: MessageBuilder.() -> Unit) = this.reply(
-    MessageBuilder().apply(init).build()
-)
+fun IReplyCallback.reply(init: ReplyMessageBuilder.() -> Unit): ReplyCallbackActionImpl {
+    val action = this.deferReply() as ReplyCallbackActionImpl
 
-fun IMessageEditCallback.edit(init: MessageBuilder.() -> Unit) = editMessage(
-    MessageBuilder().apply(init).build()
-)
+    action.applyMessage(
+        ReplyMessageBuilder(action).apply(init).build()
+    )
+
+    return action
+}
+
+fun IMessageEditCallback.edit(init: MessageBuilder.() -> Unit): MessageEditCallbackActionImpl {
+    val action = deferEdit() as MessageEditCallbackActionImpl
+
+    action.applyMessage(
+        EditMessageBuilder(action).apply(init).build()
+    )
+
+    return action
+}
+
+open class ReplyMessageBuilder(val base: ReplyCallbackAction) : MessageBuilder() {
+    fun ephemeral(value: Boolean) = base.setEphemeral(value)
+
+    fun file(data: InputStream, name: String, vararg options: AttachmentOption) = base.addFile(data, name, * options)
+    fun file(file: File, name: String, vararg options: AttachmentOption) = base.addFile(file, name, * options)
+    fun file(file: File, vararg options: AttachmentOption) = base.addFile(file, * options)
+}
+
+open class EditMessageBuilder(val base: MessageEditCallbackAction) : MessageBuilder() {
+    fun file(data: InputStream, name: String, vararg options: AttachmentOption) = base.addFile(data, name, * options)
+    fun file(file: File, name: String, vararg options: AttachmentOption) = base.addFile(file, name, * options)
+    fun file(file: File, vararg options: AttachmentOption) = base.addFile(file, * options)
+
+    fun retainFiles(vararg attachments: Message.Attachment): MessageEditCallbackAction {
+        return base.retainFiles(* attachments)
+    }
+
+    fun retainFiles(attachments: Collection<Message.Attachment>): MessageEditCallbackAction {
+        return base.retainFiles(attachments)
+    }
+}
+
 
 open class MessageBuilder: RenderData() {
     fun content(text: String) {
