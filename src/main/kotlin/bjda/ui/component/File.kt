@@ -1,9 +1,9 @@
 package bjda.ui.component
 
-import bjda.ui.core.ElementImpl
-import bjda.ui.core.IProps
+import bjda.ui.core.*
 import bjda.ui.core.internal.RenderData
-import bjda.ui.core.rangeTo
+import bjda.ui.types.ComponentTree
+import bjda.ui.utils.ElementFactory
 import bjda.ui.utils.LeafFactory
 import bjda.utils.LambdaBuilder
 import net.dv8tion.jda.api.utils.AttachmentOption
@@ -24,6 +24,46 @@ class File : ElementImpl<File.Props>(Props()) {
 
     companion object : LeafFactory<File, Props> {
         override fun create(init: Props.() -> Unit): File = File()..init
+
         fun LambdaBuilder<in File>.file(init: Props.() -> Unit) = + create(init)
+    }
+}
+
+class FileAsync : ElementImpl<FileAsync.Props>(Props()) {
+    lateinit var cache: FileData
+
+    class Props : CProps<() -> FileData>()
+
+    override fun render(): ComponentTree? {
+        cache = props.children()
+
+        return null
+    }
+
+    override fun build(data: RenderData) {
+        with (cache) {
+            data.addFile(this.data, name, * options)
+        }
+    }
+
+    class FileData(
+        val data: InputStream,
+        val name: String,
+        val options: Array<out AttachmentOption>
+    )
+
+    companion object : ElementFactory<FileAsync, Props, () -> FileData> {
+        fun data(
+            data: InputStream,
+            name: String,
+            vararg options: AttachmentOption
+        ) = FileData(data, name, options)
+
+        /**
+         * Get and Add the file only when rendering the component
+         */
+        fun LambdaBuilder<in FileAsync>.fileAsync(init: () -> FileData) = + FileAsync()-init
+
+        override fun create(init: Props.() -> () -> FileData) = FileAsync()..init
     }
 }
