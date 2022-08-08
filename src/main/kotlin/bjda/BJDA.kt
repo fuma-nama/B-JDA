@@ -10,7 +10,7 @@ fun bjda(mode: Mode, init: BJDABuilder.() -> Unit): BJDA {
     return BJDABuilder(mode).apply(init).ready()
 }
 
-class BJDA(private val jda: JDA) {
+class BJDA(val jda: JDA) {
     private val modules = ArrayList<IModule>()
 
     companion object {
