@@ -1,8 +1,11 @@
 package bjda.plugins.supercommand.builder
 
 import bjda.plugins.supercommand.CommandHandler
+import bjda.plugins.supercommand.EventContext
 import bjda.plugins.supercommand.OptionValue
 import bjda.plugins.supercommand.SuperCommand
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import net.dv8tion.jda.api.interactions.DiscordLocale
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions
 import net.dv8tion.jda.api.interactions.commands.OptionType
@@ -39,6 +42,14 @@ class SuperCommandBuilder(val base: SuperCommandImpl): OptionBuilder {
     
     fun execute(listener: CommandHandler) {
         base.run = listener
+    }
+
+    fun execute(scope: CoroutineScope, listener: suspend EventContext.() -> Unit) {
+        base.run = {
+            scope.launch {
+                listener()
+            }
+        }
     }
 
     //options

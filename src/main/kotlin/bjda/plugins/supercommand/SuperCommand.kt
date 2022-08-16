@@ -12,7 +12,7 @@ import net.dv8tion.jda.api.interactions.commands.build.SubcommandData
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
 import java.awt.Color
 
-typealias CommandHandler = EventInfo.() -> Unit
+typealias CommandHandler = EventContext.() -> Unit
 
 abstract class SuperCommand (
     override val name: String,
@@ -39,7 +39,7 @@ abstract class SuperCommand (
     }
 
     internal fun execute(event: SlashCommandInteractionEvent) {
-        val info = EventInfo(event)
+        val info = EventContext(event)
 
         try {
             run(info)
@@ -78,7 +78,7 @@ abstract class SuperCommand (
     }
 }
 
-class EventInfo(
+class EventContext(
     val event: SlashCommandInteractionEvent
 ) {
 

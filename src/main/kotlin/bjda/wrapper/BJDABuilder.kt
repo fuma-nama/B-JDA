@@ -2,14 +2,15 @@ package bjda.wrapper
 
 import bjda.BJDA
 import bjda.plugins.IModule
+import kotlinx.coroutines.coroutineScope
 import net.dv8tion.jda.api.JDABuilder
+import net.dv8tion.jda.api.hooks.ListenerAdapter
 import net.dv8tion.jda.api.requests.GatewayIntent
 
-class BJDABuilder(mode: Mode)  {
+class BJDABuilder(mode: Mode) {
     private val modules = ArrayList<IModule>()
-    private var listener: (BJDA.() -> Unit)? = null
 
-    var mode = when (mode) {
+    var builder = when (mode) {
         Mode.Light -> JDABuilder.createLight(null)
         Mode.Default -> JDABuilder.createDefault(null)
         Mode.Full -> JDABuilder.create(null,
@@ -34,21 +35,17 @@ class BJDABuilder(mode: Mode)  {
     }
 
     inline fun config(init: JDABuilder.() -> Unit): JDABuilder {
-        return mode.apply(init)
+        return builder.apply(init)
     }
 
-    fun onReady(listener: BJDA.() -> Unit) {
-        this.listener = listener
+    fun listen(listener: ListenerAdapter) {
+        builder.addEventListeners(listener)
     }
 
-    internal fun ready(): BJDA {
-        val jda = mode.build().awaitReady()
+    suspend fun ready(): BJDA = coroutineScope {
+        val jda = builder.build().awaitReady()
 
-        return BJDA.create(jda)
-            .install(modules)
-            .also {
-                listener?.let {l -> it.apply(l) }
-            }
+        BJDA.create(jda).install(modules)
     }
 }
 

@@ -3,11 +3,12 @@ package bjda
 import bjda.plugins.IModule
 import bjda.wrapper.BJDABuilder
 import bjda.wrapper.Mode
+import kotlinx.coroutines.coroutineScope
 import net.dv8tion.jda.api.JDA
 import java.util.*
 
-fun bjda(mode: Mode, init: BJDABuilder.() -> Unit): BJDA {
-    return BJDABuilder(mode).apply(init).ready()
+suspend fun bjda(mode: Mode, init: BJDABuilder.() -> Unit): BJDA = coroutineScope {
+    BJDABuilder(mode).apply(init).ready()
 }
 
 class BJDA(val jda: JDA) {

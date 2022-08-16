@@ -17,9 +17,8 @@
     <packaging>jar</packaging>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>
-        A discord library based on jda for kotlin
+        Powerful Discord bot Framework based on JDA for kotlin
         Added a flexible UI API which inspired by React.js
-        Used for my own bots only, might be out of maintenance
     </description>
     <url>https://github.com/SonMooSans/bjda</url>
 
@@ -66,6 +65,11 @@
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-reflect</artifactId>
             <version>${kotlin.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kotlinx-coroutines-core-jvm</artifactId>
+            <version>1.6.4</version>
         </dependency>
     </dependencies>
 
