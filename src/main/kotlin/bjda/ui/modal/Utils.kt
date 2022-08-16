@@ -7,6 +7,9 @@ operator fun ModalInteractionEvent.get(id: String): String {
     return value(id)
 }
 
+/**
+ * Yoy will only receive null when the field doesn't exist
+ */
 fun ModalInteractionEvent.getOrNull(id: String): String? {
     return getValue(id)?.asString
 }

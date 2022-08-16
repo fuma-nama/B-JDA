@@ -134,10 +134,10 @@ open class UI(option: Option? = null) {
             .build()
     }
 
-    fun updateHooks(hook: InteractionHook) {
+    fun updateHooks(ignore: InteractionHook) {
         if (hooks.isNotEmpty()) {
 
-            hook.retrieveOriginal().queue {
+            ignore.retrieveOriginal().queue {
                 updateHooks(ignore(it))
             }
         }
@@ -234,40 +234,5 @@ open class UI(option: Option? = null) {
         }
     }
 
-    class ComponentTreeScannerImpl(val ui: UI) : ComponentTreeScanner() {
-        override fun unmounted(comp: AnyElement) {
-            comp.unmount()
-        }
 
-        override fun mounted(comp: AnyElement, parent: AnyElement) {
-            comp.mount(parent, this.ui)
-        }
-
-        override fun <P : AnyProps> reused(comp: Element<out P>, props: P) {
-            comp.receiveProps(props)
-        }
-    }
-
-    open class UpdaterImpl : Updater {
-        private var current: RestAction<*>? = null
-        private var next: RestAction<*>? = null
-
-        override fun addTask(action: RestAction<*>) {
-            if (current == null) {
-                current = action
-
-                update()
-            } else {
-                next = action
-            }
-        }
-
-        private fun update() {
-            current?.queue {
-                current = next
-
-                update()
-            }
-        }
-    }
 }

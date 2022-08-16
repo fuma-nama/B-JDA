@@ -66,9 +66,12 @@ abstract class Component<P : CProps<*>>(props: P): ElementImpl<P>(props) {
         return State(initial)
     }
 
-    fun<T> useState(initial: T, onUpdate: () -> Unit): State<T> {
+    /**
+     * @param onUpdated invoked when state has been updated
+     */
+    fun<T> useState(initial: T, onUpdated: () -> Unit): State<T> {
         return object : State<T>(initial) {
-            override val onUpdated = onUpdate
+            override val onUpdated = onUpdated
         }
     }
 

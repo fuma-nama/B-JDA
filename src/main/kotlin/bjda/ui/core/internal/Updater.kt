@@ -12,3 +12,26 @@ interface Updater {
         )
     }
 }
+
+open class UpdaterImpl : Updater {
+    private var current: RestAction<*>? = null
+    private var next: RestAction<*>? = null
+
+    override fun addTask(action: RestAction<*>) {
+        if (current == null) {
+            current = action
+
+            update()
+        } else {
+            next = action
+        }
+    }
+
+    private fun update() {
+        current?.queue {
+            current = next
+
+            update()
+        }
+    }
+}

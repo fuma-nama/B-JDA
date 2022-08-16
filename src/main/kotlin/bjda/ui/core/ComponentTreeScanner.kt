@@ -9,6 +9,20 @@ private val AnyElement.key: Any?
         return props.key
     }
 
+class ComponentTreeScannerImpl(val ui: UI) : ComponentTreeScanner() {
+    override fun unmounted(comp: AnyElement) {
+        comp.unmount()
+    }
+
+    override fun mounted(comp: AnyElement, parent: AnyElement) {
+        comp.mount(parent, this.ui)
+    }
+
+    override fun <P : AnyProps> reused(comp: Element<out P>, props: P) {
+        comp.receiveProps(props)
+    }
+}
+
 abstract class ComponentTreeScanner {
     protected abstract fun unmounted(comp: AnyElement)
 
