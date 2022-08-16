@@ -72,7 +72,7 @@ app.reply(event)
 <dependency>
   <groupId>io.github.sonmoosans</groupId>
   <artifactId>bjda</artifactId>
-  <version>5.1.0</version>
+  <version>5.1.1</version>
 </dependency>
 ```
 
