@@ -1,6 +1,8 @@
 package bjda.plugins.supercommand.builder
 
 import bjda.plugins.supercommand.SuperContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import net.dv8tion.jda.api.events.interaction.command.GenericContextInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent
@@ -50,6 +52,13 @@ class SuperContextBuilder<T : GenericContextInteractionEvent<*>>(val base: Super
 
     fun execute(listener: (T) -> Unit) {
         base.run = listener
+    }
+
+    fun execute(scope: CoroutineScope, listener: suspend CoroutineScope.(T) -> Unit) {
+
+        base.run = {
+            scope.launch { listener(it) }
+        }
     }
 }
 
