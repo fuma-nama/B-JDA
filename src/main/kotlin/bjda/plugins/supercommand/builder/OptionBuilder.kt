@@ -1,14 +1,37 @@
 package bjda.plugins.supercommand.builder
 
-import bjda.plugins.supercommand.IOptionValue
+import bjda.plugins.supercommand.NumberOption
 import bjda.plugins.supercommand.OptionValue
+import bjda.utils.DslBuilder
 import net.dv8tion.jda.api.entities.*
 import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.interactions.commands.OptionType
 
-fun<O: OptionValue<V>, V: Channel> O.channel(vararg types: ChannelType) = channel(types.toList())
+fun<O: OptionValue<out Number, *>> O.range(range: Pair<Number?, Number?>): O {
+    val (min, max) = range
 
-fun<O: OptionValue<V>, V: Channel> O.channel(types: Collection<ChannelType>): O {
+    if (min != null) {
+        when (min) {
+            is Double -> data.setMinValue(min)
+            is Float -> data.setMinValue(min.toDouble())
+            else -> data.setMinValue(min.toLong())
+        }
+    }
+
+    if (max != null) {
+        when (max) {
+            is Double -> data.setMaxValue(max)
+            is Float -> data.setMinValue(max.toDouble())
+            else -> data.setMaxValue(max.toLong())
+        }
+    }
+
+    return this
+}
+
+fun<O: OptionValue<V, *>, V: Channel> O.channel(vararg types: ChannelType) = channel(types.toList())
+
+fun<O: OptionValue<V, *>, V: Channel> O.channel(types: Collection<ChannelType>): O {
     if (data.type != OptionType.CHANNEL)
         error("Option Type must be channel")
 
@@ -17,60 +40,56 @@ fun<O: OptionValue<V>, V: Channel> O.channel(types: Collection<ChannelType>): O 
     return this
 }
 
-fun<V> choice(key: String, value: V): Command.Choice {
-    return when (value) {
-        is Long -> Command.Choice(key, value)
-        is Int -> Command.Choice(key, value.toLong())
-        is Double -> Command.Choice(key, value)
-        else -> Command.Choice(key, value.toString())
-    }
+@DslBuilder
+class ChoicesBuilder<out T> {
+    val choices = arrayListOf<Command.Choice>()
 }
 
-fun<V: Number, O: IOptionValue<V, O>> O.range(range: Pair<V?, V?>): O {
-    val (min, max) = range
+fun ChoicesBuilder<String>.choice(key: String, value: String) {
+    choices += Command.Choice(key, value)
+}
 
-    if (min != null) {
-        when (min) {
-            is Long -> data.setMinValue(min)
-            is Double -> data.setMinValue(min)
-            else -> data.setMinValue(min.toLong())
-        }
+fun ChoicesBuilder<Number>.choice(key: String, value: Number) {
+    choices += when (value) {
+        is Double -> Command.Choice(key, value)
+        is Float -> Command.Choice(key, value.toDouble())
+        else -> Command.Choice(key, value.toLong())
     }
-
-    if (max != null) {
-        when (max) {
-            is Long -> data.setMaxValue(max)
-            is Double -> data.setMaxValue(max)
-            else -> data.setMaxValue(max.toLong())
-        }
-    }
-
-    return this
 }
 
 interface OptionBuilder {
-    fun<T> option(
+    fun addOption(option: OptionValue<*, *>)
+
+    fun<T: Any> option(
         type: OptionType,
         name: String,
         description: String,
-        init: (OptionValue<T>.() -> Unit)? = null
-    ): OptionValue<T>
+        init: (OptionValue<T, T>.() -> Unit)? = null
+    ): OptionValue<T, T> {
+        val value = OptionValue<T, T>(name, type, description)
 
-    fun<T: Channel> channel(name: String, description: String, vararg types: ChannelType): OptionValue<T> {
-        return option<T>(OptionType.CHANNEL, name, description).channel(*types)
+        if (init != null) {
+            value.apply(init)
+        }
+
+        addOption(value)
+        return value
     }
 
-    @Deprecated("Please use long instead", ReplaceWith("long(name, description, init)"))
-    fun int(name: String, description: String, init: OptionInit<Long>? = null) = long(
-        name, description, init
-    ).map { it.toInt() }
+    fun<T: Channel> channel(name: String, description: String, vararg types: ChannelType) = option<T>(
+        OptionType.CHANNEL, name, description
+    ).channel(*types)
 
-    fun long(name: String, description: String, init: OptionInit<Long>? = null) = option(
-        OptionType.INTEGER, name, description, init
+    fun int(name: String, description: String, init: NumberOptionInit<Int>? = null) = number(
+        name, description, init
     )
 
-    fun number(name: String, description: String, init: OptionInit<Double>? = null) = option(
-        OptionType.NUMBER, name, description, init
+    fun long(name: String, description: String, init: NumberOptionInit<Long>? = null) = number(
+        name, description, init
+    )
+
+    fun double(name: String, description: String, init: NumberOptionInit<Double>? = null) = number(
+        name, description, init
     )
 
     fun text(name: String, description: String, init: OptionInit<String>? = null) = option(
@@ -104,4 +123,19 @@ interface OptionBuilder {
     fun mentionable(name: String, description: String, init: OptionInit<IMentionable>? = null) = option(
         OptionType.MENTIONABLE, name, description, init
     )
+}
+
+inline fun<reified T: Number> OptionBuilder.number(
+    name: String,
+    description: String,
+    noinline init: (NumberOption<T>.() -> Unit)? = null
+): NumberOption<T> {
+    val value = NumberOption(name, description, T::class)
+
+    if (init != null) {
+        value.apply(init)
+    }
+
+    addOption(value)
+    return value
 }

@@ -1,19 +1,21 @@
 package bjda.plugins.supercommand
 
-import bjda.plugins.supercommand.builder.choice
+import bjda.plugins.supercommand.builder.ChoicesBuilder
+import bjda.utils.DslBuilder
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.DiscordLocale
 import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.interactions.commands.OptionMapping
 import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.OptionData
+import kotlin.reflect.KClass
 
-typealias AnyOption = IOptionValue<*, *>
+typealias AnyOption = IOptionValue<*, *, *>
 
-open class OptionValueMapper<T, R>(
-    private val base: IOptionValue<T, *>,
-    val mapper: (T) -> R
-): IOptionValue<R, OptionValueMapper<T, R>> {
+open class OptionValueMapper<T: Any, N, R>(
+    private val base: IOptionValue<T, N, *>,
+    val mapper: (N) -> R
+): IOptionValue<T, R, OptionValueMapper<T, N, R>> {
     override var data: OptionData by base::data
 
     override fun parseMapping(mapping: OptionMapping?): R {
@@ -22,13 +24,44 @@ open class OptionValueMapper<T, R>(
     }
 }
 
-class OptionValue<T>(
+open class NumberOption<T: Number>(
+    name: String,
+    description: String,
+    private val original: KClass<T>
+): OptionValue<T, T>(
+    name,
+    when (original) {
+        Int::class, Long::class -> OptionType.INTEGER
+        else -> OptionType.NUMBER
+    },
+    description
+) {
+    override fun parseMapping(mapping: OptionMapping?): T {
+        if (mapping == null) {
+            return default?.invoke()?: null as T
+        }
+
+        val data = when (mapping.type) {
+            OptionType.INTEGER -> mapping.asLong
+            OptionType.NUMBER -> mapping.asDouble
+            else -> error("Unknown option type ${mapping.type}")
+        }
+
+        return when (original) {
+            Int::class -> data.toInt()
+            Float::class -> data.toFloat()
+            else -> data
+        } as T
+    }
+}
+
+open class OptionValue<T: Any, R>(
     name: String,
     type: OptionType,
-    description: String) : IOptionValue<T, OptionValue<T>> {
+    description: String) : IOptionValue<T, R, OptionValue<T, R>> {
 
     override var data = OptionData(type, name, description)
-    var default: (() -> T)? = null
+    var default: (() -> R & Any)? = null
 
     var autoComplete
         get() = data.isAutoComplete
@@ -42,37 +75,21 @@ class OptionValue<T>(
             data.isRequired = v
         }
 
-    fun optional(): OptionValue<T?> = this.required(false) as OptionValue<T?>
+    fun optional() = this.required(false) as OptionValue<T, R?>
 
-    fun optional(default: () -> T): OptionValue<T> {
+    fun optional(default: () -> R & Any): OptionValue<T, R & Any> {
 
         return this.required(false).default(default)
     }
 
-    fun default(value: () -> T): OptionValue<T> {
+    fun default(value: () -> R & Any): OptionValue<T, R & Any> {
         default = value
-        return this
+        return this as OptionValue<T, R & Any>
     }
 
-    fun choices(vararg choices: Pair<String, T>) = choices(
-        choices.map { (key, value) ->
-            choice(key, value)
-        }
-    )
-
-    fun choices(vararg choices: Command.Choice) = choices(
-        choices.toList()
-    )
-
-    fun choices(choices: Collection<Command.Choice>): OptionValue<T> {
-        data.addChoices(choices)
-
-        return this
-    }
-
-    override fun parseMapping(mapping: OptionMapping?): T {
+    override fun parseMapping(mapping: OptionMapping?): R {
         if (mapping == null) {
-            return default?.invoke()?: null as T
+            return default?.invoke()?: null as R
         }
 
         val data: Any = when (mapping.type) {
@@ -86,34 +103,27 @@ class OptionValue<T>(
             else -> error("Unknown option type ${mapping.type}")
         }
 
-        return data as T
+        return data as R
     }
 }
 
-interface IOptionValue<T, O: IOptionValue<T, O>> {
+@DslBuilder
+interface IOptionValue<T: Any, R, O: IOptionValue<T, R, O>> {
     var data: OptionData
 
     private val self
         get() = this as O
 
-    fun parseMapping(mapping: OptionMapping?): T
+    fun parseMapping(mapping: OptionMapping?): R
 
-    infix fun valueOf(event: SlashCommandInteractionEvent): T {
+    infix fun valueOf(event: SlashCommandInteractionEvent): R {
         val mapping = event.getOption(data.name)
 
         return parseMapping(mapping)
     }
 
-    fun<R> map(value: (T) -> R): OptionValueMapper<T, R> {
-
-        return OptionValueMapper(this, value)
-    }
-
-    fun<R> map(value: (T) -> R, init: O.() -> Unit): OptionValueMapper<T, R> {
-        self.apply(init)
-
-        return OptionValueMapper(this, value)
-    }
+    fun<N> map(value: (R) -> N) = OptionValueMapper(this, value)
+    fun<N> map(value: (R) -> N, apply: O.() -> Unit) = OptionValueMapper(self.apply(apply), value)
 
     fun required(value: Boolean = true): O {
         data = data.setRequired(value)
@@ -157,8 +167,22 @@ interface IOptionValue<T, O: IOptionValue<T, O>> {
         return self
     }
 
+    fun choices(choices: ChoicesBuilder<T>.() -> Unit) = choices(
+        ChoicesBuilder<T>().apply(choices).choices
+    )
+
+    fun choices(vararg choices: Command.Choice) = choices(
+        choices.toList()
+    )
+
+    fun choices(choices: Collection<Command.Choice>): O {
+        data.addChoices(choices)
+
+        return self
+    }
+
     companion object {
-        infix fun<T> SlashCommandInteractionEvent.valueOf(option: IOptionValue<T, *>): T {
+        infix fun<R> SlashCommandInteractionEvent.valueOf(option: IOptionValue<*, R, *>): R {
             return option valueOf this
         }
     }
