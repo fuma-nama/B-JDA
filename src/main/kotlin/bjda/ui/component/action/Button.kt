@@ -22,8 +22,34 @@ class Button(props: Apply<Button>) : Action {
     var style: ButtonStyle? = null
     var label: String? = null
     var emoji: Emoji? = null
-
     var disabled: Boolean = false
+
+    fun primary(): Button {
+        style = ButtonStyle.PRIMARY
+        return this
+    }
+
+    fun secondary(): Button {
+        style = ButtonStyle.SECONDARY
+        return this
+    }
+
+    fun danger(): Button {
+        style = ButtonStyle.DANGER
+        return this
+    }
+
+    /**
+     * @param url The button's url
+     */
+    fun link(url: String? = null): Button {
+        if (url != null) {
+            this.url = url
+        }
+
+        style = ButtonStyle.LINK
+        return this
+    }
 
     override fun build(): ActionComponent {
         val style = style?: if (url != null)
@@ -35,10 +61,9 @@ class Button(props: Apply<Button>) : Action {
     }
 
     companion object {
-        fun LambdaBuilder<in Button>.button(init: Button.() -> Unit) = + Button(init)
+        fun LambdaBuilder<in Button>.button(init: Apply<Button>) = + Button(init)
 
-
-        fun LambdaBuilder<in Button>.button(label: String, init: Button.() -> Unit) = + Button {
+        fun LambdaBuilder<in Button>.button(label: String, init: Apply<Button>) = + Button {
             this.label = label
             init(this)
         }
@@ -47,9 +72,18 @@ class Button(props: Apply<Button>) : Action {
             this.label = label
         }
 
-        fun LambdaBuilder<in Button>.button(id: String, label: String? = null, init: Button.() -> Unit) = + Button(id) {
+        fun LambdaBuilder<in Button>.button(id: String, label: String? = null, init: Apply<Button>) = + Button(id) {
             this.label = label
             init(this)
+        }
+
+        fun LambdaBuilder<in Button>.linkbutton(label: String, url: String, init: Apply<Button>? = null) = + Button {
+            this.label = label
+            link(url)
+
+            if (init != null) {
+                apply(init)
+            }
         }
     }
 }
