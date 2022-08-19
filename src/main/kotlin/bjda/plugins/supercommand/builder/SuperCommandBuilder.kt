@@ -1,17 +1,14 @@
 package bjda.plugins.supercommand.builder
 
-import bjda.plugins.supercommand.CommandHandler
-import bjda.plugins.supercommand.EventContext
-import bjda.plugins.supercommand.OptionValue
-import bjda.plugins.supercommand.SuperCommand
+import bjda.plugins.supercommand.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import net.dv8tion.jda.api.interactions.DiscordLocale
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions
-import net.dv8tion.jda.api.interactions.commands.OptionType
 import java.util.*
 
-typealias OptionInit<T> = OptionValue<T>.() -> Unit
+typealias OptionInit<T> = OptionValue<T, T>.() -> Unit
+typealias NumberOptionInit<T> = NumberOption<T>.() -> Unit
 
 fun command(
     name: String,
@@ -31,7 +28,7 @@ fun command(
     return builder.base
 }
 
-class SuperCommandBuilder(val base: SuperCommandImpl): OptionBuilder {
+class SuperCommandBuilder(val base: SuperCommandImpl): OptionBuilder by base {
     fun name(local: DiscordLocale, name: String) {
         base.localNames[local] = name
     }
@@ -51,11 +48,6 @@ class SuperCommandBuilder(val base: SuperCommandImpl): OptionBuilder {
             }
         }
     }
-
-    //options
-    override fun<T> option(type: OptionType, name: String, description: String, init: OptionInit<T>?) = base.option(
-        type, name, description, init
-    )
 }
 
 open class SuperCommandImpl(

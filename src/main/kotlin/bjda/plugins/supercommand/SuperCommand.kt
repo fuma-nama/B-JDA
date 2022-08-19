@@ -7,7 +7,6 @@ import bjda.plugins.supercommand.entries.SuperNode
 import bjda.utils.embed
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions
-import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
 import java.awt.Color
@@ -22,20 +21,8 @@ abstract class SuperCommand (
 ): SuperNode, PermissionEntry, SlashLocalization, OptionBuilder {
     private val options = ArrayList<AnyOption>()
 
-    override fun<T> option(
-        type: OptionType,
-        name: String,
-        description: String,
-        init: (OptionValue<T>.() -> Unit)?
-    ): OptionValue<T> {
-        val value = OptionValue<T>(name, type, description)
-
-        if (init != null) {
-            value.apply(init)
-        }
-
-        options.add(value)
-        return value
+    override fun addOption(option: OptionValue<*, *>) {
+        options.add(option)
     }
 
     internal fun execute(event: SlashCommandInteractionEvent) {
@@ -81,17 +68,16 @@ abstract class SuperCommand (
 class EventContext(
     val event: SlashCommandInteractionEvent
 ) {
-
-    operator fun<T, P> IOptionValue<T, *>.getValue(parent: P, property: Any): T {
+    operator fun<T, P> IOptionValue<*, T, *>.getValue(parent: P, property: Any): T {
         return valueOf(event)
     }
 
-    fun<T> IOptionValue<T, *>.value(): T {
+    operator fun<T> IOptionValue<*, T, *>.invoke(): T {
         return valueOf(event)
     }
 
-    operator fun<T> IOptionValue<T, *>.invoke(): T {
-        return valueOf(event)
+    operator fun<T, R> IOptionValue<*, T, *>.invoke(mapper: T.() -> R): R {
+        return valueOf(event).let(mapper)
     }
 
     fun error(message: String?) {
