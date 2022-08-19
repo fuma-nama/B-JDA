@@ -8,7 +8,7 @@ import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions
 import java.util.*
 
 typealias OptionInit<T> = OptionValue<T, T>.() -> Unit
-typealias NumberOptionInit<T> = NumberOption<T>.() -> Unit
+typealias NumberOptionInit<T> = NumberOption<T, T>.() -> Unit
 
 fun command(
     name: String,

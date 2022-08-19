@@ -24,11 +24,11 @@ open class OptionValueMapper<T: Any, N, R>(
     }
 }
 
-open class NumberOption<T: Number>(
+open class NumberOption<T: Number, R: Number?>(
     name: String,
     description: String,
     private val original: KClass<T>
-): OptionValue<T, T>(
+): OptionValue<T, R>(
     name,
     when (original) {
         Int::class, Long::class -> OptionType.INTEGER
@@ -36,9 +36,9 @@ open class NumberOption<T: Number>(
     },
     description
 ) {
-    override fun parseMapping(mapping: OptionMapping?): T {
+    override fun parseMapping(mapping: OptionMapping?): R {
         if (mapping == null) {
-            return default?.invoke()?: null as T
+            return default?.invoke()?: null as R
         }
 
         val data = when (mapping.type) {
@@ -51,7 +51,7 @@ open class NumberOption<T: Number>(
             Int::class -> data.toInt()
             Float::class -> data.toFloat()
             else -> data
-        } as T
+        } as R
     }
 }
 

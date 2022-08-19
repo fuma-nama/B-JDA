@@ -128,9 +128,9 @@ interface OptionBuilder {
 inline fun<reified T: Number> OptionBuilder.number(
     name: String,
     description: String,
-    noinline init: (NumberOption<T>.() -> Unit)? = null
-): NumberOption<T> {
-    val value = NumberOption(name, description, T::class)
+    noinline init: (NumberOption<T, T>.() -> Unit)? = null
+): NumberOption<T, T> {
+    val value = NumberOption<T, T>(name, description, T::class)
 
     if (init != null) {
         value.apply(init)
