@@ -21,7 +21,7 @@ Create **Slash Commands**, **Text Commands** with few lines of code
 ```kotlin
 command(name = "hello", description = "Say Hello") {
   
-  val size = long("size", "Size of example") {
+  val size = int("size", "Size of example") {
     optional { 6 }
   }
   
@@ -72,7 +72,7 @@ app.reply(event)
 <dependency>
   <groupId>io.github.sonmoosans</groupId>
   <artifactId>bjda</artifactId>
-  <version>5.1.1</version>
+  <version>5.2.0</version>
 </dependency>
 ```
 
@@ -101,7 +101,7 @@ val Panel = component {
         row {
             button("Confirm") {
                 id = onConfirm
-                style = ButtonStyle.SUCCESS
+                success()
             }
         }
     }
