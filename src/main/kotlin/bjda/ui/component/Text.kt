@@ -15,6 +15,11 @@ open class Text : ElementImpl<Text.Props> {
         var content: String? = null
         var language: String? = null
         var style: TextStyle = TextStyle.NORMAL
+
+        fun normal() { style = TextStyle.NORMAL }
+        fun codeBlock() { style = TextStyle.CODE_BLOCK }
+        fun codeLine() { style = TextStyle.CODE_LINE }
+        fun line() { style = TextStyle.LINE }
     }
 
     override fun build(data: RenderData) {
