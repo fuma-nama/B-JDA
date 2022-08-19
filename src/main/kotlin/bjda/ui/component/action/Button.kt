@@ -34,6 +34,11 @@ class Button(props: Apply<Button>) : Action {
         return this
     }
 
+    fun success(): Button {
+        style = ButtonStyle.SUCCESS
+        return this
+    }
+
     fun danger(): Button {
         style = ButtonStyle.DANGER
         return this
