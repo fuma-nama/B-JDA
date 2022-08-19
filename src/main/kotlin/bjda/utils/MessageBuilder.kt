@@ -76,13 +76,13 @@ open class MessageBuilder: RenderData() {
     fun text(
         content: String? = null,
         language: String? = null,
-        type: TextStyle = TextStyle.NORMAL
+        type: TextStyle = TextStyle.Normal
     ) {
         when (type) {
-            TextStyle.NORMAL -> append(content)
-            TextStyle.LINE -> appendLine(content)
-            TextStyle.CODE_LINE -> appendCodeLine(content)
-            TextStyle.CODE_BLOCK -> appendCodeBlock(content, language)
+            TextStyle.Normal -> append(content)
+            TextStyle.Line -> appendLine(content)
+            TextStyle.CodeLine -> appendCodeLine(content)
+            TextStyle.CodeBlock -> appendCodeBlock(content, language)
         }
     }
 

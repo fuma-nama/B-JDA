@@ -14,22 +14,22 @@ open class Text : ElementImpl<Text.Props> {
     class Props : IProps() {
         var content: String? = null
         var language: String? = null
-        var style: TextStyle = TextStyle.NORMAL
+        var style: TextStyle = TextStyle.Normal
 
-        fun normal() { style = TextStyle.NORMAL }
-        fun codeBlock() { style = TextStyle.CODE_BLOCK }
-        fun codeLine() { style = TextStyle.CODE_LINE }
-        fun line() { style = TextStyle.LINE }
+        fun normal() { style = TextStyle.Normal }
+        fun codeBlock() { style = TextStyle.CodeBlock }
+        fun codeLine() { style = TextStyle.CodeLine }
+        fun line() { style = TextStyle.Line }
     }
 
     override fun build(data: RenderData) {
         with (props) {
 
             when (style) {
-                TextStyle.NORMAL -> data.append(content)
-                TextStyle.LINE -> data.appendLine(content)
-                TextStyle.CODE_LINE -> data.appendCodeLine(content)
-                TextStyle.CODE_BLOCK -> data.appendCodeBlock(content, language)
+                TextStyle.Normal -> data.append(content)
+                TextStyle.Line -> data.appendLine(content)
+                TextStyle.CodeLine -> data.appendCodeLine(content)
+                TextStyle.CodeBlock -> data.appendCodeBlock(content, language)
             }
         }
     }
@@ -46,5 +46,5 @@ open class Text : ElementImpl<Text.Props> {
 }
 
 enum class TextStyle {
-    NORMAL, LINE, CODE_LINE, CODE_BLOCK
+    Normal, Line, CodeLine, CodeBlock
 }
