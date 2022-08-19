@@ -4,13 +4,13 @@ import bjda.ui.core.hooks.Delegate
 import bjda.ui.core.hooks.IHook
 import bjda.ui.core.internal.RenderData
 import bjda.ui.types.*
-import bjda.utils.Builder
+import bjda.utils.DslBuilder
 import net.dv8tion.jda.api.interactions.callbacks.IMessageEditCallback
 import kotlin.reflect.KProperty
 
 open class IProps : CProps<Unit>()
 
-@Builder
+@DslBuilder
 open class CProps<C: Any> {
     var key: Key? = null
     open lateinit var children: C
