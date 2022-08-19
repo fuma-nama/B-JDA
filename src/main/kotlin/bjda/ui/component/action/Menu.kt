@@ -13,34 +13,34 @@ fun createOptions(selected: String? = null, vararg pairs: Pair<String, String>):
     }
 }
 
-class Menu(props: Apply<Props>) : Action {
-    private val props = Props().apply(props)
-    override val id by this.props::id
+class Menu(props: Apply<Menu>) : Action {
+    override lateinit var id: String
+    var placeholder: String? = null
+    var minValues: Int = 1
+    var maxValues: Int = 1
+    var disabled: Boolean = false
+    var options = mutableListOf<SelectOption>()
 
-    constructor(id: String, props: Apply<Props>) : this(props) {
-        this.props.id = id
+    init {
+        apply(props)
     }
 
-    class Props {
-        lateinit var id: String
-        var placeholder: String? = null
-        var minValues: Int = 1
-        var maxValues: Int = 1
-        var disabled: Boolean = false
-        lateinit var options: List<SelectOption>
+    constructor(id: String, props: Apply<Menu>) : this(props) {
+        this.id = id
+    }
+
+    fun option(key: String, value: String, init: Apply<SelectOption>) {
+        options += SelectOption.of(key, value).apply(init)
     }
 
     override fun build(): ActionComponent {
-        with (props) {
-            val max = maxValues.coerceAtMost(options.size)
+        val max = maxValues.coerceAtMost(options.size)
 
-            return SelectMenuImpl(id, placeholder, minValues, max, disabled, options)
-        }
+        return SelectMenuImpl(id, placeholder, minValues, max, disabled, options)
     }
 
     companion object {
-
-        fun LambdaBuilder<in Menu>.menu(init: Props.() -> Unit) = + Menu(init)
-        fun LambdaBuilder<in Menu>.menu(id: String, init: Props.() -> Unit) = + Menu(id, init)
+        fun LambdaBuilder<in Menu>.menu(init: Menu.() -> Unit) = + Menu(init)
+        fun LambdaBuilder<in Menu>.menu(id: String, init: Menu.() -> Unit) = + Menu(id, init)
     }
 }
