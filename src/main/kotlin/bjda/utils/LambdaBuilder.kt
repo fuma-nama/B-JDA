@@ -3,7 +3,7 @@ package bjda.utils
 typealias LambdaList<C> = LambdaBuilder<C>.() -> Unit
 
 @DslMarker
-annotation class Builder
+annotation class DslBuilder
 
 fun <C>(LambdaBuilder<C>.() -> Unit).build(): List<C> {
     val builder = LambdaBuilder<C>()
@@ -25,14 +25,14 @@ fun<C> Collection<Convert<C>>.convert(): Collection<C> {
 /**
  * Used for Lambda Builder
  */
-@Builder
+@DslBuilder
 class Blocking {
     companion object {
         val default = Blocking()
     }
 }
 
-@Builder
+@DslBuilder
 open class LambdaBuilder<C> {
     val elements = ArrayList<C>()
 
