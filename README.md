@@ -98,13 +98,21 @@ You can see the documentation [here](https://github.com/SonMooSans/B-JDA/wiki)
 
 ### Creating a Slash Command
 ```kotlin
-val MessageHelloCommand = command(name = "hello", description = "Hello World") {
-    execute {
-        val ui = UI(
-            Panel..{}
-        )
+val TestCommand = command(name = "test", description = "Example Command") {
+    val size = int("size", "Size of Text")
+        .optional()
+        .map({"${it}px"}) {
+            choices {
+                choice("sm", 1)
+                choice("md", 2)
+                choice("lg", 5)
+            }
 
-        ui.reply(event)
+            default { 0 }
+        }
+
+    execute {
+        event.reply(size.value).queue()
     }
 }
 ```
