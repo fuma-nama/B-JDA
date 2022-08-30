@@ -68,16 +68,15 @@ abstract class SuperCommand (
 class EventContext(
     val event: SlashCommandInteractionEvent
 ) {
-    operator fun<T, P> IOptionValue<*, T, *>.getValue(parent: P, property: Any): T {
-        return valueOf(event)
-    }
+    val<T> IOptionValue<*, T, *>.value
+        get() = from(event)
 
     operator fun<T> IOptionValue<*, T, *>.invoke(): T {
-        return valueOf(event)
+        return from(event)
     }
 
     operator fun<T, R> IOptionValue<*, T, *>.invoke(mapper: T.() -> R): R {
-        return valueOf(event).let(mapper)
+        return from(event).let(mapper)
     }
 
     fun error(message: String?) {

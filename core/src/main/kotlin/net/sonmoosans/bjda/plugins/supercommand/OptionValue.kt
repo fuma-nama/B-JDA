@@ -116,7 +116,7 @@ interface IOptionValue<T: Any, R, O: IOptionValue<T, R, O>> {
 
     fun parseMapping(mapping: OptionMapping?): R
 
-    infix fun valueOf(event: SlashCommandInteractionEvent): R {
+    infix fun from(event: SlashCommandInteractionEvent): R {
         val mapping = event.getOption(data.name)
 
         return parseMapping(mapping)
@@ -180,10 +180,8 @@ interface IOptionValue<T: Any, R, O: IOptionValue<T, R, O>> {
 
         return self
     }
+}
 
-    companion object {
-        infix fun<R> SlashCommandInteractionEvent.valueOf(option: IOptionValue<*, R, *>): R {
-            return option valueOf this
-        }
-    }
+infix fun<R> SlashCommandInteractionEvent.valueOf(option: IOptionValue<*, R, *>): R {
+    return option from this
 }
