@@ -7,8 +7,6 @@
 
 A Discord Bot Framework based on JDA written in **Kotlin**
 <br>
-A UI System inspired by React.js
-<br>
 With many utilities to speed up you development.
 </div>
 
@@ -51,7 +49,8 @@ val UserHelloCommand = userCommand(name = "hello") {
 }
 ```
 ## Message Component UI Framework
-> We highly recommend using [DUI](https://github.com/SonMooSans/discord-ui) instead of BJDUI
+> We highly recommend using [DUI](https://github.com/SonMooSans/discord-ui) instead of BJDUI.
+> <br>
 > BJDUI is already outdated, and stopped maintain
 
 Install **BJDUI** for UI Module
