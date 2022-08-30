@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/../Discord/Kbot/Kbot.iml" filepath="$PROJECT_DIR$/../Discord/Kbot/Kbot.iml" />
-      <module fileurl="file://$PROJECT_DIR$/bjda.iml" filepath="$PROJECT_DIR$/bjda.iml" />
     </modules>
   </component>
 </project>

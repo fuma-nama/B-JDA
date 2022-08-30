@@ -6,11 +6,9 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="bjda" />
+        <module name="core" />
+        <module name="bjdui" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="bjda" target="17" />
-    </bytecodeTargetLevel>
   </component>
 </project>
