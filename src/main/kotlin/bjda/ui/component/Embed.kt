@@ -2,7 +2,7 @@ package bjda.ui.component
 
 import bjda.ui.component.utils.Builder
 import bjda.ui.core.*
-import bjda.ui.core.internal.RenderData
+import bjda.ui.core.internal.MessageBuilder
 import bjda.ui.utils.LeafFactory
 import bjda.utils.LambdaBuilder
 import bjda.utils.embed
@@ -30,7 +30,7 @@ class Embed : ElementImpl<Embed.Props>(Props()) {
         var fields: List<Field>? = null
     }
 
-    override fun build(data: RenderData) {
+    override fun build(data: MessageBuilder) {
         with (props) {
             val embed = embed(
                 url,
@@ -48,7 +48,7 @@ class Embed : ElementImpl<Embed.Props>(Props()) {
                 fields
             )
 
-            data.addEmbeds(embed)
+            data.setEmbeds(data.embeds + embed)
         }
     }
 
@@ -56,7 +56,7 @@ class Embed : ElementImpl<Embed.Props>(Props()) {
         fun MessageEmbed.toComponent(): Builder {
 
             return Builder { data ->
-                data.addEmbeds(this)
+                data.setEmbeds(data.embeds + this)
             }
         }
 

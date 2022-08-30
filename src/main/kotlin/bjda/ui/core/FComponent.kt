@@ -1,6 +1,6 @@
 package bjda.ui.core
 
-import bjda.ui.core.internal.RenderData
+import bjda.ui.core.internal.MessageBuilder
 import bjda.ui.types.AnyProps
 import bjda.ui.types.Children
 
@@ -18,7 +18,7 @@ class FComponent<P: AnyProps>(
     private val component: FComponentBody<P>
 ) : Component<P>(props) {
     private lateinit var render: Children
-    var build: ((data: RenderData) -> Unit)? = null
+    var build: ((data: MessageBuilder) -> Unit)? = null
     var unmount: (() -> Unit)? = null
     var receiveProps: ((prev: P, next: P) -> Unit)? = null
 
@@ -30,7 +30,7 @@ class FComponent<P: AnyProps>(
         this.unmount?.invoke()
     }
 
-    override fun build(data: RenderData) {
+    override fun build(data: MessageBuilder) {
         this.build?.invoke(data)
     }
 

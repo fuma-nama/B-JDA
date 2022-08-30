@@ -1,6 +1,7 @@
 package bjda.ui.hook
 
 import net.dv8tion.jda.api.entities.Message
+import net.dv8tion.jda.api.utils.messages.MessageEditData
 
 /**
  * Change the behavior of an Update Hook
@@ -41,7 +42,7 @@ class HookOverride(
         return alwaysIgnore || base.isIgnored(data)
     }
 
-    override fun onUpdate(message: Message, data: HookData) = base.onUpdate(message, data)
+    override fun onUpdate(message: MessageEditData, data: HookData) = base.onUpdate(message, data)
 
     override fun listen() = base.listen()
 

@@ -29,8 +29,10 @@ class Menu(props: Apply<Menu>) : Action {
         this.id = id
     }
 
-    fun option(key: String, value: String, init: Apply<SelectOption>) {
-        options += SelectOption.of(key, value).apply(init)
+    fun option(key: String, value: String, mapper: (SelectOption.() -> SelectOption)? = null) {
+        val option = SelectOption.of(key, value)
+
+        options += mapper?.invoke(option)?: option
     }
 
     override fun build(): ActionComponent {

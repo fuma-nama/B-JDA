@@ -2,7 +2,7 @@ package bjda.ui.core
 
 import bjda.ui.core.hooks.Context
 import bjda.ui.core.hooks.Delegate
-import bjda.ui.core.internal.RenderData
+import bjda.ui.core.internal.MessageBuilder
 import bjda.ui.types.*
 import bjda.ui.utils.ComponentBuilder
 
@@ -38,18 +38,18 @@ interface Element<P : AnyProps> {
     /**
      * Build current component
      */
-    fun build(data: RenderData) = Unit
+    fun build(data: MessageBuilder) = Unit
 
     fun render(): ComponentTree? = null
 
     fun unmount()
 
-    fun buildAll(data: RenderData) {
+    fun buildAll(data: MessageBuilder) {
         build(data)
         buildChildren(data)
     }
 
-    fun buildChildren(data: RenderData) {
+    fun buildChildren(data: MessageBuilder) {
         snapshot?.forEach { component ->
             component?.buildAll(data)
         }
@@ -102,7 +102,7 @@ fun interface FElementConstructor<P : AnyProps, C> {
 
 class FElement<P: AnyProps>(props: P, val body: FElementBody<P>) : ElementImpl<P>(props) {
     private var render: Children? = null
-    var build: ((RenderData) -> Unit)? = null
+    var build: ((MessageBuilder) -> Unit)? = null
 
     override fun mount(parent: AnyElement?, ui: UI?) {
         super.mount(parent, ui)
@@ -117,7 +117,7 @@ class FElement<P: AnyProps>(props: P, val body: FElementBody<P>) : ElementImpl<P
         }
     }
 
-    override fun build(data: RenderData) {
+    override fun build(data: MessageBuilder) {
         this.build?.invoke(data)
     }
 

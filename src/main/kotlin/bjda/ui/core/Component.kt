@@ -2,7 +2,7 @@ package bjda.ui.core
 
 import bjda.ui.core.hooks.Delegate
 import bjda.ui.core.hooks.IHook
-import bjda.ui.core.internal.RenderData
+import bjda.ui.core.internal.MessageBuilder
 import bjda.ui.types.*
 import bjda.utils.DslBuilder
 import net.dv8tion.jda.api.interactions.callbacks.IMessageEditCallback
@@ -53,7 +53,7 @@ abstract class Component<P : CProps<*>>(props: P): ElementImpl<P>(props) {
      * Always invoked from its parent
      */
     open fun onRender(): Children = {}
-    override fun build(data: RenderData) = Unit
+    override fun build(data: MessageBuilder) = Unit
     open fun onReceiveProps(prev: P, next: P) = Unit
     open fun onMount() = Unit
     open fun onUnmount() = Unit

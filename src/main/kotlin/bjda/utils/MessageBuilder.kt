@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.entities.EmbedType
 import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.interactions.callbacks.IMessageEditCallback
 import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback
+import net.dv8tion.jda.api.interactions.components.ActionRow
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder
 import net.dv8tion.jda.internal.requests.restaction.interactions.MessageEditCallbackActionImpl
@@ -36,8 +37,9 @@ fun IMessageEditCallback.edit(init: MessageEditBuilder.() -> Unit): MessageEditC
 
     return action
 }
+
 var MessageBuilder.text
-    get() = this.getContent()
+    get() = this.content
     set(s) { this.setContent(s) }
 
 fun MessageBuilder.text(
@@ -56,6 +58,12 @@ fun MessageBuilder.text(
                 """.trimIndent()
     }
 }
+
+fun MessageBuilder.addActionRow(row: ActionRow) = setComponents(
+    ArrayList(components).apply {
+        add(row)
+    }
+)
 
 fun MessageBuilder.embed(
     url: String? = null,

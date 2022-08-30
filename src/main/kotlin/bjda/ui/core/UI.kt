@@ -10,8 +10,13 @@ import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.interactions.callbacks.IMessageEditCallback
 import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback
+import net.dv8tion.jda.api.interactions.components.ActionRow
 import net.dv8tion.jda.api.interactions.components.Modal
 import net.dv8tion.jda.api.requests.RestAction
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder
+import net.dv8tion.jda.api.utils.messages.MessageCreateData
+import net.dv8tion.jda.api.utils.messages.MessageEditBuilder
+import net.dv8tion.jda.api.utils.messages.MessageEditData
 import java.util.function.Consumer
 import kotlin.collections.ArrayList
 
@@ -72,21 +77,21 @@ open class UI(option: Option? = null) {
     fun edit(message: Message, success: Consumer<Message>? = null) {
 
         updater.addTask(
-            message.edit(this.build()),
+            message.editMessage(this.buildEdit()).setReplace(true),
             success
         )
     }
 
     fun edit(callback: IMessageEditCallback, success: Consumer<InteractionHook>? = null) {
         updater.addTask(
-            callback.edit(this.build()),
+            callback.editMessage(this.buildEdit()).setReplace(true),
             success
         )
     }
 
     fun edit(hook: InteractionHook, success: Consumer<Message>? = null) {
         updater.addTask(
-            hook.edit(this.build()),
+            hook.editOriginal(this.buildEdit()).setReplace(true),
             success
         )
     }
@@ -101,37 +106,29 @@ open class UI(option: Option? = null) {
     }
 
     fun reply(message: Message, success: Consumer<Message>? = null) {
-        message.replyRendered(this.build()).queue(success)
+        message.reply(this.build()).queue(success)
     }
 
     fun reply(callback: IReplyCallback, ephemeral: Boolean = false, success: Consumer<InteractionHook>? = null) {
-        callback.replyRendered(this.build())
+        callback.reply(this.build())
             .setEphemeral(ephemeral)
             .queue(success)
     }
 
-    fun build(): RenderedMessage {
-        val data = RenderData()
+    fun build(): MessageCreateData {
+        val data = MessageCreateBuilder()
 
         root!!.buildAll(data)
 
         return data.build()
     }
 
-    /**
-     * Build a Modal
-     *
-     * Some components will be ignored as message type is unsupported by it
-     *
-     * Note: the title is assigned to the content of built message if not specified
-     */
-    @Deprecated("Use the new Modal API")
-    fun buildModal(id: String, title: String? = null): Modal {
-        val message = build()
+    fun buildEdit(): MessageEditData {
+        val data = MessageEditBuilder()
 
-        return Modal.create(id, title?: message.contentRaw)
-            .addActionRows(message.actionRows)
-            .build()
+        root!!.buildAll(data)
+
+        return data.build()
     }
 
     fun updateHooks(ignore: InteractionHook) {
@@ -148,7 +145,7 @@ open class UI(option: Option? = null) {
     }
 
     fun updateHooks(data: HookData = HookData()) {
-        val message = build()
+        val message = buildEdit()
 
         for (hook in hooks) {
             if (hook !is UpdateHook || hook.isIgnored(data)) continue

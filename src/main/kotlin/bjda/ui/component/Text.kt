@@ -2,10 +2,11 @@ package bjda.ui.component
 
 import bjda.ui.core.ElementImpl
 import bjda.ui.core.IProps
-import bjda.ui.core.internal.RenderData
+import bjda.ui.core.internal.MessageBuilder
 import bjda.ui.core.rangeTo
 import bjda.ui.utils.LeafFactory
 import bjda.utils.LambdaBuilder
+import bjda.utils.text
 
 open class Text : ElementImpl<Text.Props> {
     constructor() : super(Props())
@@ -22,14 +23,18 @@ open class Text : ElementImpl<Text.Props> {
         fun line() { style = TextStyle.Line }
     }
 
-    override fun build(data: RenderData) {
+    override fun build(data: MessageBuilder) {
         with (props) {
 
-            when (style) {
-                TextStyle.Normal -> data.append(content)
-                TextStyle.Line -> data.appendLine(content)
-                TextStyle.CodeLine -> data.appendCodeLine(content)
-                TextStyle.CodeBlock -> data.appendCodeBlock(content, language)
+            data.text += when (style) {
+                TextStyle.Normal -> content
+                TextStyle.Line -> content + "\n"
+                TextStyle.CodeLine -> "`$content`"
+                TextStyle.CodeBlock -> """
+                    ```${language.orEmpty()} 
+                    $content
+                    ```
+                """.trimIndent()
             }
         }
     }

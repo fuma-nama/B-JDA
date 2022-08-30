@@ -4,9 +4,10 @@ import bjda.ui.component.action.Action
 import bjda.ui.component.action.toAction
 import bjda.ui.core.CProps
 import bjda.ui.core.ElementImpl
-import bjda.ui.core.internal.RenderData
+import bjda.ui.core.internal.MessageBuilder
 import bjda.utils.LambdaBuilder
 import bjda.utils.LambdaList
+import bjda.utils.addActionRow
 import bjda.utils.build
 import net.dv8tion.jda.api.interactions.components.ActionComponent
 import net.dv8tion.jda.api.interactions.components.ActionRow
@@ -30,7 +31,7 @@ class RowLayout(actions: List<Action>) : ElementImpl<RowLayout.Props>(Props(acti
 
     private val rowSpace = 1.0
 
-    override fun build(data: RenderData) {
+    override fun build(data: MessageBuilder) {
         val row: Stack<ItemComponent> = Stack()
         val actions = props.children
         var space = rowSpace

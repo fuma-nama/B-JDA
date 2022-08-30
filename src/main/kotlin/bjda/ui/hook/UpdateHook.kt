@@ -3,6 +3,9 @@ package bjda.ui.hook
 import bjda.ui.core.UI
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.requests.RestAction
+import net.dv8tion.jda.api.utils.messages.MessageCreateData
+import net.dv8tion.jda.api.utils.messages.MessageEditBuilder
+import net.dv8tion.jda.api.utils.messages.MessageEditData
 
 abstract class UpdateHook : UIHook {
 
@@ -18,7 +21,7 @@ abstract class UpdateHook : UIHook {
     }
 
     abstract fun isIgnored(data: HookData): Boolean
-    abstract fun onUpdate(message: Message, data: HookData): RestAction<*>?
+    abstract fun onUpdate(message: MessageEditData, data: HookData): RestAction<*>?
     abstract fun listen()
 
     override fun onEnable(ui: UI) {

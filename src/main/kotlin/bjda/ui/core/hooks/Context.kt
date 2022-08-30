@@ -3,7 +3,6 @@ package bjda.ui.core.hooks
 import bjda.ui.core.CProps
 import bjda.ui.utils.ComponentBuilder
 import bjda.ui.core.ElementImpl
-import bjda.ui.core.internal.RenderData
 import bjda.ui.core.minus
 import bjda.ui.types.AnyComponent
 import bjda.ui.types.Children
@@ -29,8 +28,6 @@ class Context<V> private constructor() {
         override val contexts: ContextMap =
             if (parent?.contexts == null) HashMap()
             else HashMap(parent?.contexts)
-
-        override fun build(data: RenderData) = Unit
 
         override fun render(): ComponentTree {
             contexts[this@Context] = props.value

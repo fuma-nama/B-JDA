@@ -1,45 +1,30 @@
 package bjda.ui.core
 
-import bjda.ui.core.internal.RenderData
 import bjda.ui.core.internal.Renderer.Companion.renderSingle
-import net.dv8tion.jda.api.entities.Message
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder
+import net.dv8tion.jda.api.utils.messages.MessageCreateData
+import net.dv8tion.jda.api.utils.messages.MessageEditBuilder
+import net.dv8tion.jda.api.utils.messages.MessageEditData
 
-/**
- * UI instance that used for rendering only once
- *
- * Build and unmount components when init
- *
- * Notice that it will throw an exception if you add any hooks or used ui property in components
- */
-open class UIOnce(element: ElementImpl<*>) {
-    private val rendered: Message
 
-    init {
-        element.mount(null, null)
-        renderSingle(element)
+fun Element<*>.buildMessage(): MessageCreateData {
+    mount(null, null)
+    renderSingle(this)
 
-        val data = RenderData()
-        element.buildAll(data)
+    val data = MessageCreateBuilder()
+    buildAll(data)
+    unmount()
 
-        rendered = data.build()
+    return data.build()
+}
 
-        element.unmount()
-    }
+fun Element<*>.buildEditMessage(): MessageEditData {
+    mount(null, null)
+    renderSingle(this)
 
-    fun get(): Message {
-        return rendered
-    }
+    val data = MessageEditBuilder()
+    buildAll(data)
+    unmount()
 
-    companion object {
-        fun Element<*>.buildMessage(): Message {
-            mount(null, null)
-            renderSingle(this)
-
-            val data = RenderData()
-            buildAll(data)
-            unmount()
-
-            return data.build()
-        }
-    }
+    return data.build()
 }
