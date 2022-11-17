@@ -1,3 +1,6 @@
+> # Warning <br>
+> BJDA had been replaced by [JDAK](https://github.com/SonMooSans/jdak) and [Discord-UI](https://github.com/SonMooSans/discord-ui) <br>
+> You should use them instead
 <div align="center">
     <img src="https://i.ibb.co/d6rcGkh/BJDA.jpg" alt="banner"/>
     <br>
